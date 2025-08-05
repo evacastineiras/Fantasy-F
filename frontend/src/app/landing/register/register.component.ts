@@ -11,6 +11,7 @@ export class RegisterComponent implements OnInit {
   @Output() mostrarLog = new EventEmitter<void>();
 
   nombre: string = '';
+  username: string = '';
   email: string = '';
   password: string = '';
   confirmPassword: string = '';

@@ -16,8 +16,23 @@
           'input-error': nombreInput.invalid && nombreInput.touched
         }"
       />
-      <div *ngIf="nombreInput.invalid && nombreInput.touched" class="error-text">
+      <div *ngIf="usernameInput.invalid && usernameInput.touched" class="error-text">
         El nombre debe tener al menos 3 caracteres.
+      </div>
+      <input
+        type="text"
+        placeholder="Username"
+        name="username"
+        [(ngModel)]="username"
+        required
+        minlength="3"
+        #usernameInput="ngModel"
+        [ngClass]="{
+          'input-error': usernameInput.invalid && usernameInput.touched
+        }"
+      />
+      <div *ngIf="usernameInput.invalid && usernameInput.touched" class="error-text">
+        El nombre de usuario debe tener al menos 3 caracteres.
       </div>
       <input
         type="email"
