@@ -1,0 +1,78 @@
+<div class="modal-overlay">
+  <div class="modal-card">
+    <button class="close-button" (click)="cerrar()">×</button>
+    <img src="assets/logogreen.png" alt="Logo" class="logo" />
+    
+    <form #registerForm="ngForm" (ngSubmit)="registrarse()" novalidate>
+      <input
+        type="text"
+        placeholder="Nombre"
+        name="nombre"
+        [(ngModel)]="nombre"
+        required
+        minlength="3"
+        #nombreInput="ngModel"
+        [ngClass]="{
+          'input-error': nombreInput.invalid && nombreInput.touched
+        }"
+      />
+      <div *ngIf="nombreInput.invalid && nombreInput.touched" class="error-text">
+        El nombre debe tener al menos 3 caracteres.
+      </div>
+      <input
+        type="email"
+        placeholder="Correo electrónico"
+        name="email"
+        [(ngModel)]="email"
+        required
+        email
+        #emailInput="ngModel"
+        [ngClass]="{
+          'input-error': emailInput.invalid && emailInput.touched
+        }"
+      />
+      <div *ngIf="emailInput.invalid && emailInput.touched" class="error-text">
+        Introduce un correo válido.
+      </div>
+      <input
+        type="password"
+        placeholder="Contraseña"
+        name="password"
+        [(ngModel)]="password"
+        required
+        minlength="6"
+        #passwordInput="ngModel"
+        [ngClass]="{
+          'input-error': passwordInput.invalid && passwordInput.touched
+        }"
+      />
+      <div *ngIf="passwordInput.invalid && passwordInput.touched" class="error-text">
+        La contraseña debe tener al menos 6 caracteres.
+      </div>
+      <input
+        type="password"
+        placeholder="Repite la contraseña"
+        name="confirmPassword"
+        [(ngModel)]="confirmPassword"
+        required
+        #confirmPasswordInput="ngModel"
+        [ngClass]="{
+          'input-error': confirmPasswordInput.touched && password !== confirmPassword,
+          'input-success': confirmPasswordInput.touched && password === confirmPassword
+        }"
+      />
+      <div
+        *ngIf="confirmPasswordInput.touched && password !== confirmPassword"
+        class="error-text"
+      >
+        Las contraseñas no coinciden.
+      </div>
+      <button type="submit" [disabled]="registerForm.invalid || password !== confirmPassword">
+        Registrarse
+      </button>
+    </form>
+
+    <p>¿Ya tienes una cuenta? <a href="#" (click)="mostrarLogin()"> Inicia sesión</a></p>
+  </div>
+</div>
+

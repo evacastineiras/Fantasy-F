@@ -7,6 +7,7 @@ import { Component, EventEmitter, Output } from '@angular/core';
 })
 export class LoginComponent {
   @Output() cerrarModal = new EventEmitter<void>();
+  @Output() abrirRegist = new EventEmitter<void>();
 
   email: string = '';
   password: string = '';
@@ -16,7 +17,13 @@ export class LoginComponent {
   }
 
   entrar() {
-    // Aquí haces el login real, pero ahora mismo solo ocultamos
+    // Aquí login real
     this.cerrarModal.emit();
   }
+
+  registrarseDisplay()
+  {
+    this.abrirRegist.emit();
+  }
+
 }

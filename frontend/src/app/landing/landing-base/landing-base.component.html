@@ -12,7 +12,7 @@
                 <a href="#inicio"><img src="assets/logowhite.png" alt=""></a>
             </div>
             <div class="button-nav-box">
-                <a href=""><button>Crear cuenta</button></a>
+                <button (click)="displayRegister()">Crear cuenta</button>
             </div>
         </div>
         <div class="video-box">
@@ -20,7 +20,8 @@
                 <source src="assets/video.mp4" type="video/mp4"/>
             </video>
             <button *ngIf="showPlayButton" class="jugar-button" (click)="onPlay()"> Jugar </button>
-            <app-login *ngIf="showLogin" class="login-component"(cerrarModal)="showLogin = false; showPlayButton = true "></app-login>
+            <app-login *ngIf="showLogin" class="login-component"(cerrarModal)="showLogin = false; showPlayButton = true " (abrirRegist)="showLogin = false; showRegister = true"></app-login>
+            <app-register *ngIf="showRegister" class="login-component" (cerrarModal)="showRegister = false; showPlayButton = true" (mostrarLog)="showRegister = false; showLogin = true" ></app-register>
         </div>
     </div>
     <div class="equipos-box" id="equipos">

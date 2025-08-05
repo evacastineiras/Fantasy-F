@@ -9,8 +9,9 @@ export class LandingBaseComponent implements OnInit, AfterViewInit {
 
   @ViewChild('videoPlayer') videoPlayer!:ElementRef<HTMLVideoElement>;
 
-  showPlayButton: boolean = false;
-  showLogin: boolean = true;
+  showPlayButton: boolean = true;
+  showLogin: boolean = false;
+  showRegister: boolean = false;
 
   constructor() { }
 
@@ -20,13 +21,21 @@ export class LandingBaseComponent implements OnInit, AfterViewInit {
     const video = this.videoPlayer.nativeElement;
     video.muted = true;
     video.play().catch(() => {
-      console.log('Autoplay falló, el usuario debe iniciar el video');
+      
     });
   }
 
   onPlay() {
     this.showPlayButton = false;
     this.showLogin = true;
+    this.showRegister = false;
     
+  }
+
+  displayRegister()
+  {
+    this.showPlayButton = false;
+    this.showLogin = false;
+    this.showRegister = true;
   }
 }
