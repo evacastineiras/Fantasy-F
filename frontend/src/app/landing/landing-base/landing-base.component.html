@@ -16,7 +16,10 @@
             </div>
         </div>
         <div class="video-box">
-            <video src="../../../assets/video.mp4" autoplay muted loop type="video/mp4"></video>
+            <video #videoPlayer autoplay muted loop poster="assets/fakevideo.png">
+                <source src="assets/video.mp4" type="video/mp4"/>
+            </video>
+            <button *ngIf="showPlayButton" class="jugar-button" (click)="onPlay()"> Jugar </button>
         </div>
     </div>
     <div class="equipos-box" id="equipos">
