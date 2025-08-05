@@ -303,3 +303,20 @@
 .jugar-button:hover {
   filter: brightness(1.6);
 }
+
+.login-container {
+  opacity: 0;
+  animation: fadeIn 0.4s ease forwards;
+  z-index: 10; /* para estar encima del vídeo */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}

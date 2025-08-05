@@ -9,7 +9,8 @@ export class LandingBaseComponent implements OnInit, AfterViewInit {
 
   @ViewChild('videoPlayer') videoPlayer!:ElementRef<HTMLVideoElement>;
 
-  showPlayButton: boolean = true;
+  showPlayButton: boolean = false;
+  showLogin: boolean = true;
 
   constructor() { }
 
@@ -25,6 +26,7 @@ export class LandingBaseComponent implements OnInit, AfterViewInit {
 
   onPlay() {
     this.showPlayButton = false;
+    this.showLogin = true;
     
   }
 }

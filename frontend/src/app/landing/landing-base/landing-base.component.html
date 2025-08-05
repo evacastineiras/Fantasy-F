@@ -20,6 +20,7 @@
                 <source src="assets/video.mp4" type="video/mp4"/>
             </video>
             <button *ngIf="showPlayButton" class="jugar-button" (click)="onPlay()"> Jugar </button>
+            <app-login *ngIf="showLogin" class="login-component"(cerrarModal)="showLogin = false; showPlayButton = true "></app-login>
         </div>
     </div>
     <div class="equipos-box" id="equipos">
