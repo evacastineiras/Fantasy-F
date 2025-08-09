@@ -1,4 +1,5 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-register',
@@ -15,7 +16,7 @@ export class RegisterComponent implements OnInit {
   email: string = '';
   password: string = '';
   confirmPassword: string = '';
-  constructor() { }
+  constructor(private authService: AuthService) { }
 
   ngOnInit(): void {
   }
@@ -27,6 +28,27 @@ export class RegisterComponent implements OnInit {
 
   registrarse()
   {
+    if(this.password != this.confirmPassword){
+      alert('Las contraseñas no coinciden');
+      return;
+    }
+
+    const newPlayer = {
+      nombre: this.nombre,
+      username: this.username,
+      email: this.email,
+      password: this.password
+    };
+
+    this.authService.register(newPlayer).subscribe({
+      next: (res:any) => {
+        console.log('Registrado correctamente', res);
+      },
+      error: (error:any) => {
+        console.error('Error en el registro', error)
+      }
+    })
+      
     console.log("Registrar")
   }
 
