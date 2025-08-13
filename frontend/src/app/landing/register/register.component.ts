@@ -1,5 +1,6 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-register',
@@ -16,7 +17,7 @@ export class RegisterComponent implements OnInit {
   email: string = '';
   password: string = '';
   confirmPassword: string = '';
-  constructor(private authService: AuthService) { }
+  constructor(private authService: AuthService, private router: Router) { }
 
   ngOnInit(): void {
   }
@@ -43,6 +44,8 @@ export class RegisterComponent implements OnInit {
     this.authService.register(newPlayer).subscribe({
       next: (res:any) => {
         console.log('Registrado correctamente', res);
+        this.authService.justRegistered = true;
+        this.router.navigate(['./leagueIndex'])
       },
       error: (error:any) => {
         console.error('Error en el registro', error)

@@ -82,9 +82,9 @@
       >
         Las contraseñas no coinciden.
       </div>
-      <button type="submit" [disabled]="registerForm.invalid || password !== confirmPassword">
+      <a href="../../league-register/league-index.html"><button type="submit" [disabled]="registerForm.invalid || password !== confirmPassword">
         Registrarse
-      </button>
+      </button></a>
     </form>
 
     <p>¿Ya tienes una cuenta? <a href="#" (click)="mostrarLogin()"> Inicia sesión</a></p>
