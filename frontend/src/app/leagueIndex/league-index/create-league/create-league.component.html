@@ -1,0 +1,29 @@
+<div class="main-container tarjeta">
+    <div class="tittle-container">
+        <div class="back-container" (click)="volverAtras()">
+        <img src="assets/icons/flecha-izq-w.png" alt="">
+    </div><h3>CREAR UNA LIGA</h3>
+    </div>
+    <div class="form-container">
+        <form>
+            <div class="item">
+                <h5>Nombre de la liga</h5>
+                <input type="text" placeholder="Introduce un nombre">
+            </div>
+
+            <div class="item codigo-item">
+                <h5>Código</h5>
+                <div class="codigo-input">
+                    <input type="text" [value]="codigoLiga" readonly>
+                    <button type="button" (click)="copiarCodigo()">📋</button>
+                </div>
+            </div>
+            <div class="item codigo-item submit-b">
+                <button type="submit">Crear liga</button>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="toast" *ngIf="mostrarToast">
+  ¡Código copiado!
+</div>

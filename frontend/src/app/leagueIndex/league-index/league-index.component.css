@@ -1,0 +1,13 @@
+
+.gen-container {
+    width: 100%;
+    height: 100%;
+    background-color: #1E1E1E;
+    text-align: center;
+    overflow-y: hidden;
+}
+
+.gen-container img {
+   opacity: 60%;
+   width: 100%;
+}

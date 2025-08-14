@@ -1,1 +1,6 @@
-<p>league-index works!</p>
+<div class="gen-container">
+    <img src="assets/league-index-display.jpg" alt="">
+    <app-select-league-index *ngIf="mostrarEleccion" (crearLigaShow)="crearLigaSelected()" (ligaPrivadaShow)="unirseLigaPriv()"></app-select-league-index>
+    <app-private-league *ngIf="mostrarLigaPrivada" (volverAtrasEvent)="indexSelected()"></app-private-league>
+    <app-create-league *ngIf="mostrarCrearLiga" (volverAtrasEvent)="indexSelected()"></app-create-league>
+</div>
