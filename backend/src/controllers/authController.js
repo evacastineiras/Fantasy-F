@@ -13,7 +13,7 @@ async function register (req, res)  {
 
     // Comprobar si email o username ya existe
     const [existing] = await pool.query(
-      'SELECT id FROM users WHERE email = ? OR username = ?',
+      'SELECT id_usuario FROM usuario WHERE email = ? OR nombre_usuario = ?',
       [email, username]
     );
 
@@ -22,12 +22,11 @@ async function register (req, res)  {
     }
 
     // Hashear la contraseña
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-
+    const password_hash = await bcrypt.hash(password, saltRounds);
     // Insertar nuevo usuario
     await pool.query(
-      'INSERT INTO users (nombre, username, email, password) VALUES (?, ?, ?, ?)',
-      [nombre, username, email, hashedPassword]
+      'INSERT INTO usuario (nombre, nombre_usuario, email, password_hash) VALUES (?, ?, ?, ?)',
+      [nombre, username, email, password_hash]
     );
 
     res.status(201).json({ message: 'Usuario creado correctamente' });
@@ -45,7 +44,7 @@ const login = async (req, res) => {
     }
 
     const [users] = await pool.query(
-      'SELECT * FROM users WHERE email = ?',
+      'SELECT * FROM usuario WHERE email = ?',
       [email]
     );
 
@@ -56,13 +55,13 @@ const login = async (req, res) => {
     const user = users[0];
 
     // Comparar contraseñas
-    const match = await bcrypt.compare(password, user.password);
+    const match = await bcrypt.compare(password, user.password_hash);
     if (!match) {
       return res.status(401).json({ message: 'Contraseña incorrecta' });
     }
 
     // Login correcto
-    res.json({ message: 'Login correcto', user: { id: user.id, email: user.email, username: user.username } });
+    res.json({ message: 'Login correcto', user: { id: user.id_usuario, email: user.email, username: user.nombre_usuario } });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Error interno' });

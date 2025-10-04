@@ -1,6 +1,22 @@
--- Fantasy DB v2 — Esquema simplificado para MySQL 8.0 (InnoDB, utf8mb4)
--- Ajustado a requisitos: una liga, una temporada, reglas fijas, formación validada fuera de BD
+DROP TRIGGER IF EXISTS trg_puja_after_update;
+DROP TRIGGER IF EXISTS trg_puja_after_insert;
+DROP VIEW IF EXISTS v_clasificacion_liga;
 
+DROP TABLE IF EXISTS notificacion;
+DROP TABLE IF EXISTS puja;
+DROP TABLE IF EXISTS alineacion_item;
+DROP TABLE IF EXISTS alineacion;
+DROP TABLE IF EXISTS rendimiento_jornada;
+DROP TABLE IF EXISTS partido;
+DROP TABLE IF EXISTS jornada;
+DROP TABLE IF EXISTS plantilla_jugadora;
+DROP TABLE IF EXISTS jugadora;
+DROP TABLE IF EXISTS plantilla;
+DROP TABLE IF EXISTS club;
+DROP TABLE IF EXISTS usuario;
+DROP TABLE IF EXISTS liga;
+
+USE fantasyf_db;
 SET NAMES utf8mb4;
 SET time_zone = '+00:00';
 
@@ -8,10 +24,28 @@ SET time_zone = '+00:00';
 -- LIGA
 -- =====================
 CREATE TABLE liga (
-  id_liga       INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+  id_liga       INT UNSIGNED PRIMARY KEY,
   nombre        VARCHAR(50) NOT NULL,
   creada_en     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =====================
+-- USUARIO  
+-- =====================
+CREATE TABLE usuario (
+  id_usuario        INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+  id_liga           INT UNSIGNED NULL,
+  nombre            VARCHAR(50) NOT NULL,
+  nombre_usuario    VARCHAR(60) NOT NULL,
+  email             VARCHAR(160) NOT NULL,
+  password_hash     VARCHAR(100) NOT NULL,
+  foto_perfil_url   VARCHAR(255) NULL,
+  CONSTRAINT fk_usuario_liga FOREIGN KEY (id_liga) REFERENCES liga(id_liga)
+    ON UPDATE CASCADE ON DELETE RESTRICT,
+  UNIQUE KEY uk_usuario_username (nombre_usuario),
+  UNIQUE KEY uk_usuario_email (email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 -- =====================
 -- CLUB (Real)
@@ -22,6 +56,25 @@ CREATE TABLE club (
   nombre        VARCHAR(60) NOT NULL,
   escudo_url    VARCHAR(255) NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =====================
+-- PLANTILLA  
+-- =====================
+
+CREATE TABLE plantilla (
+  id_plantilla  INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+  id_usuario    INT UNSIGNED NOT NULL,
+  id_liga       INT UNSIGNED NOT NULL,
+  presupuesto   INT UNSIGNED NOT NULL DEFAULT 0,
+  valor_equipo  INT UNSIGNED NOT NULL DEFAULT 0,
+  n_jugadoras   SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+  CONSTRAINT fk_plantilla_usuario FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
+    ON UPDATE CASCADE ON DELETE CASCADE,
+  CONSTRAINT fk_plantilla_liga FOREIGN KEY (id_liga) REFERENCES liga(id_liga)
+    ON UPDATE CASCADE ON DELETE RESTRICT,
+  UNIQUE KEY uk_plantilla_usuario_liga (id_usuario, id_liga)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 -- =====================
 -- JUGADORA (Real)
@@ -50,46 +103,13 @@ CREATE TABLE jugadora (
   FOREIGN KEY (id_club) REFERENCES club(id_club) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- =====================
--- USUARIO  
--- =====================
-CREATE TABLE usuario (
-  id_usuario        BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-  id_liga           INT UNSIGNED NOT NULL,
-  nombre            VARCHAR(50) NOT NULL,
-  nombre_usuario    VARCHAR(60) NOT NULL,
-  email             VARCHAR(160) NOT NULL,
-  password_hash     VARCHAR(100) NOT NULL,
-  foto_perfil_url   VARCHAR(255) NULL,
-  CONSTRAINT fk_usuario_liga FOREIGN KEY (id_liga) REFERENCES liga(id_liga)
-    ON UPDATE CASCADE ON DELETE RESTRICT,
-  UNIQUE KEY uk_usuario_username (nombre_usuario),
-  UNIQUE KEY uk_usuario_email (email)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- =====================
--- PLANTILLA  
--- =====================
-
-CREATE TABLE plantilla (
-  id_plantilla  INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-  id_usuario    INT UNSIGNED NOT NULL,
-  id_liga       INT UNSIGNED NOT NULL,
-  presupuesto   INT UNSIGNED NOT NULL DEFAULT 0,
-  valor_equipo  INT UNSIGNED NOT NULL DEFAULT 0,
-  n_jugadoras   SMALLINT UNSIGNED NOT NULL DEFAULT 0,
-  CONSTRAINT fk_plantilla_usuario FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
-    ON UPDATE CASCADE ON DELETE CASCADE,
-  CONSTRAINT fk_plantilla_liga FOREIGN KEY (id_liga) REFERENCES liga(id_liga)
-    ON UPDATE CASCADE ON DELETE RESTRICT,
-  UNIQUE KEY uk_plantilla_usuario_liga (id_usuario, id_liga)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- =====================
 -- PLANTILLA_JUGADORA
 -- =====================
 CREATE TABLE plantilla_jugadora (
-  id_entry      BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+  id_entry      INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
   id_plantilla  INT UNSIGNED NULL,
   id_liga       INT UNSIGNED NOT NULL,
   id_jugadora   INT UNSIGNED NOT NULL,
@@ -109,7 +129,7 @@ CREATE TABLE plantilla_jugadora (
 -- JORNADA
 -- =====================
 CREATE TABLE jornada (
-  id_jornada   BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+  id_jornada   INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
   numero       INT UNSIGNED NOT NULL,
   f_inicio     DATETIME NOT NULL,
   f_fin        DATETIME NOT NULL,

@@ -34,14 +34,15 @@ export class RegisterComponent implements OnInit {
       return;
     }
 
-    const newPlayer = {
+    const newUser = {
       nombre: this.nombre,
-      username: this.username,
+      nombre_usuario: this.username,
       email: this.email,
-      password: this.password
+      password: this.password,
+
     };
 
-    this.authService.register(newPlayer).subscribe({
+    this.authService.register(newUser).subscribe({
       next: (res:any) => {
         console.log('Registrado correctamente', res);
         this.authService.justRegistered = true;
