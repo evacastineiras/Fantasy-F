@@ -1,4 +1,6 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { UserService } from 'src/app/services/user.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-create-league',
@@ -7,11 +9,14 @@ import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 })
 export class CreateLeagueComponent implements OnInit {
 
-  constructor() { }
+  constructor(private UserService: UserService, private router: Router) { }
+
+
   @Output() volverAtrasEvent = new EventEmitter<void>();
 
-  codigoLiga = "h295wjdketwef3";
+  codigoLiga: number = 0;
   mostrarToast = false;
+  nombre: string = '';
 
   ngOnInit(): void {
     this.generarCodigoLiga();
@@ -19,18 +24,18 @@ export class CreateLeagueComponent implements OnInit {
 
   generarCodigoLiga() 
   {
-  const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  const caracteres = '0123456789';
   let codigo = '';
   for (let i = 0; i < 8; i++) {
     const indice = Math.floor(Math.random() * caracteres.length);
     codigo += caracteres[indice];
   }
-  this.codigoLiga = codigo;
+  this.codigoLiga = parseInt(codigo);
   }
 
   copiarCodigo()
   {
-    navigator.clipboard.writeText(this.codigoLiga)
+    navigator.clipboard.writeText(this.codigoLiga.toString())
     .then(() => {
       this.mostrarToast = true;
       setTimeout(() => {
@@ -45,6 +50,25 @@ export class CreateLeagueComponent implements OnInit {
   volverAtras()
   {
     this.volverAtrasEvent.emit();
+  }
+
+  crearLiga()
+  {
+    const newLeague = {
+      id_liga: this.codigoLiga,
+      nombre: this.nombre,
+      usuario: this.UserService.getUsuario().id
+    }
+    
+  this.UserService.crearLiga(newLeague).subscribe({
+      next: (res:any) => {
+        console.log("Liga creada", res);
+      },
+      error: (error:any) => {
+        console.error("Error en la creacion de la liga", error)
+      }
+    })
+    
   }
 
 }

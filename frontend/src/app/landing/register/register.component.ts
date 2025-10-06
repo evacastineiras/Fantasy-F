@@ -17,6 +17,7 @@ export class RegisterComponent implements OnInit {
   email: string = '';
   password: string = '';
   confirmPassword: string = '';
+
   constructor(private authService: AuthService, private router: Router) { }
 
   ngOnInit(): void {
@@ -36,24 +37,25 @@ export class RegisterComponent implements OnInit {
 
     const newUser = {
       nombre: this.nombre,
-      nombre_usuario: this.username,
+      username: this.username,
       email: this.email,
       password: this.password,
 
     };
 
+  
+
     this.authService.register(newUser).subscribe({
       next: (res:any) => {
         console.log('Registrado correctamente', res);
         this.authService.justRegistered = true;
+        localStorage.setItem('usuario', JSON.stringify(res.user));
         this.router.navigate(['./leagueIndex'])
       },
       error: (error:any) => {
         console.error('Error en el registro', error)
       }
     })
-      
-    console.log("Registrar")
   }
 
   mostrarLogin()

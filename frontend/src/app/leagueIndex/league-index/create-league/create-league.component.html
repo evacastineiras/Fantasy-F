@@ -5,10 +5,13 @@
     </div><h3>CREAR UNA LIGA</h3>
     </div>
     <div class="form-container">
-        <form>
+        <form #createLeagueForm="ngForm" (ngSubmit)="crearLiga()" novalidate>
             <div class="item">
                 <h5>Nombre de la liga</h5>
-                <input type="text" placeholder="Introduce un nombre">
+                <input type="text" placeholder="Introduce un nombre"
+                name="nombre"
+                [(ngModel)]="nombre"
+                required >
             </div>
 
             <div class="item codigo-item">
@@ -19,7 +22,7 @@
                 </div>
             </div>
             <div class="item codigo-item submit-b">
-                <button type="submit">Crear liga</button>
+                <button type="submit" >Crear liga</button>
             </div>
         </form>
     </div>
