@@ -1,0 +1,71 @@
+.gen-container {
+    
+}
+
+.banner{
+    background-color: #D9D9D9;
+    height: 10vh;
+    display: flex;
+    flex-direction: row;
+}
+
+.logo-container{
+    width: 50%;
+    padding-left: 30px;
+}
+
+.logo-container img {
+    height: 10vh;
+}
+
+.profile-container {
+    width: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: end;
+    height: 10vh;
+    padding-right: 50px;
+}
+
+.profile-container img {
+    height: 8vh;
+}
+
+
+
+.profile-wrapper {
+  position: relative;
+  cursor: pointer;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 7.5vh;
+  right: 50px;
+  background-color: #646464;
+  border: 2px solid #66D425;
+  color:#f0f0f0;
+  border-radius: 6px;
+  list-style: none;
+  padding: 10px 0;
+  margin: 0;
+  width: 150px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  display: none;
+  z-index: 100;
+}
+
+.dropdown-menu.show {
+  display: block;
+}
+
+.dropdown-menu li {
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.dropdown-menu li:hover {
+  background-color: #828282;
+  color: #66D425;
+}

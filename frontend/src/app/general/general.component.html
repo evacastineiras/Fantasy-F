@@ -1,0 +1,18 @@
+<div class="gen-container">
+    <div class="banner">
+        <div class="logo-container">
+            <img src="../../assets/logogray.png" alt="">
+        </div>
+        <div class="profile-container">
+            <div class="profile-wrapper" (click)="toggleDropdown()">
+                <img src="../../assets/default-profile.png" alt="Foto de perfil">
+                    
+                <ul class="dropdown-menu" [class.show]="dropdownOpen">
+                    <li (click)="goToProfile()">Mi perfil</li>
+                    <li (click)="goToNotifications()">Notificaciones</li>
+                    <li (click)="logout()">Salir</li>
+                 </ul>
+            </div>
+        </div>
+    </div>
+</div>
