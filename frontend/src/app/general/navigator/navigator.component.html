@@ -1,0 +1,10 @@
+<nav class="nav-container">
+  <ul class="nav-list">
+    <li class="nav-item" [class.active]="activeItem === 'inicio'" (click)="setActive('inicio')">Inicio</li>
+    <li class="nav-item" [class.active]="activeItem === 'mercado'" (click)="setActive('mercado')">Mercado</li>
+    <li class="nav-item" [class.active]="activeItem === 'equipo'" (click)="setActive('equipo')">Mi equipo</li>
+    <li class="nav-item" [class.active]="activeItem === 'estadisticas'" (click)="setActive('estadisticas')">Estadísticas</li>
+    <li class="nav-item" [class.active]="activeItem === 'liga'" (click)="setActive('liga')">Liga</li>
+    <li class="nav-item" [class.active]="activeItem === 'mas'" (click)="setActive('mas')">Más</li>
+  </ul>
+</nav>
