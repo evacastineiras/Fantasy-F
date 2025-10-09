@@ -1,7 +1,7 @@
 <div class="gen-container">
     <div class="banner">
         <div class="logo-container">
-            <img src="../../assets/logogray.png" alt="">
+            <img src="../../assets/logogray.png" alt="" (click)="goHome()">
         </div>
         <div class="profile-container">
             <div class="profile-wrapper" (click)="toggleDropdown()">
@@ -15,5 +15,11 @@
             </div>
         </div>
     </div>
-    <app-navigator></app-navigator>
+    <app-navigator  [activeItem]="visualNav" (visualNav)="showComponent($event)"></app-navigator>
+    <app-home *ngIf="visualNav === 'inicio'"></app-home>
+    <app-market *ngIf="visualNav === 'mercado'"></app-market>
+    <app-team *ngIf="visualNav === 'equipo'"></app-team>
+    <app-stats *ngIf="visualNav === 'estadisticas'"></app-stats>
+    <app-league *ngIf="visualNav === 'liga'"></app-league>
+    <app-more *ngIf="visualNav === 'mas'"></app-more>
 </div>

@@ -13,6 +13,7 @@ export class GeneralComponent implements OnInit {
   }
 
   dropdownOpen = false;
+  visualNav = 'inicio';
 
 toggleDropdown() {
   this.dropdownOpen = !this.dropdownOpen;
@@ -25,6 +26,16 @@ handleClickOutside(event: MouseEvent)
   const clickdentro = target.closest('.profile-wrapper');
   if(!clickdentro)
     this.dropdownOpen = false;
+}
+
+showComponent(item:string)
+{
+  this.visualNav = item;
+}
+
+goHome()
+{
+  this.visualNav = 'inicio'
 }
 
 goToProfile() {

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output, Input } from '@angular/core';
 
 @Component({
   selector: 'app-navigator',
@@ -11,9 +11,12 @@ export class NavigatorComponent implements OnInit {
 
   ngOnInit(): void {
   }
-activeItem: string = 'inicio';
+  
+@Input() activeItem: string = 'inicio';
+@Output() visualNav = new EventEmitter<string>();
 
 setActive(item: string) {
   this.activeItem = item;
+  this.visualNav.emit(item);
 }
 }

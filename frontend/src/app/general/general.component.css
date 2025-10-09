@@ -17,6 +17,7 @@
 
 .logo-container img {
     height: 10vh;
+    cursor: pointer;
 }
 
 .profile-container {
