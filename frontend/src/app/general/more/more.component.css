@@ -1,0 +1,62 @@
+.gen-container { 
+  justify-content: center;
+  width: 100vw;
+  display: flex;
+  min-height: 85vh;
+}
+
+.options-container {
+  width: 20vw;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  margin-top: 8vh;
+}
+
+.button-div {
+  width: 90%;
+  background-color: #4A4A4A;
+  color: #66D425;
+  border-radius: 5px;
+  height: 7vh;
+  margin: 10px;
+  display: flex;
+  flex-direction: row;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.button-div:hover {
+  background-color: #5C5C5C;
+}
+
+.button-div.roj {
+  background-color: rgb(187, 22, 22);
+  color: black;
+  font-weight: bolder;
+}
+
+.button-div.roj:hover {
+  background-color: rgb(220, 50, 50);
+}
+
+.text-div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 60%;
+  font-size: larger;
+  padding-left: 15%;
+}
+
+.icon-div {
+  width: 30%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.icon-div img {
+  height: 50px;
+  width: auto;
+}

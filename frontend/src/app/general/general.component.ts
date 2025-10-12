@@ -13,7 +13,7 @@ export class GeneralComponent implements OnInit {
   }
 
   dropdownOpen = false;
-  visualNav = 'inicio';
+  visualNav = 'mas';
 
 toggleDropdown() {
   this.dropdownOpen = !this.dropdownOpen;
