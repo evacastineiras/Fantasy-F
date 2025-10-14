@@ -6,10 +6,10 @@
     <h3>UNIRSE A LIGA PRIVADA</h3>
     </div>
     <div class="form-container">
-        <form>
+        <form #joinLeagueForm="ngForm" (ngSubmit)="unirseALiga()" novalidate>
             <div class="item">
                 <h5>Codigo de la Liga</h5>
-                <input type="text" placeholder="Introduce un código">
+                <input name="codigo" [(ngModel)]="codigo" [value]="codigo" type="text" placeholder="Introduce un código">
             </div>
             <div class="item codigo-item submit-b">
                 <button type="submit">Unirse a liga</button>

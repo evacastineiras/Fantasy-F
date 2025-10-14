@@ -13,7 +13,6 @@ export class RegisterGuard implements CanActivate {
     {
         if(this.auth.justRegistered)
         {
-            this.auth.justRegistered = false;
             return true;
         }
 

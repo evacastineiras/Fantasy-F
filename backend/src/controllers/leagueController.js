@@ -74,9 +74,9 @@ async function joinPrivateLeague(req, res)
 
 async function joinRandomLeague(req, res) {
     try {
-        const { usuario, id_liga } = req.body;
+        const { usuario } = req.body;
 
-        if (!usuario || !id_liga) {
+        if (!usuario) {
             return res.status(400).json({ message: 'Faltan datos' });
         }
 

@@ -1,4 +1,7 @@
 import { Component, OnInit, EventEmitter, Output } from '@angular/core';
+import { Router } from '@angular/router';
+import { UserService } from 'src/app/services/user.service';
+import { AuthService } from 'src/app/services/auth.service';
 
 @Component({
   selector: 'app-select-league-index',
@@ -7,7 +10,7 @@ import { Component, OnInit, EventEmitter, Output } from '@angular/core';
 })
 export class SelectLeagueIndexComponent implements OnInit {
 
-  constructor() { }
+  constructor(private UserService: UserService, private router: Router , private authService: AuthService) { }
 
    @Output() ligaPrivadaShow = new EventEmitter<void>();
    @Output() crearLigaShow = new EventEmitter<void>();
@@ -17,7 +20,21 @@ export class SelectLeagueIndexComponent implements OnInit {
 
   addToRandomLeague()
   {
-    console.log('random league')
+    
+    const user = {
+      usuario: this.UserService.getUsuario().id
+    }
+    
+  this.UserService.unirseALigaAleatoria(user).subscribe({
+      next: (res:any) => {
+        console.log("Unido a liga", res);
+        this.authService.justRegistered = false;
+        this.router.navigate(['/home']);
+      },
+      error: (error:any) => {
+        console.error("Error al unirse a liga", error)
+      }
+    })
   }
 
   addToPrivateLeague()

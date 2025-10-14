@@ -1,6 +1,7 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { UserService } from 'src/app/services/user.service';
 import { Router } from '@angular/router';
+import { AuthService } from 'src/app/services/auth.service';
 
 @Component({
   selector: 'app-create-league',
@@ -9,7 +10,7 @@ import { Router } from '@angular/router';
 })
 export class CreateLeagueComponent implements OnInit {
 
-  constructor(private UserService: UserService, private router: Router) { }
+  constructor(private UserService: UserService, private router: Router, private authService: AuthService) { }
 
 
   @Output() volverAtrasEvent = new EventEmitter<void>();
@@ -63,6 +64,8 @@ export class CreateLeagueComponent implements OnInit {
   this.UserService.crearLiga(newLeague).subscribe({
       next: (res:any) => {
         console.log("Liga creada", res);
+        this.authService.justRegistered = false;
+        this.router.navigate(['/home']);
       },
       error: (error:any) => {
         console.error("Error en la creacion de la liga", error)

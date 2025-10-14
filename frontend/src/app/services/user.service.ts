@@ -21,5 +21,15 @@ export class UserService
     crearLiga(data:any)
     {
         return this.http.post(`${this.baseUrl}/createLeague`, data);
+    } 
+
+    unirseALigaAleatoria(data:any)
+    {
+        return(this.http.post(`${this.baseUrl}/publicLeague`, data));
+    }
+
+    unirseALigaPrivada(data: any)
+    {
+        return(this.http.post(`${this.baseUrl}/privateLeague`, data));
     }
 }

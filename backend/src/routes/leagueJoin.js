@@ -6,4 +6,4 @@ router.post('/createLeague', leagueController.createLeague);
 router.post('/privateLeague', leagueController.joinPrivateLeague);
 router.post('/publicLeague', leagueController.joinRandomLeague);
 
-module.exports = router;
+module.exports = router; 
