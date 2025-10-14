@@ -1,4 +1,6 @@
 import { Component, OnInit, HostListener } from '@angular/core';
+import { Router } from '@angular/router';
+import { UserService } from '../services/user.service';
 
 @Component({
   selector: 'app-general',
@@ -7,7 +9,7 @@ import { Component, OnInit, HostListener } from '@angular/core';
 })
 export class GeneralComponent implements OnInit {
 
-  constructor() { }
+  constructor(private UserService: UserService, private router: Router) { }
 
   ngOnInit(): void {
   }
@@ -47,7 +49,8 @@ goToNotifications() {
 }
 
 logout() {
-  // Lógica de logout
+  this.UserService.logout();
+  this.router.navigate(['/']);
 }
 
 }
