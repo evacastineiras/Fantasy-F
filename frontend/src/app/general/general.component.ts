@@ -41,7 +41,7 @@ goHome()
 }
 
 goToProfile() {
-  // Navegar al perfil
+  this.router.navigate(['/profile']);
 }
 
 goToNotifications() {

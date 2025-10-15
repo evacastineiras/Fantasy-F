@@ -14,7 +14,8 @@ export class UserGuard implements CanActivate {
     canActivate() : boolean
     {
         const usuario = this.userService.getUsuario();
-        if(usuario && usuario.id && !this.auth.justRegistered)
+       
+       if (usuario && usuario.id !== undefined && usuario.id !== null && !this.auth.justRegistered)
         {
             return true;
         }

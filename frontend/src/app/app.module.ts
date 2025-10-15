@@ -21,6 +21,7 @@ import { TeamComponent } from './general/team/team.component';
 import { StatsComponent } from './general/stats/stats.component';
 import { LeagueComponent } from './general/league/league.component';
 import { MoreComponent } from './general/more/more.component';
+import { ProfileComponent } from './general/options/profile/profile.component';
 
 
 @NgModule({
@@ -41,6 +42,7 @@ import { MoreComponent } from './general/more/more.component';
     StatsComponent,
     LeagueComponent,
     MoreComponent,
+    ProfileComponent,
   ],
   imports: [
     BrowserModule,
