@@ -19,13 +19,24 @@
                     </div>
                 </div>
                 <div class="data-mid">
-                    <div class="inputs-profile">
-                        <input type="text" class="username" placeholder="username">
-                        <input type="text" class="nombre" placeholder="nombre">
-                        <input type="text" class="email" placeholder="email">
+                    <form class="inputs-profile" >
+                        <div class="input-group">
+                            <label for="username">Username</label>
+                            <input name="username" id="username" [(ngModel)]="activeUserData.username" type="text" class="username" placeholder="username">
+                        </div>
+
+                        <div class="input-group">
+                            <label for="nombre">Nombre</label>
+                            <input name="nombre" id="nombre" [(ngModel)]="activeUserData.nombre" type="text" class="nombre" placeholder="nombre">
+                        </div>
+
+                        <div class="input-group">
+                            <label for="email">Email</label>
+                            <input name="email" id="email" [(ngModel)]="activeUserData.email" type="text" class="email" placeholder="email">
+                        </div>
                         <p class="pass-change">Cambiar contraseña</p>
-                    </div>
-                    <div class="save-button">Guardar</div>
+                    </form>
+                    <div class="save-button" (click)="update()">Guardar</div>
 
                 </div>
             </div>

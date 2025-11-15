@@ -32,7 +32,7 @@ async function register (req, res)  {
       [nombre, username, email, password_hash]
     );
 
-    res.status(201).json({ message: 'Usuario creado correctamente' ,  user: { id: result.insertId, email: email, username: username }});
+    res.status(201).json({ message: 'Usuario creado correctamente' ,  user: { id: result.insertId, email: email, username: username, nombre: nombre }});
   } catch (error) {
     console.error('Error en register:', error);
     res.status(500).json({ message: 'Error interno' });
@@ -64,14 +64,46 @@ const login = async (req, res) => {
     }
 
     // Login correcto
-    res.json({ message: 'Login correcto', user: { id: user.id_usuario, email: user.email, username: user.nombre_usuario } });
+    res.json({ message: 'Login correcto', user: { id: user.id_usuario, email: user.email, username: user.nombre_usuario, nombre: user.nombre } });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Error interno' });
   }
 };
 
+const editProfile = async (req, res) => {
+  try {
+    console.log("Recibido")
+    console.log(req.body)
+      const { nombre, username, email, id} = req.body;
+  
+    if (!nombre || !username || !email ) {
+      return res.status(400).json({ message: 'Los campos no pueden estar vacíos' });
+    }
+
+     const [users] = await pool.query(
+      'SELECT * FROM usuario WHERE id_usuario = ?',
+      [id]
+    );
+
+   if (users.length === 0) {
+      return res.status(401).json({ message: 'Usuario no encontrado' });
+    }
+
+    const user = users[0];
+
+    await pool.query('UPDATE usuario SET nombre = ? , nombre_usuario = ?, email = ? WHERE id_usuario = ?', [nombre, username, email, id]);
+
+   res.json({ message: 'Perfil editado', user: { id: user.id_usuario, email: email, username: username, nombre: nombre } });
+}
+catch {
+        console.error('Error al modificar perfil:', error);
+        res.status(500).json({ message: 'Error interno' });
+}
+}
+
 module.exports = {
   register,
-  login
+  login,
+  editProfile
 };

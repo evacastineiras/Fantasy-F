@@ -15,7 +15,7 @@ export class GeneralComponent implements OnInit {
   }
 
   dropdownOpen = false;
-  visualNav = 'mas';
+  visualNav = 'liga';
 
 toggleDropdown() {
   this.dropdownOpen = !this.dropdownOpen;

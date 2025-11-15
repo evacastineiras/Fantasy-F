@@ -14,12 +14,16 @@
                  </ul>
             </div>
         </div>
-    </div>
+    </div> 
     <app-navigator  [activeItem]="visualNav" (visualNav)="showComponent($event)"></app-navigator>
-    <app-home *ngIf="visualNav === 'inicio'"></app-home>
-    <app-market *ngIf="visualNav === 'mercado'"></app-market>
-    <app-team *ngIf="visualNav === 'equipo'"></app-team>
-    <app-stats *ngIf="visualNav === 'estadisticas'"></app-stats>
-    <app-league *ngIf="visualNav === 'liga'"></app-league>
-    <app-more *ngIf="visualNav === 'mas'"></app-more>
+    <div class="component-box">
+       
+        <app-home *ngIf="visualNav === 'inicio'"></app-home>
+        <app-market *ngIf="visualNav === 'mercado'"></app-market>
+        <app-team *ngIf="visualNav === 'equipo'"></app-team>
+        <app-stats *ngIf="visualNav === 'estadisticas'"></app-stats>
+        <app-league *ngIf="visualNav === 'liga'"></app-league>
+        <app-more *ngIf="visualNav === 'mas'"></app-more> 
+    </div>
+    
 </div>

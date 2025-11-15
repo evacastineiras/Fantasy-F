@@ -1,5 +1,6 @@
 .gen-container {
     background-color: #1e1e1e;
+    height: 100%;
 }
 
 .banner{
@@ -71,4 +72,8 @@
 .dropdown-menu li:hover {
   background-color: #828282;
   color: #66D425;
+}
+
+.component.box {
+  min-height: 98%;
 }

@@ -16,4 +16,9 @@ export class AuthService {
   register(data: any) {
     return this.http.post(`${this.baseUrl}/register`, data);
   }
+
+  editProfile(data: any)
+  {
+    return this.http.post(`${this.baseUrl}/editProfile`, data)
+  }
 }

@@ -174,3 +174,22 @@
 .borrar-perfil-button:hover {
   background-color: #e03c3c;
 }
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+  gap: 0.5vh;
+}
+
+.input-group label {
+  color: #ccc;        
+  font-size: 0.9rem;   
+  font-weight: 500;
+  margin-left: 4px;    
+}
+
+.input-group input {
+
+  width: 100%;
+}
