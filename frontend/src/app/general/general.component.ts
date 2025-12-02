@@ -1,6 +1,7 @@
 import { Component, OnInit, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
 import { UserService } from '../services/user.service';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-general',
@@ -9,13 +10,15 @@ import { UserService } from '../services/user.service';
 })
 export class GeneralComponent implements OnInit {
 
-  constructor(private UserService: UserService, private router: Router) { }
+  constructor(private UserService: UserService, private router: Router, private AuthService: AuthService) { }
 
   ngOnInit(): void {
   }
 
   dropdownOpen = false;
   visualNav = 'liga';
+  userImagePath = this.UserService.getUsuario().profileImage;
+  profileImagePreview : string = this.userImagePath ? this.AuthService.backendUrl + this.userImagePath :"../../assets/default-profile.png";
 
 toggleDropdown() {
   this.dropdownOpen = !this.dropdownOpen;

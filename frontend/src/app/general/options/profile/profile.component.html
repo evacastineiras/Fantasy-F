@@ -12,9 +12,16 @@
             <div class="profile-box">
                 <div class="pic-mid">
                     <div class="img-box">
-                        <img src="../../../../assets/default-profile.png" alt="">
+                        <img  [src]="profileImagePreview" alt="">
                     </div>
-                    <div class="change-box">
+                    <input 
+                        type="file"  
+                        style="display: none" 
+                        #fileInput
+                        (change)="onFileSelected($event)"
+                        accept="image/*"
+                    >
+                    <div class="change-box" (click)="fileInput.click()">
                         Cambiar foto de perfil
                     </div>
                 </div>
@@ -34,7 +41,7 @@
                             <label for="email">Email</label>
                             <input name="email" id="email" [(ngModel)]="activeUserData.email" type="text" class="email" placeholder="email">
                         </div>
-                        <p class="pass-change">Cambiar contraseña</p>
+                        <p class="pass-change" (click)="changePasswordCross()" >Cambiar contraseña </p>
                     </form>
                     <div class="save-button" (click)="update()">Guardar</div>
 
@@ -45,4 +52,62 @@
             <div class="borrar-perfil-button">Borrar Perfil</div>
         </div>
     </div>
+</div>
+
+<div class="cropper-modal" *ngIf="showCropper">
+  <div class="cropper-content">
+
+    <div class="cropper-circle">
+      <img 
+        [src]="tempImage"
+        class="crop-img"
+        draggable="false"
+        (mousedown)="startDrag($event)"
+        [style.transform]="
+            'translate(' + posX + 'px,' + posY + 'px) ' +
+            'scale(' + scale + ')'
+        "
+        [style.transform-origin]="'center center'"
+        >
+    </div>
+
+    <div class="crop-controls">
+      <input type="range" min="1" max="3" step="0.01" [(ngModel)]="scale">
+      <button class="ok-btn" (click)="applyCrop()">Recortar</button>
+      <button class="cancel-btn" (click)="cancelCrop()">Cancelar</button>
+    </div>
+
+  </div>
+
+  
+</div>
+<div class="pass-modal" *ngIf="showPassPopUp">
+  <div class="pass-content">
+    <div class="img-back-cont">
+      <img (click)="changePasswordCross()" src="../../../../assets/icons/flecha-izq-w.png" alt="">
+    </div>
+    <form action="" class="pass-form">
+      <div class="pass-input">
+        <label for="old">Antigua contraseña</label>
+        <input type="password" name="oldPassword" id="oldPassword" [(ngModel)]="oldPassword">
+      </div>
+      <div class="pass-input">
+        <label for="new">Nueva contraseña</label>
+        <input type="password" name="newPassword" id="newPassword" [(ngModel)]="newPassword"
+               [style.border]="repPassword && newPassword !== repPassword ? '1px solid red' : ''">
+      </div>
+      <div class="pass-input">
+        <label for="rep">Repite la contraseña</label>
+        <input type="password" name="repPassword" id="repPassword" [(ngModel)]="repPassword"
+               [style.border]="repPassword && newPassword !== repPassword ? '1px solid red' : ''">
+      </div>
+
+      <!-- Mensaje de error -->
+      <p *ngIf="repPassword && newPassword !== repPassword" class="error-message">
+        Las contraseñas no coinciden
+      </p>
+
+      <div (click)="changePassword()" class="passbutton" [attr.disabled]="repPassword && newPassword !== repPassword ? true : null">Guardar</div>
+    </form> 
+  </div>
 </div>

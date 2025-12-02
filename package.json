@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "ngx-avatar-2": "^5.3.0",
+    "ngx-image-cropper": "^9.1.5"
+  }
+}

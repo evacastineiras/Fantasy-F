@@ -1,5 +1,5 @@
 .nav-container {
-  background-color: #4A4A4A;
+  background-color: var(--primary-grey);
   height: 5vh;
   display: flex;
   align-items: center;
@@ -38,5 +38,5 @@
   transform: translateX(-50%);
   height: 6px;
   width: 80%;
-  background-color: #66D425; 
+  background-color: var(--primary-green); 
 }

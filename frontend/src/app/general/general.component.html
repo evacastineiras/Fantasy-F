@@ -5,7 +5,7 @@
         </div>
         <div class="profile-container">
             <div class="profile-wrapper" (click)="toggleDropdown()">
-                <img src="../../assets/default-profile.png" alt="Foto de perfil">
+                <img class="img-p" [src]="profileImagePreview" alt="Foto de perfil">
                     
                 <ul class="dropdown-menu" [class.show]="dropdownOpen">
                     <li (click)="goToProfile()">Mi perfil</li>

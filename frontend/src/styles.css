@@ -1,4 +1,15 @@
 /* You can add global styles to this file, and also import other style files */
+
+/*Variables de color*/
+
+:root
+{
+  --primary-grey: #4a4a4a;
+  --background-grey: #1e1e1e;
+  --light-grey: #d9d9d9;
+  --primary-green: #66d425;
+}
+
 html, body {
     height: 100%;
     width: 100%;

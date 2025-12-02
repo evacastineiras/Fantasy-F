@@ -78,10 +78,11 @@
   border-radius: 50%;
   object-fit: cover;
   background-color: #444;
+  border: 8px solid #3a3a3a;
 }
 
 .change-box {
-  background-color: #6fe62a;
+  background-color: #69d829;
   color: white;
   padding: 0.8vh 1.5vw;
   border-radius: 6px;
@@ -93,7 +94,7 @@
 }
 
 .change-box:hover {
-  background-color: #7be63a;
+  background-color: #51ad1c;
 }
 
 
@@ -133,7 +134,7 @@
 }
 
 .save-button {
-  background-color: #66d425;
+  background-color: #69d829;
   color: white;
   padding: 1vh 2vw;
   border-radius: 6px;
@@ -147,7 +148,7 @@
 }
 
 .save-button:hover {
-  background-color: #7be63a;
+  background-color: #51ad1c;
 }
 
 .bottom-box {
@@ -192,4 +193,157 @@
 .input-group input {
 
   width: 100%;
+}
+
+.cropper-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.cropper-content {
+  background: #2a2a2a;
+  padding: 20px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.cropper-circle {
+  width: 250px;
+  height: 250px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #111;
+  position: relative;
+}
+
+.crop-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  cursor: grab;
+  width: auto;      
+  height: 100%;    
+  max-width: none; 
+}
+
+.crop-controls {
+  margin-top: 20px;
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.ok-btn, .cancel-btn {
+  background: #66d425;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.cancel-btn {
+  background: #bb1616;
+}
+
+
+/*cambiar contraseña*/
+
+.pass-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.pass-content {
+  background: #2a2a2a;
+  padding: 20px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  min-height: 25vh;
+  min-width: 40vw;
+}
+
+.img-back-cont img
+{
+  height: 2vh;
+  margin-top: 1vh;
+  cursor: pointer;
+}
+
+.pass-content form
+{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 5vh;
+}
+
+.pass-input{
+  display: flex;
+  flex-direction: column;
+}
+
+.pass-input label{
+  color: var(--light-grey);
+  font-size: 1.35vh;
+  margin: 7px;
+}
+
+.pass-input input{
+  width: 28vw;
+  margin-bottom: 15px;
+  height: 2.25vh;
+  border-radius: 3px;
+  background-color: var(--primary-grey);
+  box-shadow: none;        
+  outline: none;            
+  border: 1px solid var(--background-grey);
+  padding-left: 20px;
+}
+
+.pass-input input:focus
+{
+  border: 1.5px solid var(--primary-green);
+}
+
+.passbutton{
+  background-color: var(--primary-green);
+  padding: 10px;
+  border-radius: 3px;
+  margin-top: 50px;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+  width: 10vw;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.passbutton:hover{
+  background-color: #89df57;
+}
+
+.error-message {
+  color: red;
+  font-size: 0.9em;
+  margin-top: 4px;
 }

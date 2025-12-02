@@ -5,6 +5,7 @@ import { Injectable } from '@angular/core';
 export class AuthService {
 
   private baseUrl = 'http://localhost:3000/api';
+  public readonly backendUrl = 'http://localhost:3000';
   justRegistered = false;
 
   constructor(private http: HttpClient) {}
@@ -20,5 +21,10 @@ export class AuthService {
   editProfile(data: any)
   {
     return this.http.post(`${this.baseUrl}/editProfile`, data)
+  }
+
+  changePassword(data: any)
+  {
+    return this.http.post(`${this.baseUrl}/changePassword`, data)
   }
 }
