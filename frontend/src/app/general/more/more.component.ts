@@ -8,6 +8,8 @@ import { Router } from '@angular/router';
 })
 export class MoreComponent implements OnInit {
 
+  mostrarAux = 1;
+
   constructor(private userService: UserService, private router: Router) { }
 
   ngOnInit(): void {
@@ -15,22 +17,27 @@ export class MoreComponent implements OnInit {
 
   consultarReglas()
   {
-
+    this.mostrarAux = 2;
   }
 
   verCalendario()
   {
-
+    this.mostrarAux = 3;
   }
 
   cambiarLiga()
   {
-
+    
   }
 
   abandonarLiga()
   {
 
+  }
+
+  mostrarBasico()
+  {
+    this.mostrarAux = 1;
   }
 
   cerrarSesion()
