@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -27,4 +28,8 @@ export class AuthService {
   {
     return this.http.post(`${this.baseUrl}/changePassword`, data)
   }
+
+ getBudgetValue(idUsuario: number): Observable<any> {
+  return this.http.get(`${this.baseUrl}/getBudgetValue/${idUsuario}`);
+}
 }

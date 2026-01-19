@@ -187,6 +187,10 @@ changePassword()
     {
       window.alert("Las contraseñas no coinciden");
     } else {
+      if(this.newPassword.length < 6 || this.newPassword.length > 30){
+        window.alert("La contraseña debe ser mayor a 6 caracteres e inferior a 30");
+      }
+     else {
         const data = {
           password: this.oldPassword,
           newPassword: this.newPassword,
@@ -204,7 +208,7 @@ changePassword()
         });
     }
   }
-      
+}   
   
 
    /*this.authService.editProfile(this.userService.getUsuario().id).subscribe({

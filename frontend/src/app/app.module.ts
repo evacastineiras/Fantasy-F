@@ -2,6 +2,9 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule} from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { LOCALE_ID } from '@angular/core'; 
+import { registerLocaleData } from '@angular/common';
+import localeEs from '@angular/common/locales/es';
 
 import { AppComponent } from './app.component';
 import { LandingBaseComponent } from './landing/landing-base/landing-base.component';
@@ -21,7 +24,10 @@ import { StatsComponent } from './general/stats/stats.component';
 import { LeagueComponent } from './general/league/league.component';
 import { MoreComponent } from './general/more/more.component';
 import { ProfileComponent } from './general/options/profile/profile.component';
+import { RulesComponent } from './general/more/rules/rules.component';
+import { BudgetBoxComponent } from './general/budget-box/budget-box.component';
 
+registerLocaleData(localeEs, 'es');
 
 @NgModule({
   declarations: [
@@ -42,6 +48,8 @@ import { ProfileComponent } from './general/options/profile/profile.component';
     LeagueComponent,
     MoreComponent,
     ProfileComponent,
+    RulesComponent,
+    BudgetBoxComponent,
   ],
   imports: [
     BrowserModule,
@@ -49,7 +57,7 @@ import { ProfileComponent } from './general/options/profile/profile.component';
     HttpClientModule,
     AppRoutingModule
   ],
-  providers: [],
+  providers: [{ provide: LOCALE_ID, useValue: 'es' }],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

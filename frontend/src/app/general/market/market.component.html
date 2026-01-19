@@ -1,1 +1,42 @@
-<p>market works!</p>
+<div class="market-container">
+  <div class="market-list">
+    <div *ngFor="let jugadora of jugadoras" class="player-row">
+      
+      <div class="left-section">
+        <span class="pos-text">{{ jugadora.posicion }}</span>
+        <div class="img-container">
+          <img [src]="'http://localhost:3000/' + jugadora.foto" class="player-photo">
+          <img [src]="'http://localhost:3000/' + jugadora.club_escudo" class="team-shield">
+        </div>
+        <span class="player-name">{{ jugadora.apodo }}</span>
+      </div>
+
+      <div class="middle-section">
+        <div class="info-group">
+          <div class="info-item">
+            <span class="label">Valor:</span>
+            <span class="value">{{ jugadora.valor | number:'1.0-0' }}€</span>
+            <span *ngIf="getTendencia(jugadora) as tendencia" 
+        [ngClass]="tendencia.sube ? 'trend up' : 'trend down'">
+    {{ tendencia.sube ? '▲' : '▼' }} {{ tendencia.valor }}%
+  </span>
+</div>
+          <div class="info-item">
+            <span class="label">Propietario:</span>
+            <span class="owner-status">libre</span>
+          </div>
+        </div>
+        
+        <div class="bid-group">
+          <span class="label">Puja actual:</span>
+          <span class="current-bid">{{ jugadora.ultima_puja ? (jugadora.ultima_puja | number:'1.0-0') + '€' : (jugadora.valor | number:'1.0-0') + '€' }}</span>
+        </div>
+      </div>
+
+      <div class="right-section">
+        <button class="btn-pujar">PUJAR</button>
+      </div>
+
+    </div>
+  </div>
+</div>

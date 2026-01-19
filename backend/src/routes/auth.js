@@ -6,5 +6,6 @@ router.post('/register', authController.register);
 router.post('/login', authController.login);
 router.post('/editProfile', authController.editProfile);
 router.post('/changePassword', authController.changePassword);
+router.get('/getBudgetValue/:id_usuario', authController.getBudgetValue);
 
 module.exports = router;

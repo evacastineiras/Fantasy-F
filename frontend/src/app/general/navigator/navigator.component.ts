@@ -16,7 +16,6 @@ export class NavigatorComponent implements OnInit {
 @Output() visualNav = new EventEmitter<string>();
 
 setActive(item: string) {
-  this.activeItem = item;
   this.visualNav.emit(item);
 }
 }

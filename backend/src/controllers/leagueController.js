@@ -2,43 +2,66 @@ const pool = require('../db');
 
 async function createLeague(req, res) 
 {
+    let connection;
     try
     {
-        const{id_liga, nombre, usuario} = req.body; //falta timestamp, el id_liga es el codigo randomizado que se calcula en el front y el usuario(id) es para meterlo directamente en la liga que acaba de crear
+        const{id_liga, nombre, usuario} = req.body; 
         if(!id_liga || !nombre || !usuario)
         {
             return res.status(400).json({message: 'Faltan datos'});
         }
 
-        const[errorCode] = await pool.query('SELECT id_liga FROM liga WHERE id_liga = ?', [id_liga]);
+        connection = await pool.getConnection();
+        await connection.beginTransaction(); 
+
+        const[errorCode] = await connection.query('SELECT id_liga FROM liga WHERE id_liga = ?', [id_liga]);
         if(errorCode.length > 0)
-            return res.status(400).json({message: 'ERROR: Utiliza un nuevo código'});
-        //Aunque es sumamente improvable, podría generarse un código ya utilizado.
+        {
+            await connection.rollback();
+            return res.status(400).json({message: 'ERROR: El código de liga ya está en uso'});
+        }   
         
-        const[errorUser] = await pool.query('SELECT id_usuario FROM usuario WHERE id_liga IS NOT NULL AND id_usuario =  ?', [usuario])
+        const[errorUser] = await connection.query('SELECT id_usuario FROM usuario WHERE id_liga IS NOT NULL AND id_usuario =  ?', [usuario])
         if(errorUser.length > 0)
+        {
+            await connection.rollback();
+        
             return res.status(400).json({message: 'ERROR: El usuario ya pertenece a una liga'});
+        }
+            
 
         const fecha = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
-        await pool.query(
+        await connection.query(
       'INSERT INTO liga (id_liga, nombre , creada_en) VALUES (?, ?, ?)',
       [id_liga, nombre, fecha]
     );
 
-    await pool.query('UPDATE usuario SET id_liga = ? WHERE id_usuario = ?', [id_liga, usuario]) //Unimos al usuario creador a su propia liga
+    await connection.query('UPDATE usuario SET id_liga = ? WHERE id_usuario = ?', [id_liga, usuario]) 
+
+    const presupuestoInicial = 50000000;
+    await connection.query('INSERT INTO plantilla (id_usuario, id_liga, presupuesto, valor_equipo, n_jugadoras) VALUES (?,?,?,0,0)', [usuario, id_liga, presupuestoInicial]);
+
+    await connection.query('INSERT INTO plantilla_jugadora (id_liga, id_jugadora, valor, clausula, id_plantilla) SELECT ?, id_jugadora, valor_base, 0, NULL FROM jugadora', [id_liga]);
+
+    await connection.commit();
 
     res.status(201).json({ message: 'Liga creada correctamente' });
 
   }catch (error) 
   {
+     if(connection) await connection.rollback();
     console.error('Error en crear liga:', error);
     res.status(500).json({ message: 'Error interno' });
   }
+  finally {
+        if (connection) connection.release();
+    }
 }
 
 async function joinPrivateLeague(req, res) 
 {
+    let connection;
     try
     {
         const {id_liga, usuario} = req.body;
@@ -48,84 +71,209 @@ async function joinPrivateLeague(req, res)
             return res.status(400).json({message: 'Faltan datos'});
         }
 
-        const[errorCode] = await pool.query('SELECT id_liga FROM liga WHERE id_liga = ?', [id_liga]);
-        if(errorCode.length == 0)
+        connection = await pool.getConnection();
+        await connection.beginTransaction();
+
+        const[errorCode] = await connection.query('SELECT id_liga FROM liga WHERE id_liga = ?', [id_liga]);
+        if(errorCode.length == 0){
+            await connection.rollback();
             return res.status(400).json({message: 'ERROR: El código no corresponde a una liga'});
+        }
+            
         
-        const[errorUser] = await pool.query('SELECT id_usuario FROM usuario WHERE id_liga IS NOT NULL AND id_usuario =  ?', [usuario])
+        const[errorUser] = await connection.query('SELECT id_usuario FROM usuario WHERE id_liga IS NOT NULL AND id_usuario =  ?', [usuario])
         if(errorUser.length > 0)
+        {
+            await connection.rollback();
             return res.status(400).json({message: 'ERROR: El usuario ya pertenece a una liga'});
+        }
+            
 
-        const[result] = await pool.query('SELECT COUNT(*) AS total FROM usuario WHERE id_liga =  ?', [id_liga])
+        const[result] = await connection.query('SELECT COUNT(*) AS total FROM usuario WHERE id_liga =  ?', [id_liga])
         if(result[0].total >= 10)
+        {
+            await connection.rollback();
             return res.status(400).json({message: 'ERROR: La liga está completa'});
+        }
+            
 
         
-    await pool.query('UPDATE usuario SET id_liga = ? WHERE id_usuario = ?', [id_liga, usuario]) 
+    await connection.query('UPDATE usuario SET id_liga = ? WHERE id_usuario = ?', [id_liga, usuario]);
+
+    const PRESUPUESTOINICIAL = 50000000;
+    await connection.query('INSERT INTO plantilla (id_usuario, id_liga, presupuesto, valor_equipo, n_jugadoras) VALUES (?,?,?, 0, 0)', [usuario, id_liga, PRESUPUESTOINICIAL]);
+
+    await connection.commit();
 
     res.status(201).json({ message: 'Unido a liga correctamente' });
 
     }catch (error){
+        if(connection) await connection.rollback();
         console.error('Error al unirse a liga:', error);
         res.status(500).json({ message: 'Error interno' });
+    } finally {
+        if (connection) connection.release();
     }
     
 }
 
 async function joinRandomLeague(req, res) {
+    let connection;
+    const PRESUPUESTO_INICIAL = 50000000;
+
     try {
-        const { usuario } = req.body;
+        const { usuario } = req.body; 
 
         if (!usuario) {
             return res.status(400).json({ message: 'Faltan datos' });
         }
 
-        const [errorUser] = await pool.query(
+        connection = await pool.getConnection();
+        await connection.beginTransaction();
+
+        const [errorUser] = await connection.query(
             'SELECT id_usuario FROM usuario WHERE id_liga IS NOT NULL AND id_usuario = ?',
             [usuario]
         );
         if (errorUser.length > 0) {
+            await connection.rollback();
             return res.status(400).json({ message: 'ERROR: El usuario ya pertenece a una liga' });
         }
 
-        const [ligas] = await pool.query(`
+        const [ligas] = await connection.query(`
             SELECT l.id_liga, l.nombre, COUNT(u.id_usuario) AS total
             FROM liga l
             LEFT JOIN usuario u ON l.id_liga = u.id_liga
             WHERE l.nombre LIKE 'Liga publica #%'
             GROUP BY l.id_liga, l.nombre
             HAVING total < 10
+            LIMIT 1
         `);
 
-        if (ligas.length > 0) {
-            await pool.query(
-                'UPDATE usuario SET id_liga = ? WHERE id_usuario = ?',
-                [ligas[0].id_liga, usuario]
-            );
-        } else {
-            //Crear una nueva liga pública si no hay ninguna disponible
-            const nombre = "Liga publica #" + id_liga;
-            const fecha = new Date().toISOString().slice(0, 19).replace('T', ' ');
+        let idLigaDestino;
 
-            await pool.query(
-                'INSERT INTO liga (id_liga, nombre, creada_en) VALUES (?, ?, ?)',
-                [id_liga, nombre, fecha]
+        if (ligas.length > 0) {
+            idLigaDestino = ligas[0].id_liga;
+        } else {
+            idLigaDestino = Math.floor(100000 + Math.random() * 900000);
+            const nombreLiga = "Liga publica #" + idLigaDestino;
+
+            await connection.query(
+                'INSERT INTO liga (id_liga, nombre) VALUES (?, ?)',
+                [idLigaDestino, nombreLiga]
             );
-            await pool.query(
-                'UPDATE usuario SET id_liga = ? WHERE id_usuario = ?',
-                [id_liga, usuario]
+
+            await connection.query(`
+                INSERT INTO plantilla_jugadora (id_liga, id_jugadora, valor, clausula, id_plantilla)
+                SELECT ?, id_jugadora, valor_base, 0, NULL FROM jugadora
+            `, [idLigaDestino]);
+        }
+
+        await connection.query(
+            'UPDATE usuario SET id_liga = ? WHERE id_usuario = ?',
+            [idLigaDestino, usuario]
+        );
+
+        await connection.query(
+            'INSERT INTO plantilla (id_usuario, id_liga, presupuesto, valor_equipo, n_jugadoras) VALUES (?, ?, ?, 0, 0)',
+            [usuario, idLigaDestino, PRESUPUESTO_INICIAL]
+        );
+
+        await connection.commit();
+        res.status(201).json({ 
+            message: 'Unido a liga correctamente', 
+            id_liga: idLigaDestino 
+        });
+
+    } catch (error) {
+        if (connection) await connection.rollback();
+        console.error('Error al unirse a liga aleatoria:', error);
+        res.status(500).json({ message: 'Error interno' });
+    } finally {
+        if (connection) connection.release();
+    }
+}
+
+async function changeLeague(req, res) {
+
+    let connection;
+ try {
+        const { id } = req.body;
+
+        if (!id) {
+            return res.status(400).json({ message: 'Faltan datos' });
+        }
+
+        connection = await pool.getConnection();
+        await connection.beginTransaction(); 
+
+        const [userData] = await connection.query(
+            `SELECT p.id_plantilla, u.id_liga 
+             FROM usuario u
+             LEFT JOIN plantilla p ON u.id_usuario = p.id_usuario AND u.id_liga = p.id_liga
+             WHERE u.id_usuario = ?`,
+            [id]
+        );
+
+        if (userData.length === 0) {
+            await connection.rollback();
+            return res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+
+        const { id_plantilla, id_liga } = userData[0];
+
+        if (!id_liga) {
+            await connection.rollback();
+            return res.status(400).json({ message: 'El usuario ya no pertenece a ninguna liga' });
+        }
+
+        if (id_plantilla) {
+            await connection.query(
+                'UPDATE plantilla_jugadora SET id_plantilla = NULL WHERE id_plantilla = ?',
+                [id_plantilla]
+            );
+
+            await connection.query(
+                'DELETE FROM plantilla WHERE id_plantilla = ?',
+                [id_plantilla]
             );
         }
 
-        res.status(201).json({ message: 'Unido a liga correctamente' });
+        await connection.query(
+            'UPDATE usuario SET id_liga = NULL WHERE id_usuario = ?',
+            [id]
+        );
+
+        const [remainingUsers] = await connection.query(
+            'SELECT COUNT(*) as total FROM usuario WHERE id_liga = ?',
+            [id_liga]
+        );
+
+        if (remainingUsers[0].total === 0) {
+            await connection.query('DELETE FROM plantilla_jugadora WHERE id_liga = ?', [id_liga]);
+            await connection.query('DELETE FROM liga WHERE id_liga = ?', [id_liga]);
+            console.log(`Liga ${id_liga} eliminada por estar vacía.`);
+        }
+
+        await connection.commit();
+        res.status(200).json({ 
+            message: remainingUsers[0].total === 0 
+                ? 'Has abandonado la liga y esta ha sido eliminada por quedar vacía.' 
+                : 'Has abandonado la liga correctamente.' 
+        });
+
     } catch (error) {
-        console.error('Error al unirse a liga:', error);
-        res.status(500).json({ message: 'Error interno' });
+        if (connection) await connection.rollback();
+        console.error('Error al abandonar liga:', error);
+        res.status(500).json({ message: 'Error interno al procesar la salida de la liga' });
+    } finally {
+        if (connection) connection.release();
     }
 }
 
 module.exports = {
   createLeague,
   joinPrivateLeague,
-  joinRandomLeague
+  joinRandomLeague,
+  changeLeague
 };

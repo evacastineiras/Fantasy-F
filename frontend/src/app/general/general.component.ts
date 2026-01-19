@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { UserService } from '../services/user.service';
 import { AuthService } from '../services/auth.service';
 
+
 @Component({
   selector: 'app-general',
   templateUrl: './general.component.html',
@@ -12,11 +13,22 @@ export class GeneralComponent implements OnInit {
 
   constructor(private UserService: UserService, private router: Router, private AuthService: AuthService) { }
 
+  presupuesto = 0;
+  valorTotal = 0;
+
   ngOnInit(): void {
+
+    this.AuthService.getBudgetValue(this.UserService.getUsuario().id).subscribe({
+      next: (res) => {
+        this.presupuesto = res.presupuesto;
+        this.valorTotal = res.valor_plantilla;
+      },
+      error: (err) => console.error('Error cargando presupuesto')
+    });
   }
 
   dropdownOpen = false;
-  visualNav = 'liga';
+  visualNav = 'inicio';
   userImagePath = this.UserService.getUsuario().profileImage;
   profileImagePreview : string = this.userImagePath ? this.AuthService.backendUrl + this.userImagePath :"../../assets/default-profile.png";
 

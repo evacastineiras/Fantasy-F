@@ -16,6 +16,14 @@
         </div>
     </div> 
     <app-navigator  [activeItem]="visualNav" (visualNav)="showComponent($event)"></app-navigator>
+
+    <app-budget-box 
+        *ngIf="visualNav !== 'mas'" 
+        [presupuesto]="presupuesto" 
+    [valorTotal]="valorTotal">
+    </app-budget-box>
+
+    
     <div class="component-box">
        
         <app-home *ngIf="visualNav === 'inicio'"></app-home>

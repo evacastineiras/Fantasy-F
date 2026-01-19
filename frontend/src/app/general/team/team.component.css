@@ -1,0 +1,11 @@
+.gen-container {
+    display: flex;
+    justify-content: center;
+    height: 100%;
+    background-color: #18181a;
+}
+
+.gen-container img {
+    height: 85vh;
+    width: auto;
+}
