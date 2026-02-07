@@ -49,7 +49,7 @@
             </div>
         </div>
         <div class="bottom-box">
-            <div class="borrar-perfil-button">Borrar Perfil</div>
+            <div class="borrar-perfil-button" (click)="openDeleteModal()">Borrar Perfil</div>
         </div>
     </div>
 </div>
@@ -109,5 +109,20 @@
 
       <div (click)="changePassword()" class="passbutton" [attr.disabled]="repPassword && newPassword !== repPassword ? true : null">Guardar</div>
     </form> 
+  </div>
+</div>
+
+<div class="pass-modal" *ngIf="showDeletePopUp">
+  <div class="pass-content delete-modal-content">
+    <div class="delete-warning-icon">⚠️</div>
+    <h2>¿Eliminar cuenta?</h2>
+    <p class="delete-text">
+        Esta acción es <b>irreversible</b>. Perderás tu equipo, tus jugadoras y tu progreso en la liga.
+    </p>
+    
+    <div class="modal-actions-delete">
+      <div class="cancel-btn-delete" (click)="closeDeleteModal()">Cancelar</div>
+      <div class="confirm-btn-delete" (click)="confirmDelete()">Eliminar para siempre</div>
+    </div>
   </div>
 </div>

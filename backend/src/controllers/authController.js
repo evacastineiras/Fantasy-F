@@ -30,6 +30,8 @@ async function register (req, res)  {
 
     // Hashear la contraseña
     const password_hash = await bcrypt.hash(password, saltRounds);
+
+    console.log(password_hash);
     // Insertar nuevo usuario
     const[result] = await pool.query(
       'INSERT INTO usuario (nombre, nombre_usuario, email, password_hash) VALUES (?, ?, ?, ?)',
@@ -130,6 +132,72 @@ catch (error) {
 }
 }
 
+const deleteProfile = async(req, res) => {
+  const connection = await pool.getConnection(); 
+    try {
+        const { id } = req.params;
+
+        if (!id) {
+            return res.status(400).json({ message: 'ID de usuario no proporcionado' });
+        }
+
+        await connection.beginTransaction();
+
+        //  foto para borrar
+        const [userRows] = await connection.query(
+            'SELECT foto_perfil_url FROM usuario WHERE id_usuario = ?', 
+            [id]
+        );
+
+        if (userRows.length === 0) {
+            await connection.rollback();
+            return res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+
+        const fotoPath = userRows[0].foto_perfil_url;
+
+        // Liberar las jugadoras id_plantilla null
+        
+        const [plantillaRows] = await connection.query(
+            'SELECT id_plantilla FROM plantilla WHERE id_usuario = ?', 
+            [id]
+        );
+
+        if (plantillaRows.length > 0) {
+            const id_plantilla = plantillaRows[0].id_plantilla;
+            // Desvinculamos las jugadoras para que vuelvan al mercado de la liga
+            await connection.query(
+                'UPDATE plantilla_jugadora SET id_plantilla = NULL WHERE id_plantilla = ?',
+                [id_plantilla]
+            );
+        }
+
+        // borramos usuario y por cascada se borra plantilla
+        await connection.query('DELETE FROM usuario WHERE id_usuario = ?', [id]);
+
+       /* // 4. Si todo ha ido bien en la DB, borramos el archivo de imagen del servidor
+        if (fotoPath && fotoPath.startsWith('/uploads/')) {
+            const fullPath = path.join(__dirname, '..', 'public', fotoPath);
+            try {
+                await fs.unlink(fullPath);
+            } catch (err) {
+                console.warn('No se pudo eliminar el archivo físico:', fullPath);
+            }
+        }
+            */
+
+        await connection.commit();
+        res.json({ message: 'Perfil y datos asociados eliminados correctamente' });
+
+    } catch (error) {
+        await connection.rollback();
+        console.error('Error en deleteProfile:', error);
+        res.status(500).json({ message: 'Error interno al eliminar el perfil' });
+    } finally {
+        connection.release(); 
+    }
+}
+
 const changePassword = async (req, res) => 
 {
   try{
@@ -215,6 +283,7 @@ module.exports = {
   register,
   login,
   editProfile,
+  deleteProfile,
   changePassword,
   getBudgetValue
 };

@@ -1,14 +1,13 @@
 const pool = require('../db');
 
-async function getMarketPlayers(req, res)
-{
+async function getMarketPlayers(req, res) {
     try {
-        const {id_usuario} = req.params;
+        const { id_usuario } = req.params;
 
-    if (!id_usuario)
-        return res.status(400).json({message: 'No se encuentra el ID del usuario'});
+        if (!id_usuario)
+            return res.status(400).json({ message: 'No se encuentra el ID del usuario' });
 
-    const [players] = await pool.query(`
+        const [players] = await pool.query(`
     SELECT 
         j.id_jugadora, 
         j.apodo, 
@@ -18,6 +17,7 @@ async function getMarketPlayers(req, res)
         j.valor_base,
         pj.valor, 
         pj.id_entry,
+        u.nombre AS nombre_usuario, -- Cambiado de u.username a u.nombre
         (SELECT MAX(montante) 
          FROM puja 
          WHERE id_entry = pj.id_entry 
@@ -25,22 +25,19 @@ async function getMarketPlayers(req, res)
     FROM plantilla_jugadora pj 
     JOIN jugadora j ON pj.id_jugadora = j.id_jugadora 
     JOIN club c ON j.id_club = c.id_club 
-    WHERE pj.id_plantilla IS NULL 
-    AND pj.id_liga = (SELECT id_liga FROM usuario WHERE id_usuario = ?)
+    LEFT JOIN plantilla p ON pj.id_plantilla = p.id_plantilla
+    LEFT JOIN usuario u ON p.id_usuario = u.id_usuario -- Asegúrate que el campo sea id_usuario
+    WHERE pj.id_liga = (SELECT id_liga FROM usuario WHERE id_usuario = ?) 
+    ORDER BY pj.valor DESC;
 `, [id_usuario]);
 
-    res.status(200).json(players);
-    } catch(error)
-    {
+        res.status(200).json(players);
+    } catch (error) {
         console.error('Error al obtener mercado: ', error);
-        res.status(500).json({message: 'Error interno al obtener el mercado'});
+        res.status(500).json({ message: 'Error interno al obtener el mercado' });
     }
-    
 }
-
-
 
 module.exports = {
     getMarketPlayers
 };
-

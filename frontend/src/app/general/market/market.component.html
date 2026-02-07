@@ -1,6 +1,14 @@
 <div class="market-container">
+  <div class="search-box">
+  <input 
+    type="text" 
+    placeholder="Busca por jugadora, posición o propietario..." 
+    (input)="filtrar($event)"
+    class="search-input">
+</div>
+
   <div class="market-list">
-    <div *ngFor="let jugadora of jugadoras" class="player-row">
+    <div *ngFor="let jugadora of jugadorasFiltradas | slice:0:limite" class="player-row">
       
       <div class="left-section">
         <span class="pos-text">{{ jugadora.posicion }}</span>
@@ -8,7 +16,7 @@
           <img [src]="'http://localhost:3000/' + jugadora.foto" class="player-photo">
           <img [src]="'http://localhost:3000/' + jugadora.club_escudo" class="team-shield">
         </div>
-        <span class="player-name">{{ jugadora.apodo }}</span>
+        <span class="player-name" id="jugadora.id_jugadora">{{ jugadora.apodo }}</span>
       </div>
 
       <div class="middle-section">
@@ -17,19 +25,24 @@
             <span class="label">Valor:</span>
             <span class="value">{{ jugadora.valor | number:'1.0-0' }}€</span>
             <span *ngIf="getTendencia(jugadora) as tendencia" 
-        [ngClass]="tendencia.sube ? 'trend up' : 'trend down'">
-    {{ tendencia.sube ? '▲' : '▼' }} {{ tendencia.valor }}%
-  </span>
-</div>
+                  [ngClass]="tendencia.sube ? 'trend up' : 'trend down'">
+              {{ tendencia.sube ? '▲' : '▼' }} {{ tendencia.valor }}%
+            </span>
+          </div>
+
           <div class="info-item">
             <span class="label">Propietario:</span>
-            <span class="owner-status">libre</span>
+            <span class="owner-status" [ngClass]="{'has-owner': jugadora.nombre_usuario}">
+              {{ jugadora.nombre_usuario ? jugadora.nombre_usuario : 'Libre' }}
+            </span>
           </div>
         </div>
         
         <div class="bid-group">
           <span class="label">Puja actual:</span>
-          <span class="current-bid">{{ jugadora.ultima_puja ? (jugadora.ultima_puja | number:'1.0-0') + '€' : (jugadora.valor | number:'1.0-0') + '€' }}</span>
+          <span class="current-bid">
+            {{ jugadora.ultima_puja ? (jugadora.ultima_puja | number:'1.0-0') + '€' : (jugadora.valor | number:'1.0-0') + '€' }}
+          </span>
         </div>
       </div>
 
@@ -38,5 +51,12 @@
       </div>
 
     </div>
+  </div>
+
+  <div class="container-more" *ngIf="limite < jugadorasFiltradas.length">
+    <button class="btn-more" (click)="mostrarMas()">
+      Mostrar más
+    </button>
+    <p class="count-text">Viendo {{ limite }} de {{ jugadorasFiltradas.length }} jugadoras</p>
   </div>
 </div>

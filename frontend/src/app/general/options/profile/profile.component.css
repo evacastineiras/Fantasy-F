@@ -347,3 +347,58 @@
   font-size: 0.9em;
   margin-top: 4px;
 }
+
+/*modal de borrado*/
+
+.delete-modal-content {
+    text-align: center;
+    padding: 40px;
+    border: 1px solid var(--primary-green); 
+}
+
+.delete-modal-content h2, .delete-modal-content b
+{
+  color: var(--primary-green);
+}
+
+.delete-warning-icon {
+    font-size: 3rem;
+    margin-bottom: 10px;
+}
+
+.delete-text {
+    color: #ccc;
+    margin-bottom: 30px;
+    line-height: 1.5;
+}
+
+.modal-actions-delete {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+
+.cancel-btn-delete {
+    background-color: var(--primary-grey);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.confirm-btn-delete {
+    background-color: #bb1616;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.3s;
+}
+
+
+.confirm-btn-delete:hover {
+    background-color: #ff0000;
+}

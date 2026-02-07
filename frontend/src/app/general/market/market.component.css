@@ -1,3 +1,59 @@
+.search-box {
+  max-width: 600px; 
+  margin: 0 auto 2.5rem auto;
+  position: relative;
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px 25px; 
+  padding-left: 45px; 
+  background-color: #252525;
+  border: 1px solid #3d3d3d; 
+  border-radius: 50px;
+  color: #e0e0e0; 
+  font-size: 0.95rem; 
+  font-family: 'Roboto', sans-serif;
+  outline: none;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); 
+}
+
+.search-input:focus {
+  border-color: #44ff00;
+  background-color: #2a2a2a;
+  box-shadow: 0 0 10px rgba(68, 255, 0, 0.15); 
+}
+
+.search-box::before {
+  content: '🔍';
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.9rem;
+  opacity: 0.4; 
+}
+
+
+@media (max-width: 600px) {
+  .search-box {
+    padding: 0 15px;
+  }
+}
+
+
+.owner-status {
+  color: #44ff00; 
+  font-weight: bold;
+  text-transform: capitalize;
+}
+
+.owner-status.has-owner {
+  color: #00d4ff; 
+}
+
+
 .market-container {
   background-color: var(--background-grey);
   padding: 20px;
@@ -8,7 +64,7 @@
 .market-list {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1.5rem;
   max-width: 900px;
   margin: 0 auto;
 }
@@ -21,6 +77,12 @@
   padding: 10px 20px;
   color: white;
   justify-content: space-between;
+  transition: transform 0.2s ease;
+}
+
+.player-row:hover {
+  transform: translateX(5px);
+  background-color: #4d4d4d;
 }
 
 .left-section {
@@ -59,7 +121,7 @@
 
 .player-name {
   font-weight: 500;
-  font-size: 1.1rem;
+  font-size: 1rem;
   padding-left: 1.5rem;
 }
 
@@ -78,7 +140,6 @@
 
 .label { color: #999; margin-right: 5px; }
 .value { font-weight: bold; }
-.owner-status { color: white; }
 
 .current-bid {
   color: #44ff00; 
@@ -86,20 +147,59 @@
   font-size: 1.1rem;
 }
 
-.trend.up { color: #44ff00; font-size: 0.7rem; margin-left: 5px; }
-
 .btn-pujar {
   background-color: #44ff00; 
-  color: var(--background-grey);
+  color: #1a1a1a; 
   border: none;
   padding: 10px 25px;
   border-radius: 6px;
   font-weight: 900;
-  font-family: 'Roboto';
   cursor: pointer;
   box-shadow: 0 0 10px rgba(68, 255, 0, 0.2);
 }
 
 .btn-pujar:hover {
   background-color: #3ce600;
+}
+
+.trend {
+  font-size: 0.75rem;
+  font-weight: bold;
+  margin-left: 6px;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.trend.up { color: #44ff00; }
+.trend.down { color: #ff4444; }
+
+.container-more {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px 0;
+  gap: 10px;
+}
+
+.btn-more {
+  background-color: transparent;
+  color: var(--primary-green); 
+  border: 2px solid var(--primary-green);
+  padding: 12px 30px;
+  border-radius: 25px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-more:hover {
+  background-color: var(--primary-green);
+  color: black;
+  box-shadow: 0 0 15px rgba(68, 255, 0, 0.4);
+}
+
+.count-text {
+  color: #777;
+  font-size: 0.8rem;
+  margin: 0;
 }

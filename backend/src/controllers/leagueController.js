@@ -271,9 +271,82 @@ async function changeLeague(req, res) {
     }
 }
 
+async function getClasificacion(req, res) {
+    console.log("Petición de clasificación para usuario:", req.params.id_usuario);
+    
+    // Usamos el pool que ya tienes definido arriba
+    const query = `
+        SELECT 
+            l.nombre AS liga_nombre,
+            l.id_liga AS liga_id,
+            u.id_usuario,
+            u.nombre_usuario,
+            u.foto_perfil_url,
+            CAST(COALESCE(SUM(rj.puntos), 0) AS SIGNED) AS puntos_totales
+        FROM liga l
+        JOIN usuario u ON l.id_liga = u.id_liga
+        LEFT JOIN plantilla p ON u.id_usuario = p.id_usuario
+        LEFT JOIN alineacion al ON p.id_plantilla = al.id_plantilla
+        LEFT JOIN alineacion_item ai ON al.id_alineacion = ai.id_alineacion
+        LEFT JOIN plantilla_jugadora pj ON ai.id_entry = pj.id_entry
+        LEFT JOIN rendimiento_jornada rj ON pj.id_jugadora = rj.id_jugadora 
+            AND rj.id_jornada = al.id_jornada
+        WHERE u.id_liga = (SELECT id_liga FROM usuario WHERE id_usuario = ?)
+        GROUP BY u.id_usuario, u.nombre_usuario, u.foto_perfil_url, l.nombre, l.id_liga
+        ORDER BY puntos_totales DESC;
+    `;
+
+    try {
+        // CAMBIO CLAVE: Usar pool.query en lugar de db.execute
+        const [rows] = await pool.query(query, [req.params.id_usuario]);
+        
+        if (rows.length === 0) {
+            return res.json({
+                nombre: "Sin Liga",
+                id_publico: "0",
+                ranking: []
+            });
+        }
+
+        const respuesta = {
+            nombre: rows[0].liga_nombre,
+            id_publico: rows[0].liga_id,
+            ranking: rows.map((r, index) => ({
+                posicion: index + 1,
+                username: r.nombre_usuario,
+                foto: r.foto_perfil_url,
+                puntos: r.puntos_totales
+            }))
+        };
+        
+        res.json(respuesta);
+    } catch (error) {
+        console.error("Error real en getClasificacion:", error);
+        res.status(500).json({ message: "Error al obtener clasificación", details: error.message });
+    }
+}
+
+async function updateLeagueName(req, res) {
+    const { id_liga, nuevoNombre } = req.body;
+
+    if (!id_liga || !nuevoNombre) {
+        return res.status(400).json({ message: 'Faltan datos' });
+    }
+
+    try {
+        await pool.query('UPDATE liga SET nombre = ? WHERE id_liga = ?', [nuevoNombre, id_liga]);
+        res.status(200).json({ message: 'Nombre de la liga actualizado correctamente' });
+    } catch (error) {
+        console.error('Error al actualizar nombre de liga:', error);
+        res.status(500).json({ message: 'Error interno al actualizar' });
+    }
+}
+
 module.exports = {
   createLeague,
   joinPrivateLeague,
   joinRandomLeague,
-  changeLeague
+  changeLeague,
+  getClasificacion, 
+  updateLeagueName
 };

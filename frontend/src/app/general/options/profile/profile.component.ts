@@ -28,6 +28,7 @@ export class ProfileComponent implements OnInit {
 
   showCropper = false;
   showPassPopUp = false;
+  showDeletePopUp = false;
   tempImage: string = "";
   posX = 0;
   posY = 0;
@@ -49,6 +50,31 @@ export class ProfileComponent implements OnInit {
   goHome() {
     this.router.navigate(['/home']);
   }
+
+  openDeleteModal() {
+  this.showDeletePopUp = true;
+}
+
+closeDeleteModal() {
+  this.showDeletePopUp = false;
+}
+
+confirmDelete() {
+  const userId = this.activeUserData.id;
+  
+  this.authService.deleteProfile(userId).subscribe({
+    next: (res: any) => {
+      console.log("Cuenta eliminada");
+      this.showDeletePopUp = false;
+      this.userService.logout(); 
+      this.router.navigate(['/']); 
+    },
+    error: (err: any) => {
+      console.error("Error al borrar cuenta", err);
+      window.alert("No se pudo eliminar la cuenta.");
+    }
+  });
+}
 
   update() {
     
@@ -209,20 +235,6 @@ changePassword()
     }
   }
 }   
-  
-
-   /*this.authService.editProfile(this.userService.getUsuario().id).subscribe({
-      next: (res:any) => {
-        console.log("Datos guardados", res);
-        this.userService.logout();
-        localStorage.setItem('usuario', JSON.stringify(res.user));
-        this.router.navigate(['/profile']);
-      },
-      error: (error:any) => {
-        console.error('Error al editar perfil', error);
-      }
-    });*/
-  }
-    
+}    
 }
 

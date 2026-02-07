@@ -24,6 +24,11 @@ export class AuthService {
     return this.http.post(`${this.baseUrl}/editProfile`, data)
   }
 
+  deleteProfile(id:any)
+  {
+    return this.http.delete(`${this.baseUrl}/deleteProfile/${id}`);
+  }
+
   changePassword(data: any)
   {
     return this.http.post(`${this.baseUrl}/changePassword`, data)

@@ -1,10 +1,59 @@
-<div class="gen-container">
-    <div class="box-container">
-       <div class="name-box">
-        Liga 38
-       </div>
-       <div class="list-box">
-
-       </div>
+<div class="liga-container" *ngIf="ligaData">
+  <div class="liga-header">
+    <div class="header-info">
+      <div class="title-container">
+        <h1>{{ ligaData.nombre }}</h1>
+        <button *ngIf="isPrivateLeague()" (click)="openEditModal()" class="btn-edit" title="Editar nombre">
+          &#9998;
+        </button>
+      </div>
+      <span class="liga-id">#{{ ligaData.id_publico }}</span>
     </div>
+  </div>
+
+  <div class="tabla-clasificacion">
+    <div class="tabla-header">
+      <span class="col-pos">Pos.</span>
+      <span class="col-user">Usuario</span>
+      <span class="col-pts">Pts.</span>
+    </div>
+
+    <div *ngFor="let user of ligaData.ranking" 
+         class="user-row" 
+         [class.is-me]="user.username === usuario.username">
+      
+      <div class="col-pos">{{ user.posicion }}º</div>
+      
+      <div class="col-user">
+        <img [src]="user.foto ? 'http://localhost:3000' + user.foto : 'assets/default-avatar.png'" 
+             class="avatar"
+             (error)="updateUrl($event)">
+        <span class="username">{{ user.username }}</span>
+      </div>
+      
+      <div class="col-pts">{{ user.puntos }}</div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="showModal">
+  <div class="modal-content">
+    <h3>Editar nombre de la liga</h3>
+    <p>Introduce el nuevo nombre para tu comunidad:</p>
+    
+    <input type="text" 
+           [(ngModel)]="nuevoNombreLiga" 
+           class="modal-input" 
+           placeholder="Nombre de la liga..."
+           maxlength="30">
+
+    <div class="modal-actions">
+      <button (click)="closeModal()" class="btn-cancelar">
+        Cancelar
+      </button>
+      <button (click)="confirmarCambioNombre()" class="btn-confirmar">
+        Guardar cambios
+      </button>
+    </div>
+  </div>
 </div>

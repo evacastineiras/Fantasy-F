@@ -1,6 +1,7 @@
 .gen-container {
     background-color: var(--background-grey);
-    height: 100%;
+    height: fit-content;
+    min-height: 100%;
 }
 
 .banner{

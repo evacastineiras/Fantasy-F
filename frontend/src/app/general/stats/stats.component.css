@@ -1,0 +1,146 @@
+/* Contenedor general para centrar el menú */
+.gen-container {
+    background-color: var(--background-grey); 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 7vh;
+    width: 100%;
+}
+
+.nav-stat {
+    width: 100%;
+    max-width: 900px; /* Ajusta según el ancho de tu app */
+    display: flex;
+    justify-content: center;
+}
+
+.nav-stat-list {
+    list-style: none;
+    display: flex;
+    gap: 40px; 
+    padding: 0;
+    margin: 0;
+}
+
+.stat-item {
+    background-color: var(--light-grey); 
+    color: var(--background-grey); 
+    padding: 8px 35px;
+    border-radius: 6px;
+    font-weight: bold;
+    font-family: sans-serif;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    min-width: 100px;
+}
+
+.stat-item:hover {
+    background-color: #c0c0c0;
+}
+
+
+.stat-item.active {
+    background-color: var(--primary-green); 
+    color: #333; 
+}
+
+
+.market-list {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  max-width: 80vw; 
+  margin: 20px auto;
+  padding: 5vh 15px;
+  min-width: 45vw;
+}
+
+.player-row {
+  background-color: var( --primary-grey); 
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  padding: 8px 20px;
+  color: white;
+  min-height: 7vh;
+}
+
+.section {
+  display: flex;
+  align-items: center;
+}
+
+.section.left {
+  flex: 1.5;
+  gap: 15px;
+}
+
+.section.center {
+  flex: 2;
+  justify-content: center;
+  gap: 40px; 
+}
+
+.section.right {
+  flex: 1;
+  justify-content: center;
+  gap: 8px;
+  margin-right: 10px;
+}
+
+
+.pos-text {
+  color: #999;
+  font-weight: bold;
+  width: 40px;
+}
+
+.img-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.player-photo {
+  width: 70px;
+  height: auto;
+  object-fit: cover;
+}
+
+.team-shield {
+  width: 30px;
+  height: auto;
+}
+
+.player-name {
+  font-weight: 500;
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+.label, .stat-label {
+  color: #bbb;
+  margin-right: 5px;
+  font-size: 0.9rem;
+}
+
+.value, .stat-value {
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.owner-status {
+  font-weight: bold;
+}
+
+.owner-status.has-owner { color: white; } 
+.owner-status:not(.has-owner) { color: var(--primary-green); }
+
+.trend {
+  font-size: 0.7rem;
+  margin-left: 5px;
+}
+.trend.up { color: #44ff00; }
+.trend.down { color: #ff4444; }

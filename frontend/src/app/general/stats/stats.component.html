@@ -1,1 +1,51 @@
-<p>stats works!</p>
+<div class="gen-container">
+  <div class="nav-stat">
+    <ul class="nav-stat-list">
+      <li class="stat-item" [class.active]="filtroSeleccionado === 'goles'" (click)="cambiarFiltro('goles')">Goles</li>
+      <li class="stat-item" [class.active]="filtroSeleccionado === 'asistencias'" (click)="cambiarFiltro('asistencias')">Asistencias</li>
+      <li class="stat-item" [class.active]="filtroSeleccionado === 'porteria'" (click)="cambiarFiltro('porteria')">Portería</li>
+      <li class="stat-item" [class.active]="filtroSeleccionado === 'tarjetas'" (click)="cambiarFiltro('tarjetas')">Tarjetas</li>
+      <li class="stat-item" [class.active]="filtroSeleccionado === 'equipo'" (click)="cambiarFiltro('equipo')">Mi equipo</li>
+    </ul>
+  </div>
+<div class="market-list">
+  <div *ngFor="let jugadora of jugadoras" class="player-row">
+    
+    <div class="section left">
+      <span class="pos-text">{{ jugadora.posicion }}</span>
+      <div class="img-wrapper">
+        <img [src]="'http://localhost:3000/' + jugadora.foto_jugadora" class="player-photo">
+        <img [src]="'http://localhost:3000/' + jugadora.foto_escudo" class="team-shield">
+      </div>
+      <span class="player-name">{{ jugadora.apodo }}</span>
+    </div>
+
+    <div class="section center">
+      <div class="info-item">
+        <span class="label">Valor:</span>
+        <span class="value">{{ jugadora.valor_actual | number:'1.0-0' }}€</span>
+        <span [ngClass]="jugadora.tendencia >= 0 ? 'trend up' : 'trend down'">
+          {{ jugadora.tendencia >= 0 ? '▲' : '▼' }}{{ jugadora.tendencia | number:'1.0-0' }}%
+        </span>
+      </div>
+      
+      <div class="info-item">
+        <span class="label">Propietario:</span>
+        <span class="owner-status" [ngClass]="{'has-owner': jugadora.propietario}">
+          {{ jugadora.propietario ? jugadora.propietario : 'libre' }}
+        </span>
+      </div>
+    </div>
+
+    <div class="section right">
+      <span class="stat-label">{{ filtroSeleccionado | titlecase }}:</span>
+      <span class="stat-value">{{ jugadora.valor_estadistico }}</span>
+    </div>
+
+  </div>
+</div>
+ 
+    
+
+    </div>
+  
