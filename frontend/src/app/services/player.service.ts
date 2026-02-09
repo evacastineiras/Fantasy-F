@@ -11,4 +11,9 @@ export class PlayerService {
   getTopStats(criterio: string) {
     return this.http.get(`${this.baseUrl}/getTopStats/${criterio}`);
   }
+
+  getPlayerInfo(data: any)
+  {
+    return this.http.post(`${this.baseUrl}/getPlayerInfo`, data);
+  }
 }

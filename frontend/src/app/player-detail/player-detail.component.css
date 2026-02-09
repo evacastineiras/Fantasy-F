@@ -1,0 +1,304 @@
+.gen-container {
+    background-color: var(--background-grey);
+    height: fit-content;
+    min-height: 100%;
+    overflow-x: hidden;
+}
+
+
+.banner{
+    background-color: var(--light-grey);
+    height: 10vh;
+    display: flex;
+    flex-direction: row;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.logo-container{
+    width: 50%;
+    padding-left: 30px;
+}
+
+.logo-container img {
+    height: 10vh;
+    cursor: pointer;
+}
+
+.profile-container {
+    width: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: end;
+    height: 10vh;
+    padding-right: 50px;
+}
+
+.profile-container img {
+    height: 8vh;
+    border-radius: 50%;
+    border: 2px solid #9c9c9c;
+}
+
+
+.profile-wrapper {
+  position: relative;
+  cursor: pointer;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 7.5vh;
+  right: 50px;
+  background-color: #646464;
+  border: 2px solid var(--primary-green);
+  color:var(--light-grey);
+  font-size: larger;
+  border-radius: 6px;
+  list-style: none;
+  padding: 10px 0;
+  margin: 0;
+  width: 170px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  display: none;
+  z-index: 100;
+}
+
+.dropdown-menu.show {
+  display: block;
+}
+
+.dropdown-menu li {
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.dropdown-menu li:hover {
+  background-color: #828282;
+  color: var(--primary-green);
+}
+
+.back-icon-container {
+  align-self: flex-start;
+  margin-top: 4vh;
+  margin-left: 4vw;
+}
+
+.back-icon-container img {
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+}
+/* --- Estructura Principal --- */
+.main-container {
+    height: auto;
+    min-height: 60vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 50px;
+}
+
+.main-box {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 160px; /* Espacio entre carta e info */
+    width: 90%;
+    margin-top: 10px;
+}
+
+/* --- Columna Izquierda (Carta y Botones) --- */
+.card-box {
+    width: 320px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.card-box h2 {
+    color: white;
+    font-size: 28px;
+    margin-bottom: 35px;
+    font-weight: bold;
+}
+
+.card-box img {
+    width: 120%;
+    height: auto;
+    filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
+}
+
+.clausula-box {
+    width: 100%;
+    text-align: left;
+    margin: 30px 0;
+    padding-left: 10px;
+}
+
+.clausula-box p {
+    color: #888;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.clausula-box h3 {
+    color: white;
+    margin: 5px 0;
+    font-size: 1.4rem;
+}
+
+/* --- Botones (Ajustados al ancho de la carta) --- */
+.bottom-part {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.button-box {
+    width: 100%;
+    padding: 14px 0;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    text-align: center;
+    transition: 0.3s;
+}
+
+.btn-pagar {
+    background-color: #333;
+    color: #ff4d4d;
+}
+
+.btn-ofrecer {
+    background-color: var(--primary-green);
+    color: black;
+}
+
+.button-box:hover {
+    filter: brightness(1.2);
+    transform: translateY(-2px);
+}
+
+/* --- Panel de Información (Derecha) --- */
+.info-box {
+    background-color: #262626; 
+    width: 45vw;      
+    min-height: 50vh;           
+    border-radius: 12px;
+    display: flex;
+    padding: 30px;
+}
+
+.preview {
+    width: 30%;
+    border-right: 1px solid #3a3a3a;
+    padding-right: 25px;
+    padding-left: 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+    justify-content: center;
+}
+
+.par {
+    color: #777;
+    font-size: 0.9rem;
+    margin-bottom: 2px;
+}
+
+.har {
+    color: white;
+    font-size: 1.1rem;
+    margin-top: 0;
+    margin-bottom: 18px;
+}
+
+/* --- Tabs y Gráfico --- */
+.tabs-box {
+    width: 70%;
+    padding-left: 25px;          
+    display: flex;
+    flex-direction: column;
+}
+
+.tabs-box h4 {
+    padding: 5px;
+    margin-top: 15px;
+    align-self: center;
+    font-size: 1.75rem;
+}
+
+.tabs-header {
+   display: flex;
+    justify-content: center;
+    gap: 0;                 
+    margin-bottom: 20px;
+    border-bottom: 1px solid #444;
+    width: 100%;
+}
+
+.tab-link {
+    padding: 10px 0;             
+    width: 50%;               
+    cursor: pointer;
+    color: #888;
+    text-align: center;          
+    transition: 0.3s;
+    position: relative;
+    font-size: 1.3rem;
+}
+
+.tab-link.active {
+    color: white;
+}
+
+.tab-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;                
+    left: 0;
+    width: 100%;                
+    height: 4px;                
+    background-color: var(--primary-green);
+    border-radius: 2px 2px 0 0;
+}
+
+
+.valor-texto {
+    color: white;
+    font-size: 2.2rem;
+    margin: 0;
+    font-weight: 900;
+}
+
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: 0.5fr 0.5fr; 
+    grid-auto-rows: min-content;
+    gap: 0 20px;                     
+    margin-top: 30px;               
+    flex-grow: 1;  
+    margin-left: 5vw;                 
+}
+
+
+.stat-group {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+
+.stats-grid .par {
+    margin-bottom: 2px;
+}
+
+.stats-grid .har {
+    margin-bottom: 18px; 
+}
+

@@ -26,6 +26,7 @@ import { MoreComponent } from './general/more/more.component';
 import { ProfileComponent } from './general/options/profile/profile.component';
 import { RulesComponent } from './general/more/rules/rules.component';
 import { BudgetBoxComponent } from './general/budget-box/budget-box.component';
+import { PlayerDetailComponent } from './player-detail/player-detail.component';
 
 registerLocaleData(localeEs, 'es');
 
@@ -50,6 +51,7 @@ registerLocaleData(localeEs, 'es');
     ProfileComponent,
     RulesComponent,
     BudgetBoxComponent,
+    PlayerDetailComponent,
   ],
   imports: [
     BrowserModule,

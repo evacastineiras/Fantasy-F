@@ -16,7 +16,7 @@
           <img [src]="'http://localhost:3000/' + jugadora.foto" class="player-photo">
           <img [src]="'http://localhost:3000/' + jugadora.club_escudo" class="team-shield">
         </div>
-        <span class="player-name" id="jugadora.id_jugadora">{{ jugadora.apodo }}</span>
+        <span class="player-name" [routerLink]="['/jugadora', jugadora.id_jugadora]" style="cursor: pointer;"> {{ jugadora.apodo }} </span>
       </div>
 
       <div class="middle-section">

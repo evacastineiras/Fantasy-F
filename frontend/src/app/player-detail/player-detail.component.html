@@ -1,0 +1,118 @@
+<div class="gen-container">
+    <div class="banner">
+        <div class="logo-container">
+            <img src="../../assets/logogray.png" alt="" (click)="goHome()">
+        </div>
+        <div class="profile-container">
+            <div class="profile-wrapper" (click)="toggleDropdown()">
+                <img class="img-p" [src]="profileImagePreview" alt="Foto de perfil">
+                <ul class="dropdown-menu" [class.show]="dropdownOpen">
+                    <li (click)="goToProfile()">Mi perfil</li>
+                    <li (click)="goToNotifications()">Notificaciones</li>
+                    <li (click)="logout()">Salir</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="back-icon-container">
+        <img src="../../../../assets/icons/flecha-izq-w.png" alt="" (click)="volver()">
+    </div>
+
+    <div class="main-container">
+        <div class="main-box">
+            
+            <div class="card-box">
+                <h2 class="nombre-jugadora">{{jugadora?.apodo}}</h2>
+                <img [src]="jugadora?.imagen_carta ? 'http://localhost:3000/' + jugadora?.imagen_carta : '../../assets/default-card.png'" alt="Carta">
+                
+                <div class="clausula-box">
+                    <p>Cláusula:</p>
+                    <h3 class="clausula-jugadora">{{ (jugadora?.clausula | number) ?? '0' }}€</h3>
+                </div>
+
+                <div class="bottom-part">
+                    <div class="button-box btn-pagar">
+                        <span>Pagar cláusula</span>
+                    </div>
+                    <div class="button-box btn-ofrecer">
+                        <span>Ofrecer</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <div class="preview">
+                    <div class="info-facts">
+                        <p class="par">Nombre</p>
+                        <h6 class="har">{{jugadora?.nombre}} {{jugadora?.apellidos}}</h6>
+                        <p class="par">Fecha de nacimiento</p>
+                        <h6 class="har">{{jugadora?.fnacimiento | date:'dd/MM/yyyy'}}</h6>
+                        <p class="par">Altura</p>
+                        <h6 class="har">{{jugadora?.altura}} cm</h6>
+                        <p class="par">Posición</p>
+                        <h6 class="har">{{jugadora?.posicion}}</h6>
+                    </div>
+                    
+                </div>
+
+                <div class="tabs-box">
+                    <div class="tabs-header">
+                        <div class="tab-link" [class.active]="activeTab === 'valor'" 
+             (click)="selectTab('valor')">Valor</div>
+                        <div class="tab-link" [class.active]="activeTab === 'rendimiento'" 
+             (click)="selectTab('rendimiento')">Rendimiento</div>
+                    </div>
+                    
+                    
+                    <div *ngIf="activeTab === 'valor'" class="animate-fade">
+                        <div class="dummy-graph"></div>
+                    </div>
+                     
+                    <div *ngIf="activeTab === 'rendimiento'" class="stats-grid animate-fade">
+                            <div class="stat-group">
+                                <p class="par">Pierna buena</p>
+                                <h6 class="har">{{jugadora.pierna_buena}}</h6>
+                            </div>
+                            <div class="stat-group">
+                                <p class="par">Asistencias</p>
+                                <h6 class="har">{{jugadora?.asistencias_total}}</h6>
+                            </div>
+                            
+                            <div class="stat-group">
+                                <p class="par">Media puntos</p>
+                                <h6 class="har">{{ (jugadora?.media_puntos | number) ?? '0' }}</h6>
+                            </div>
+                            <div class="stat-group">
+                                <p class="par">Tarjetas (A/R)</p>
+                                <h6 class="har">{{jugadora?.total_tarjetas}} ({{jugadora?.amarillas_total}}/{{jugadora?.rojas_total}})</h6>
+                            </div>
+
+                            <div class="stat-group">
+                                <p class="par">Puntos últ. partido</p>
+                                <h6 class="har">{{ (jugadora?.puntos_ultima_jornada | number) ?? '0' }}</h6>
+                            </div>
+                            <div class="stat-group">
+                                <p class="par">Goles esperados</p>
+                                <h6 class="har">{{ (jugadora?.media_goles | number) ?? '0' }}</h6>
+                            </div>
+
+                            <div class="stat-group">
+                                <p class="par">Goles</p>
+                                <h6 class="har">{{jugadora?.goles_total}}</h6>
+                            </div>
+                            <div class="stat-group">
+                                <p class="par">Asist. esperadas</p>
+                                <h6 class="har">{{ (jugadora?.media_asistencias | number) ?? '0' }}</h6>
+                            </div>
+                    </div>    
+                        <h4 class="valor-texto">{{ (jugadora?.valor | number) ?? '0' }}€</h4>
+                    </div> 
+                    
+                        
+                    </div>
+                </div>
+            </div>
+
+        </div>
+  
