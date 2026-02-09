@@ -20,8 +20,12 @@ export class PlayerDetailComponent implements OnInit {
   profileImagePreview : string = this.userImagePath ? this.AuthService.backendUrl + this.userImagePath :"../../assets/default-profile.png";
   activeTab: string = 'valor'; 
   jugadora: any;
- showModalClausula: boolean = false;
- nuevaClausula: number = 0;
+  showModalClausula: boolean = false;
+  nuevaClausula: number = 0;
+  showModalVender: boolean = false;
+  showModalPagar: boolean = false;
+  showModalOfrecer: boolean = false;
+  ofertaRealizada: number = 0;
 
   constructor( private route: ActivatedRoute, private location: Location, private UserService: UserService, private AuthService: AuthService, private router: Router, private playerService: PlayerService) { }
 
@@ -43,10 +47,53 @@ export class PlayerDetailComponent implements OnInit {
         console.error('Error al recibir informacion', error);
       }
     });
-
-
-
   }
+
+  abrirOfrecer() {
+  this.ofertaRealizada = this.jugadora.valor; 
+  this.showModalOfrecer = true;
+}
+
+confirmarOferta() {
+  console.log(`Oferta enviada por ${this.jugadora.apodo}: ${this.ofertaRealizada}€`);
+  // Aquí irá la lógica para guardar la puja en la base de datos
+  this.showModalOfrecer = false;
+}
+
+abrirVender() { this.showModalVender = true; }
+abrirPagar() { this.showModalPagar = true; }
+cerrarModales() { 
+  this.showModalVender = false; 
+  this.showModalPagar = false; 
+}
+
+confirmarVenta() {
+  console.log("Vendiendo a:", this.jugadora.apodo);
+  // Aquí irá la llamada a la API
+  this.cerrarModales();
+}
+
+confirmarPagoClausula() {
+  console.log("Pagando cláusula de:", this.jugadora.apodo);
+  // Aquí irá la llamada a la API
+  this.cerrarModales();
+}
+
+abrirModalClausula() {
+  this.nuevaClausula = this.jugadora.clausula; 
+  this.showModalClausula = true;
+}
+
+cerrarModal() {
+  this.showModalClausula = false;
+}
+
+
+confirmarNuevaClausula() {
+  console.log('Nueva cláusula a guardar:', this.nuevaClausula);
+  this.showModalClausula = false;
+}
+
 
   selectTab(tab: string)
   {
@@ -88,6 +135,8 @@ logout() {
   this.UserService.logout();
   this.router.navigate(['/']);
 }
+
+
 
 
 }

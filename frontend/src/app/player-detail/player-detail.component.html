@@ -33,19 +33,19 @@
 
                <div class="bottom-part">
                     <ng-container *ngIf="jugadora?.id_propietario === idUsuarioLogueado; else noEsMia">
-                        <div class="button-box btn-modificar">
-                            <span style="color: var(--primary-green);">Modificar cláusula</span>
+                        <div class="button-box btn-modificar" (click)="abrirModalClausula()">
+                            <span style="color: var(--primary-green);" >Modificar cláusula</span>
                         </div>
-                        <div class="button-box btn-vender">
+                        <div class="button-box btn-vender" (click)="abrirVender()">
                             <span>Vender</span>
                         </div>
                     </ng-container>
 
                     <ng-template #noEsMia>
-                        <div class="button-box btn-pagar">
+                        <div class="button-box btn-pagar" (click)=" abrirPagar()">
                             <span>Pagar cláusula</span>
                         </div>
-                        <div class="button-box btn-ofrecer">
+                        <div class="button-box btn-ofrecer" (click)="abrirOfrecer()">
                             <span>Ofrecer</span>
                         </div>
                     </ng-template>
@@ -127,3 +127,76 @@
 
         </div>
   
+        <!--Modal modificar clausula-->
+
+
+<div class="modal-overlay" *ngIf="showModalClausula">
+    <div class="modal-content">
+        <span class="close-x" (click)="cerrarModal()">X</span>
+        
+        <p class="modal-label">Cláusula actual</p>
+        <h2 class="modal-value-current">{{ jugadora?.clausula | number }}€</h2>
+        
+        <p class="modal-label">Nueva cláusula</p>
+        <div class="input-container">
+            <input type="number" [(ngModel)]="nuevaClausula" class="modal-input">
+            <span class="currency-symbol">€</span>
+        </div>
+
+        <button class="btn-aceptar" (click)="confirmarNuevaClausula()">
+            Aceptar
+        </button>
+    </div>
+</div>
+
+<!--Modal para clausula y vender a la banca-->
+<div class="modal-overlay" *ngIf="showModalVender">
+    <div class="modal-content border-red">
+        <h2 class="modal-title">¿Vender a {{jugadora?.apodo}}?</h2>
+        <p class="modal-text">La jugadora volverá al mercado libre y recibirás el 100% de su valor actual.</p>
+        
+        <div class="modal-actions">
+            <button class="btn-cancelar" (click)="cerrarModales()">Cancelar</button>
+            <button class="btn-confirmar-vender" (click)="confirmarVenta()">Confirmar Venta</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" *ngIf="showModalPagar">
+    <div class="modal-content">
+        <h2 class="modal-title">¿Pagar cláusula?</h2>
+        <p class="modal-text">Vas a fichar a <b>{{jugadora?.apodo}}</b> pagando <b>{{jugadora?.clausula | number}}€</b> inmediatamente.</p>
+        
+        <div class="modal-actions">
+            <button class="btn-cancelar" (click)="cerrarModales()">Cancelar</button>
+            <button class="btn-aceptar" (click)="confirmarPagoClausula()">Fichar ahora</button>
+        </div>
+    </div>
+</div>
+
+<!--Modal ofrecer oferta-->
+
+<div class="button-box btn-ofrecer" (click)="abrirOfrecer()">
+    <span>Ofrecer</span>
+</div>
+
+<div class="modal-overlay" *ngIf="showModalOfrecer">
+    <div class="modal-content">
+        <span class="close-x" (click)="showModalOfrecer = false">X</span>
+        
+        <h2 class="modal-title">Realizar oferta</h2>
+        <p class="modal-label">Valor de mercado</p>
+        <h2 class="modal-value-current">{{ jugadora?.valor | number }}€</h2>
+        
+        <p class="modal-label">Tu oferta</p>
+        <div class="input-container">
+            <input type="number" [(ngModel)]="ofertaRealizada" class="modal-input" placeholder="0">
+            <span class="currency-symbol">€</span>
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn-cancelar" (click)="showModalOfrecer = false">Cancelar</button>
+            <button class="btn-aceptar" (click)="confirmarOferta()">Enviar oferta</button>
+        </div>
+    </div>
+</div>
