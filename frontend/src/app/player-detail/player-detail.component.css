@@ -332,18 +332,18 @@
 }
 
 .modal-content {
-    background-color: #444; 
+    background-color: #262626; 
     padding: 30px;
     border-radius: 8px;
     width: 320px;
     position: relative;
-    color: white;
+    color: var(--light-grey);
     text-align: center;
 }
 
 .close-x {
     position: absolute;
-    top: 15px; right: 20px;
+    top: 18px; right: 28px;
     cursor: pointer;
     font-weight: bold;
     color: #bbb;
@@ -360,11 +360,13 @@
     font-size: 1.8rem;
     margin-bottom: 25px;
     text-align: left;
+    margin-top: 0;
 }
 
 .input-container {
     position: relative;
     margin-bottom: 30px;
+    margin-top:0;
 }
 
 .modal-input {
@@ -379,7 +381,7 @@
 }
 
 .btn-aceptar {
-    background-color: #76d72a; 
+    background-color: var(--primary-green); 
     border: none;
     padding: 12px 0;
     width: 100%;
