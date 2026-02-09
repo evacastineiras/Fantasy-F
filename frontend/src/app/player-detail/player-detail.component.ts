@@ -14,19 +14,23 @@ import { Router } from '@angular/router';
 export class PlayerDetailComponent implements OnInit {
 
   id: string | null = null;
+  idUsuarioLogueado: number | null = null;
   dropdownOpen = false;
   userImagePath = this.UserService.getUsuario().profileImage;
   profileImagePreview : string = this.userImagePath ? this.AuthService.backendUrl + this.userImagePath :"../../assets/default-profile.png";
   activeTab: string = 'valor'; 
   jugadora: any;
+ showModalClausula: boolean = false;
+ nuevaClausula: number = 0;
 
   constructor( private route: ActivatedRoute, private location: Location, private UserService: UserService, private AuthService: AuthService, private router: Router, private playerService: PlayerService) { }
 
   ngOnInit(): void {
     this.id = this.route.snapshot.paramMap.get('id');
+    this.idUsuarioLogueado = this.UserService.getUsuario().id;
     const toSend = {
       id_jugadora: this.id,
-      id_usuario: this.UserService.getUsuario().id
+      id_usuario: this.idUsuarioLogueado
     }
 
     this.playerService.getPlayerInfo(toSend).subscribe({

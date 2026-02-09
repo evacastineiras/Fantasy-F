@@ -17,7 +17,8 @@ async function getMarketPlayers(req, res) {
         j.valor_base,
         pj.valor, 
         pj.id_entry,
-        u.nombre AS nombre_usuario, -- Cambiado de u.username a u.nombre
+        u.nombre AS nombre_usuario,
+        p.id_usuario AS id_propietario, -- Añadimos la ID para la lógica de comparación
         (SELECT MAX(montante) 
          FROM puja 
          WHERE id_entry = pj.id_entry 
@@ -26,7 +27,7 @@ async function getMarketPlayers(req, res) {
     JOIN jugadora j ON pj.id_jugadora = j.id_jugadora 
     JOIN club c ON j.id_club = c.id_club 
     LEFT JOIN plantilla p ON pj.id_plantilla = p.id_plantilla
-    LEFT JOIN usuario u ON p.id_usuario = u.id_usuario -- Asegúrate que el campo sea id_usuario
+    LEFT JOIN usuario u ON p.id_usuario = u.id_usuario
     WHERE pj.id_liga = (SELECT id_liga FROM usuario WHERE id_usuario = ?) 
     ORDER BY pj.valor DESC;
 `, [id_usuario]);

@@ -302,3 +302,20 @@
     margin-bottom: 18px; 
 }
 
+
+.btn-modificar {
+    background-color: var(--primary-grey); 
+    cursor: pointer;
+}
+
+
+.btn-vender {
+    background-color: #ff4d4d; 
+    color: white;
+    cursor: pointer;
+}
+
+
+.button-box {
+    transition: all 0.3s ease;
+}

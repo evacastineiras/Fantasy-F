@@ -135,13 +135,13 @@ INSERT INTO jugadora (id_jugadora, nombre, apellidos, apodo, fnacimiento, altura
 
 -- 1. Aitana Bonmatí (MED)
 (
-    701, 'Aitana', 'Bonmatí Conca', 'Aitana', '1998-01-18', 162,
+    701, 'Aitana', 'Bonmatí Conca', 'Aitana Bonmatí', '1998-01-18', 162,
     'derecha', 'MED', 47500000, 91, 7,
     'assets/jugadoras/cartas/FCBarcelona/AitanaBonmati.png', 'assets/jugadoras/caras/FCBarcelona/aitana.png'
 ),
 -- 2. Alexia Putellas (MED)
 (
-    702, 'Alexia', 'Putellas Segura', 'Alexia', '1994-02-04', 173,
+    702, 'Alexia', 'Putellas Segura', 'Alexia Putellas', '1994-02-04', 173,
     'izquierda', 'MED', 45000000, 90, 7,
     'assets/jugadoras/cartas/FCBarcelona/AlexiaPutellas.png', 'assets/jugadoras/caras/FCBarcelona/alexia.png'
 ),
@@ -153,7 +153,7 @@ INSERT INTO jugadora (id_jugadora, nombre, apellidos, apodo, fnacimiento, altura
 ),
 -- 4. Claudia Pina (DEL)
 (
-    704, 'Claudia', 'Pina Medina', 'Pina', '2001-08-12', 160,
+    704, 'Claudia', 'Pina Medina', 'Claudia Pina', '2001-08-12', 160,
     'derecha', 'DEL', 28500000, 86, 7,
     'assets/jugadoras/cartas/FCBarcelona/ClaudiaPina.png', 'assets/jugadoras/caras/FCBarcelona/pina.png'
 ),
@@ -165,13 +165,13 @@ INSERT INTO jugadora (id_jugadora, nombre, apellidos, apodo, fnacimiento, altura
 ),
 -- 6. Ingrid Engen (MED)
 (
-    706, 'Ingrid', 'Syrstad Engen', 'Engen', '1998-04-29', 177,
+    706, 'Ingrid', 'Syrstad Engen', 'Ingrid Engen', '1998-04-29', 177,
     'derecha', 'MED', 22500000, 84, 7,
     'assets/jugadoras/cartas/FCBarcelona/engen.png', 'assets/jugadoras/caras/FCBarcelona/engen.png'
 ),
 -- 7. Esmee Brugts (DEL)
 (
-    707, 'Esmee', 'Brugts', 'Brugts', '2003-07-28', 170,
+    707, 'Esmee', 'Brugts', 'Esmee Brugts', '2003-07-28', 170,
     'izquierda', 'DEL', 21000000, 83, 7,
     'assets/jugadoras/cartas/FCBarcelona/esmeebrugts.png', 'assets/jugadoras/caras/FCBarcelona/esmee.png'
 ),
@@ -195,13 +195,13 @@ INSERT INTO jugadora (id_jugadora, nombre, apellidos, apodo, fnacimiento, altura
 ),
 -- 11. Graham Hansen (DEL)
 (
-    711, 'Caroline Graham', 'Hansen', 'Hansen', '1995-02-18', 173,
+    711, 'Caroline Graham', 'Hansen', 'Graham Hansen', '1995-02-18', 173,
     'derecha', 'DEL', 42000000, 89, 7,
     'assets/jugadoras/cartas/FCBarcelona/grahamHansen.png', 'assets/jugadoras/caras/FCBarcelona/hansen.png'
 ),
 -- 12. Irene Paredes (DEF)
 (
-    712, 'Irene', 'Paredes Hernández', 'Paredes', '1991-07-04', 176,
+    712, 'Irene', 'Paredes Hernández', 'Irene Paredes', '1991-07-04', 176,
     'derecha', 'DEF', 32000000, 87, 7,
     'assets/jugadoras/cartas/FCBarcelona/ireneParedes.png', 'assets/jugadoras/caras/FCBarcelona/paredes.png'
 ),
@@ -213,7 +213,7 @@ INSERT INTO jugadora (id_jugadora, nombre, apellidos, apodo, fnacimiento, altura
 ),
 -- 14. Keira Walsh (MED)
 (
-    714, 'Keira', 'Walsh', 'Walsh', '1997-04-08', 167,
+    714, 'Keira', 'Walsh', 'Keira Walsh', '1997-04-08', 167,
     'derecha', 'MED', 25500000, 85, 7,
     'assets/jugadoras/cartas/FCBarcelona/KeiraWalsh.png', 'assets/jugadoras/caras/FCBarcelona/walsh.png'
 ),
@@ -276,7 +276,7 @@ INSERT INTO jugadora (id_jugadora, nombre, apellidos, apodo, fnacimiento, altura
 ),
 -- 2. Antonia Silva (DEF)
 (
-    1202, 'Antonia', 'Silva', 'Antonia', '1994-04-26', 171,
+    1202, 'Antonia', 'Silva', 'Antonia Silva', '1994-04-26', 171,
     'derecha', 'DEF', 7500000, 75, 12,
     'assets/jugadoras/cartas/RealMadrid/AntoniaSilva.png', 'assets/jugadoras/caras/RealMadrid/antonia.png'
 ),
@@ -300,7 +300,7 @@ INSERT INTO jugadora (id_jugadora, nombre, apellidos, apodo, fnacimiento, altura
 ),
 -- 6. Caroline Weir (MED)
 (
-    1206, 'Caroline', 'Weir', 'Weir', '1995-06-20', 165,
+    1206, 'Caroline', 'Weir', 'Caroline Weir', '1995-06-20', 165,
     'izquierda', 'MED', 25500000, 85, 12,
     'assets/jugadoras/cartas/RealMadrid/CarolineWeir.png', 'assets/jugadoras/caras/RealMadrid/weir.png'
 ),
@@ -348,7 +348,7 @@ INSERT INTO jugadora (id_jugadora, nombre, apellidos, apodo, fnacimiento, altura
 ),
 -- 14. Misa Rodríguez (POR)
 (
-    1214, 'María Isabel', 'Rodríguez Rivero', 'Misa', '1999-07-22', 170,
+    1214, 'María Isabel', 'Rodríguez Rivero', 'Misa Rodríguez', '1999-07-22', 170,
     'derecha', 'POR', 21000000, 83, 12,
     'assets/jugadoras/cartas/RealMadrid/MisaRodriguez.png', 'assets/jugadoras/caras/RealMadrid/misa.png'
 ),
@@ -360,19 +360,19 @@ INSERT INTO jugadora (id_jugadora, nombre, apellidos, apodo, fnacimiento, altura
 ),
 -- 16. Naomi Feller (DEL)
 (
-    1216, 'Naomi', 'Feller', 'Feller', '2001-11-06', 170,
+    1216, 'Naomi', 'Feller', 'Naomi Feller', '2001-11-06', 170,
     'derecha', 'DEL', 18000000, 80, 12,
     'assets/jugadoras/cartas/RealMadrid/NaomiFeller.png', 'assets/jugadoras/caras/RealMadrid/feller.png'
 ),
 -- 17. Oihane Hernández (DEF)
 (
-    1217, 'Oihane', 'Hernández Zurbano', 'Oihane', '2000-05-04', 165,
+    1217, 'Oihane', 'Hernández Zurbano', 'Oihane Hernández', '2000-05-04', 165,
     'derecha', 'DEF', 15000000, 79, 12,
     'assets/jugadoras/cartas/RealMadrid/OihaneHernandez.png', 'assets/jugadoras/caras/RealMadrid/oihane.png'
 ),
 -- 18. Olga Carmona (DEF)
 (
-    1218, 'Olga', 'Carmona García', 'Olga', '2000-06-27', 160,
+    1218, 'Olga', 'Carmona García', 'Olga Carmona', '2000-06-27', 160,
     'izquierda', 'DEF', 22500000, 84, 12,
     'assets/jugadoras/cartas/RealMadrid/OlgaCarmona.png', 'assets/jugadoras/caras/RealMadrid/olga.png'
 ),
@@ -384,19 +384,19 @@ INSERT INTO jugadora (id_jugadora, nombre, apellidos, apodo, fnacimiento, altura
 ),
 -- 20. Sandie Toletti (MED)
 (
-    1220, 'Sandie', 'Toletti', 'Toletti', '1995-07-13', 165,
+    1220, 'Sandie', 'Toletti', 'Sandie Toletti', '1995-07-13', 165,
     'derecha', 'MED', 21000000, 83, 12,
     'assets/jugadoras/cartas/RealMadrid/SandieToletti.png', 'assets/jugadoras/caras/RealMadrid/toletti.png'
 ),
 -- 21. Sheila García (DEL)
 (
-    1221, 'Sheila', 'García Gómez', 'Sheila', '1999-07-15', 166,
+    1221, 'Sheila', 'García Gómez', 'Sheila García', '1999-07-15', 166,
     'derecha', 'DEL', 11000000, 77, 12,
     'assets/jugadoras/cartas/RealMadrid/SheilaGarcia.png', 'assets/jugadoras/caras/RealMadrid/sheila.png'
 ),
 -- 22. Signe Bruun (DEL)
 (
-    1222, 'Signe', 'Bruun', 'Bruun', '1998-04-06', 178,
+    1222, 'Signe', 'Bruun', 'Signe Bruun', '1998-04-06', 178,
     'derecha', 'DEL', 9500000, 76, 12,
     'assets/jugadoras/cartas/RealMadrid/SigneBruun.png', 'assets/jugadoras/caras/RealMadrid/bruun.png'
 ),

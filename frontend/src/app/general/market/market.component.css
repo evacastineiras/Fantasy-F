@@ -147,6 +147,29 @@
   font-size: 1.1rem;
 }
 
+.right-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 120px; 
+}
+
+
+.btn-negociar {
+  background-color: var(--light-grey);
+  color: #1a1a1a;
+  border: none;
+  padding: 10px 25px;
+  border-radius: 6px;
+  font-weight: 900;
+  cursor: pointer;
+  width: 100%;
+}
+
+.btn-negociar:hover {
+  background-color: #c1bcbc;
+}
+
 .btn-pujar {
   background-color: #44ff00; 
   color: #1a1a1a; 

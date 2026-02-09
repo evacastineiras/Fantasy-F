@@ -47,7 +47,14 @@
       </div>
 
       <div class="right-section">
-        <button class="btn-pujar">PUJAR</button>
+          <button *ngIf="!jugadora.nombre_usuario" class="btn-pujar">
+            PUJAR
+          </button>
+
+          <button *ngIf="jugadora.nombre_usuario && jugadora.id_propietario !== idUsuarioLogueado" 
+                  class="btn-negociar">
+            NEGOCIAR
+          </button>
       </div>
 
     </div>

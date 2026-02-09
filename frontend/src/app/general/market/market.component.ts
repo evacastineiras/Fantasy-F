@@ -13,6 +13,7 @@ export class MarketComponent implements OnInit {
   jugadorasFiltradas: any[] = []; 
   loading: boolean = true;
   limite: number = 10;
+  idUsuarioLogueado: number | null = null;
 
   constructor(
     private marketService: MarketService,
@@ -20,13 +21,13 @@ export class MarketComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.idUsuarioLogueado = this.userService.getUsuario().id;
     const idUsuario = this.userService.getUsuario().id;
     this.marketService.getMarketPlayers(idUsuario).subscribe({
       next: (data) => {
         this.jugadoras = data;
         
-        // --- LOGICA DE FILTRO INICIAL ---
-        // Al cargar, solo mostramos las que NO tienen propietario (nombre_usuario es null o vacío)
+     
         this.jugadorasFiltradas = this.jugadoras.filter(j => !j.nombre_usuario);
         
         this.loading = false;
