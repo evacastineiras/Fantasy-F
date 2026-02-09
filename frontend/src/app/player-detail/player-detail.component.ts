@@ -136,6 +136,10 @@ logout() {
   this.router.navigate(['/']);
 }
 
+pujar()
+{
+  
+}
 
 
 

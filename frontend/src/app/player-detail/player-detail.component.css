@@ -392,7 +392,7 @@
 }
 
 .btn-aceptar:hover {
-    background-color: #88f035;
+    background-color: var(--primary-green);
 }
 
 .modal-title {
@@ -408,9 +408,22 @@
 
 .modal-actions {
     display: flex;
-    gap: 10px;
+    gap: 12px;
+    width: 100%;       
+    margin-top: 10px;
 }
 
+.modal-actions button {
+    flex: 1;            
+    border: none;
+    padding: 12px 5px;  
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap; 
+}
 .btn-cancelar {
     flex: 1;
     background: #666;
@@ -420,6 +433,7 @@
     border-radius: 6px;
     cursor: pointer;
     font-weight: bold;
+    width: 50%;
 }
 
 .btn-confirmar-vender {
@@ -431,6 +445,7 @@
     border-radius: 6px;
     cursor: pointer;
     font-weight: bold;
+    width: 50%;
 }
 
 

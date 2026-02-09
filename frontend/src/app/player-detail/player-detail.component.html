@@ -32,23 +32,29 @@
                 </div>
 
                <div class="bottom-part">
-                    <ng-container *ngIf="jugadora?.id_propietario === idUsuarioLogueado; else noEsMia">
+                    <ng-container *ngIf="jugadora?.id_propietario === idUsuarioLogueado">
                         <div class="button-box btn-modificar" (click)="abrirModalClausula()">
-                            <span style="color: var(--primary-green);" >Modificar cláusula</span>
+                            <span style="color: var(--primary-green);">Modificar cláusula</span>
                         </div>
                         <div class="button-box btn-vender" (click)="abrirVender()">
                             <span>Vender</span>
                         </div>
                     </ng-container>
 
-                    <ng-template #noEsMia>
-                        <div class="button-box btn-pagar" (click)=" abrirPagar()">
+                    <ng-container *ngIf="jugadora?.id_propietario && jugadora?.id_propietario !== idUsuarioLogueado">
+                        <div class="button-box btn-pagar" (click)="abrirPagar()">
                             <span>Pagar cláusula</span>
                         </div>
                         <div class="button-box btn-ofrecer" (click)="abrirOfrecer()">
                             <span>Ofrecer</span>
                         </div>
-                    </ng-template>
+                    </ng-container>
+
+                    <ng-container *ngIf="!jugadora?.id_propietario">
+                        <div class="button-box btn-ofrecer" (click)="pujar()">
+                            <span>Pujar</span>
+                        </div>
+                        </ng-container>
                 </div>
             </div>
 
