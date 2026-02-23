@@ -15,30 +15,47 @@ export class PrivateLeagueComponent implements OnInit {
 
   codigo: string = '';
   ngOnInit(): void {
+    console.log(this.userService.getUsuario())
   }
   volverAtras()
   {
     this.volverAtrasEvent.emit();
   }
 
-  unirseALiga()
-  {
-    console.log(this.codigo);
-    const user = {
-      id_liga: this.codigo,
-      usuario: this.userService.getUsuario().id
-    }
+async unirseALiga() { 
+  
+  
+  const datosParaEnviar = {
+    id_liga: this.codigo,
+    usuario: this.userService.getUsuario().id
+  };
 
-    this.userService.unirseALigaPrivada(user).subscribe({
-      next: (res:any) => {
-        console.log("Unido a liga con éxito", res);
-        this.authService.justRegistered = false;
-        this.router.navigate(['/home']);
-      },
-      error: (error:any) => {
-        console.error("Error al unirse a liga", error);
-      }
-    })
-  }
+  this.userService.unirseALigaPrivada(datosParaEnviar).subscribe({
+    next: async (res: any) => { 
+      console.log("Unido a liga con éxito", res);
+      this.authService.justRegistered = false;
+      const usuarioActual = this.userService.getUsuario();
+      const usuarioActualizado = {
+        ...usuarioActual,
+        id_liga: res.id_liga,
+        presupuesto: res.presupuesto,
+        id_plantilla: res.id_plantilla
+      };
+      
+      this.userService.setUsuario(usuarioActualizado);
+      await new Promise(f => setTimeout(f, 600));
+
+      
+      this.router.navigate(['/home']).then(nav => {
+        if (!nav) {
+          console.error("La navegación fue rechazada por el Guard. ");
+        }
+      });
+    },
+    error: (error: any) => {
+      console.error("Error al unirse a liga", error);
+    }
+  });
+}
 
 }

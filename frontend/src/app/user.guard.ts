@@ -15,13 +15,20 @@ export class UserGuard implements CanActivate {
     {
         const usuario = this.userService.getUsuario();
        
-       if (usuario && usuario.id !== undefined && usuario.id !== null && !this.auth.justRegistered)
+       if (usuario && usuario.id !== undefined && usuario.id !== null && !this.auth.justRegistered && usuario.id_liga !== null)
         {
             return true;
         }
 
         if(this.auth.justRegistered == true)
         {
+            this.router.navigate(['/leagueIndex'])
+            return false;
+        }
+
+        if(usuario && usuario.id !== undefined && usuario.id !== null && usuario.id_liga == null)
+        {
+            this.auth.justRegistered = true;
             this.router.navigate(['/leagueIndex'])
             return false;
         }

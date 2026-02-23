@@ -48,13 +48,11 @@ const getPlayerInfo = async (req, res) => {
         if (!id_usuario || !id_jugadora)
             return res.status(400).json({ message: 'Faltan datos' });
 
-        // 1. Validar que el usuario existe (opcional, pero buena práctica)
         const [users] = await pool.query(`SELECT id_usuario FROM usuario WHERE id_usuario = ?`, [id_usuario]);
         if (users.length === 0) {
             return res.status(404).json({ message: 'Usuario no encontrado' });
         }
 
-        // 2. Consulta principal (Integra datos básicos, dueño en la liga actual y rendimiento)
         const [rows] = await pool.query(
             `SELECT 
         j.nombre, j.apellidos, j.fnacimiento, j.altura, j.pierna_buena, j.posicion, j.apodo,
@@ -63,6 +61,7 @@ const getPlayerInfo = async (req, res) => {
         -- Datos específicos de la jugadora en esta liga (Cláusula y Valor Actual)
         pj.clausula, 
         pj.valor,
+        pj.id_entry,
 
         -- Propietario en la liga del usuario consultante
         (SELECT p.id_usuario 
@@ -90,7 +89,7 @@ const getPlayerInfo = async (req, res) => {
     
     WHERE j.id_jugadora = ? 
       AND p_consulta.id_usuario = ?
-    GROUP BY j.id_jugadora, pj.clausula, pj.valor, pj.id_plantilla`,
+    GROUP BY j.id_jugadora, pj.clausula, pj.id_entry, pj.valor, pj.id_plantilla`,
     [id_jugadora, id_usuario]
         );
 
@@ -112,7 +111,28 @@ const getPlayerInfo = async (req, res) => {
     }
 }
 
+
+const getFeed = async (req, res) => {
+    const { id } = req.params; 
+    try {
+        if (!id) return res.status(400).json({ message: 'Faltan datos' });
+        const [toret] = await pool.query(`
+            SELECT * FROM notificacion 
+            WHERE id_usuario = ? 
+              AND tipo IN ('clausulazo', 'venta', 'nuevo_en_liga', 'abandono_liga', 'resultado', 'sistema', 'inicio_traspasos', 'fin_traspasos')
+            ORDER BY creada_en DESC
+        `, [id]);
+
+        res.json(toret);
+
+    } catch (error) {
+        console.error('Error al obtener notificaciones:', error);
+        res.status(500).json({ message: 'Error interno' });
+    }
+};
+
 module.exports = {
     getTopStats,
-    getPlayerInfo
+    getPlayerInfo,
+    getFeed
 };

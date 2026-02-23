@@ -44,9 +44,13 @@ async function createLeague(req, res)
 
     await connection.query('INSERT INTO plantilla_jugadora (id_liga, id_jugadora, valor, clausula, id_plantilla) SELECT ?, id_jugadora, valor_base, 0, NULL FROM jugadora', [id_liga]);
 
+     const plantillas = await connection.query('SELECT id_plantilla FROM plantilla WHERE id_usuario = ?', [usuario]);
+    const plantilla = plantillas[0];
+
+    await generarNotificacionBienvenida(connection, usuario);
     await connection.commit();
 
-    res.status(201).json({ message: 'Liga creada correctamente' });
+    res.status(201).json({ message: 'Liga creada correctamente', presupuesto: presupuestoInicial, id_liga: id_liga, id_plantilla: plantilla.id_plantilla  });
 
   }catch (error) 
   {
@@ -103,9 +107,13 @@ async function joinPrivateLeague(req, res)
     const PRESUPUESTOINICIAL = 50000000;
     await connection.query('INSERT INTO plantilla (id_usuario, id_liga, presupuesto, valor_equipo, n_jugadoras) VALUES (?,?,?, 0, 0)', [usuario, id_liga, PRESUPUESTOINICIAL]);
 
+    const plantillas = await connection.query('SELECT id_plantilla FROM plantilla WHERE id_usuario = ?', [usuario]);
+    const plantilla = plantillas[0];
+
+    await generarNotificacionBienvenida(connection, usuario);
     await connection.commit();
 
-    res.status(201).json({ message: 'Unido a liga correctamente' });
+    res.status(201).json({ message: 'Unido a liga correctamente', presupuesto: PRESUPUESTOINICIAL, id_liga: id_liga, id_plantilla: plantilla.id_plantilla });
 
     }catch (error){
         if(connection) await connection.rollback();
@@ -179,10 +187,14 @@ async function joinRandomLeague(req, res) {
             [usuario, idLigaDestino, PRESUPUESTO_INICIAL]
         );
 
+         const plantillas = await connection.query('SELECT id_plantilla FROM plantilla WHERE id_usuario = ?', [usuario]);
+        const plantilla = plantillas[0];
+
+        await generarNotificacionBienvenida(connection, usuario);
         await connection.commit();
         res.status(201).json({ 
             message: 'Unido a liga correctamente', 
-            id_liga: idLigaDestino 
+            id_liga: idLigaDestino,  presupuesto: PRESUPUESTO_INICIAL, id_plantilla: plantilla.id_plantilla  
         });
 
     } catch (error) {
@@ -193,11 +205,9 @@ async function joinRandomLeague(req, res) {
         if (connection) connection.release();
     }
 }
-
 async function changeLeague(req, res) {
-
     let connection;
- try {
+    try {
         const { id } = req.body;
 
         if (!id) {
@@ -226,6 +236,13 @@ async function changeLeague(req, res) {
             await connection.rollback();
             return res.status(400).json({ message: 'El usuario ya no pertenece a ninguna liga' });
         }
+
+      
+        await generarNotificacionSalida(connection, id);
+
+        await connection.query('DELETE FROM notificacion WHERE id_usuario = ?', [id]);
+        
+      
 
         if (id_plantilla) {
             await connection.query(
@@ -256,6 +273,8 @@ async function changeLeague(req, res) {
         }
 
         await connection.commit();
+
+        
         res.status(200).json({ 
             message: remainingUsers[0].total === 0 
                 ? 'Has abandonado la liga y esta ha sido eliminada por quedar vacía.' 
@@ -274,7 +293,6 @@ async function changeLeague(req, res) {
 async function getClasificacion(req, res) {
     console.log("Petición de clasificación para usuario:", req.params.id_usuario);
     
-    // Usamos el pool que ya tienes definido arriba
     const query = `
         SELECT 
             l.nombre AS liga_nombre,
@@ -297,7 +315,6 @@ async function getClasificacion(req, res) {
     `;
 
     try {
-        // CAMBIO CLAVE: Usar pool.query en lugar de db.execute
         const [rows] = await pool.query(query, [req.params.id_usuario]);
         
         if (rows.length === 0) {
@@ -340,6 +357,65 @@ async function updateLeagueName(req, res) {
         console.error('Error al actualizar nombre de liga:', error);
         res.status(500).json({ message: 'Error interno al actualizar' });
     }
+}
+
+async function generarNotificacionBienvenida(connection, id_usuario) {
+    
+    const [[userData]] = await connection.query(
+        'SELECT nombre_usuario, foto_perfil_url, id_liga FROM usuario WHERE id_usuario = ?', 
+        [id_usuario]
+    );
+
+    if (!userData || !userData.id_liga) return;
+
+    
+    const [usuariosLiga] = await connection.query(
+        'SELECT id_usuario FROM usuario WHERE id_liga = ?',
+        [userData.id_liga]
+    );
+
+    const payload = JSON.stringify({
+        usuario: userData.nombre_usuario,
+        avatar: userData.foto_perfil_url, 
+        mensaje: `${userData.nombre_usuario} se ha unido a la liga.`
+    });
+
+    const queries = usuariosLiga.map(u => {
+        return connection.query(
+            'INSERT INTO notificacion (id_usuario, tipo, payload) VALUES (?, "nuevo_en_liga", ?)',
+            [u.id_usuario, payload]
+        );
+    });
+
+    await Promise.all(queries);
+}
+
+async function generarNotificacionSalida(connection, id_usuario) {
+    const [[userData]] = await connection.query(
+        'SELECT nombre_usuario, foto_perfil_url, id_liga FROM usuario WHERE id_usuario = ?', 
+        [id_usuario]
+    );
+
+    if (!userData || !userData.id_liga) return;
+    const [usuariosLiga] = await connection.query(
+        'SELECT id_usuario FROM usuario WHERE id_liga = ?',
+        [userData.id_liga]
+    );
+
+    const payload = JSON.stringify({
+        usuario: userData.nombre_usuario,
+        avatar: userData.foto_perfil_url,
+        mensaje: `${userData.nombre_usuario} ha abandonado la liga.`
+    });
+
+    const queries = usuariosLiga.map(u => {
+        return connection.query(
+            'INSERT INTO notificacion (id_usuario, tipo, payload) VALUES (?, "abandono_liga", ?)',
+            [u.id_usuario, payload]
+        );
+    });
+
+    await Promise.all(queries);
 }
 
 module.exports = {

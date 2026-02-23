@@ -669,7 +669,9 @@ CREATE TABLE puja (
 CREATE TABLE notificacion (
   id_notificacion INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
   id_usuario      INT UNSIGNED NOT NULL,
-  tipo            ENUM('puja_nueva','puja_aceptada','puja_rechazada','puja_expirada','sistema', 'venta', 'nuevo_en_liga') NOT NULL,
+  tipo            ENUM('puja_superada','oferta_aceptada','oferta_rechazada','oferta_expirada',
+						'clausulazo','sistema','abandono_liga','venta','nuevo_en_liga', 'resultado',
+                        'inicio_traspasos', 'fin_traspasos', 'nueva_oferta', 'clausulazo_priv') NOT NULL,
   payload         JSON NULL,
   leida           TINYINT(1) NOT NULL DEFAULT 0,
   creada_en       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -677,35 +679,9 @@ CREATE TABLE notificacion (
     ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Triggers de notificación para pujas
-DELIMITER $$
-CREATE TRIGGER trg_puja_after_insert
-AFTER INSERT ON puja
-FOR EACH ROW
-BEGIN
-  INSERT INTO notificacion (id_usuario, tipo, payload)
-  VALUES (NEW.id_vendedor, 'puja_nueva', JSON_OBJECT('id_puja', NEW.id_puja, 'montante', NEW.montante));
-END $$
 
-CREATE TRIGGER trg_puja_after_update
-AFTER UPDATE ON puja
-FOR EACH ROW
-BEGIN
-  IF NEW.estado <> OLD.estado THEN
-    CASE NEW.estado
-      WHEN 'aceptada' THEN
-        INSERT INTO notificacion (id_usuario, tipo, payload)
-        VALUES (NEW.id_comprador, 'puja_aceptada', JSON_OBJECT('id_puja', NEW.id_puja));
-      WHEN 'rechazada' THEN
-        INSERT INTO notificacion (id_usuario, tipo, payload)
-        VALUES (NEW.id_comprador, 'puja_rechazada', JSON_OBJECT('id_puja', NEW.id_puja));
-      WHEN 'expirada' THEN
-        INSERT INTO notificacion (id_usuario, tipo, payload)
-        VALUES (NEW.id_comprador, 'puja_expirada', JSON_OBJECT('id_puja', NEW.id_puja));
-    END CASE;
-  END IF;
-END $$
-DELIMITER ;
+
+
 
 -- =====================
 -- VISTA de CLASIFICACION 
@@ -755,3 +731,5 @@ SELECT
     valor_base,    
     valor_base * 1.2 
 FROM jugadora;
+
+update plantilla_jugadora set id_plantilla = 1 where id_entry=4 and id_jugadora = 204;

@@ -3,6 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common'; //funcion de angular que funciona como un paso atrás. Mantiene filters y scroll.
 import { UserService } from '../services/user.service';
 import { AuthService } from '../services/auth.service';
+import { MarketService } from '../services/market.service';
 import { PlayerService } from '../services/player.service';
 import { Router } from '@angular/router';
 
@@ -27,7 +28,7 @@ export class PlayerDetailComponent implements OnInit {
   showModalOfrecer: boolean = false;
   ofertaRealizada: number = 0;
 
-  constructor( private route: ActivatedRoute, private location: Location, private UserService: UserService, private AuthService: AuthService, private router: Router, private playerService: PlayerService) { }
+  constructor( private route: ActivatedRoute, private location: Location, private UserService: UserService, private AuthService: AuthService, private router: Router, private playerService: PlayerService, private marketService: MarketService) { }
 
   ngOnInit(): void {
     this.id = this.route.snapshot.paramMap.get('id');
@@ -68,14 +69,49 @@ cerrarModales() {
 }
 
 confirmarVenta() {
-  console.log("Vendiendo a:", this.jugadora.apodo);
-  // Aquí irá la llamada a la API
+ 
+  const data = {
+    id_usuario: this.idUsuarioLogueado,
+    id_jugadora: this.id,
+    id_liga: this.UserService.getUsuario().id_liga
+  }
+  this.marketService.marketSell(data).subscribe({
+    next: (res:any) => {
+         console.log(res.message);
+        this.location.back();
+      },
+      error: (error:any) => {
+        console.error('Error:', error);
+      }
+  })
   this.cerrarModales();
 }
 
 confirmarPagoClausula() {
+
+  if(this.UserService.getUsuario().presupuesto >= this.jugadora.clausula){
   console.log("Pagando cláusula de:", this.jugadora.apodo);
-  // Aquí irá la llamada a la API
+  const data = {
+    id_usuario: this.idUsuarioLogueado,
+    id_jugadora: this.id,
+    id_clausula: this.jugadora.clausula,
+    id_propietario: this.jugadora.id_propietario,
+    id_entry: this.jugadora.id_entry
+  }
+  this.marketService.payClause(data).subscribe({
+      next: (res:any) => {
+         console.log(res.message);
+         this.jugadora.clausula = this.jugadora.valor;
+         this.jugadora.id_propietario = this.idUsuarioLogueado;
+
+      },
+      error: (error:any) => {
+        console.error('Error:', error);
+      }
+    })
+  } else{
+    window.alert("No dispones de presupuesto suficiente");
+  }
   this.cerrarModales();
 }
 
@@ -90,7 +126,28 @@ cerrarModal() {
 
 
 confirmarNuevaClausula() {
-  console.log('Nueva cláusula a guardar:', this.nuevaClausula);
+  if(this.nuevaClausula > (this.jugadora.valor * 1.40))
+  {
+    window.alert("La nueva cláusula no puede sobrepasar el valor de mercado en más del 40%");
+  } else {
+    const data = {
+      id_usuario: this.idUsuarioLogueado,
+      id_jugadora: this.id,
+      nueva_clausula: this.nuevaClausula
+    }
+
+    this.marketService.modifyClause(data).subscribe({
+      next: (res:any) => {
+         console.log(res.message);
+         this.jugadora.clausula = res.nueva_clausula
+      },
+      error: (error:any) => {
+        console.error('Error:', error);
+      }
+    })
+
+    
+  }
   this.showModalClausula = false;
 }
 

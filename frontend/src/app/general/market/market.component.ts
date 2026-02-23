@@ -42,11 +42,10 @@ export class MarketComponent implements OnInit {
   filtrar(event: any): void {
     const busqueda = event.target.value.toLowerCase();
 
-    // Si el buscador está vacío, volvemos a mostrar solo las LIBRES
     if (busqueda.trim() === '') {
       this.jugadorasFiltradas = this.jugadoras.filter(j => !j.nombre_usuario);
     } else {
-      // Si hay búsqueda, buscamos en TODO el universo de jugadoras (libres y ocupadas)
+    
       this.jugadorasFiltradas = this.jugadoras.filter(jugadora => {
         const nombreMatch = jugadora.apodo?.toLowerCase().includes(busqueda);
         const posicionMatch = jugadora.posicion?.toLowerCase().includes(busqueda);
@@ -59,7 +58,6 @@ export class MarketComponent implements OnInit {
     this.limite = 10; 
   }
 
-  // ... (getTendencia y mostrarMas se quedan igual)
   getTendencia(jugadora: any) {
     if (!jugadora.valor_base || jugadora.valor === jugadora.valor_base) return null;
     const diferencia = jugadora.valor - jugadora.valor_base;

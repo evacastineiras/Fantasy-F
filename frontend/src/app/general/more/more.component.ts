@@ -14,6 +14,7 @@ export class MoreComponent implements OnInit {
   constructor(private userService: UserService, private auth: AuthService, private router: Router) { }
 
   ngOnInit(): void {
+    
   }
 
   consultarReglas()
@@ -53,7 +54,6 @@ export class MoreComponent implements OnInit {
     this.userService.cambiarLiga(data).subscribe({
       next: (res:any) => {
         console.log("Eliminado de liga", res);
-        this.auth.justRegistered = true;
         this.router.navigate(['/']);
       },
       error: (error:any) => {

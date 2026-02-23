@@ -1,1 +1,70 @@
-<p>home works!</p>
+<div class="gen-container">
+  <div *ngFor="let n of notificaciones | slice:0:limite" class="notificacion-card">
+    
+    <div [ngSwitch]="n.tipo">
+
+      <div *ngSwitchCase="'nuevo_en_liga'" class="layout-simple">
+        <img [src]="n.data.avatar || 'assets/default-user.png'" class="avatar-circle">
+        <div class="info">
+          <p><span class="highlight">{{n.data.usuario}}</span> se ha unido a la liga</p>
+          <span class="timestamp">a las {{ n.creada_en | date:'HH:mm' }}</span>
+        </div>
+      </div>
+
+      <div *ngSwitchCase="'abandono_liga'" class="layout-simple">
+        <img [src]="n.data.avatar || 'assets/default-user.png'" class="avatar-circle grayscale">
+        <div class="info">
+          <p><span class="highlight-exit">{{n.data.usuario}}</span> ha abandonado la liga</p>
+          <span class="timestamp">a las {{ n.creada_en | date:'HH:mm' }}</span>
+        </div>
+      </div>
+
+      <div *ngSwitchCase="n.tipo === 'venta' || n.tipo === 'clausulazo' ? n.tipo : ''" class="layout-transfer">
+        <div class="transfer-visual">
+          <img [src]="n.data.avatarVendedor" class="avatar-circle">
+          <span class="arrow">→</span>
+          <img [src]="'http://localhost:3000/' + n.data.fotoJugadora" class="player-img">
+          <span class="arrow">→</span>
+          <img [src]="n.data.avatarComprador" class="avatar-circle">
+        </div>
+        <div class="info center">
+          <p>
+            <span *ngIf="n.tipo === 'clausulazo'" class="badge-clausulazo">CLAUSULAZO</span>
+            {{ n.data.mensaje }}
+          </p>
+          <span class="timestamp">a las {{ n.creada_en | date:'HH:mm' }}</span>
+        </div>
+      </div>
+
+      <div *ngSwitchCase="'resultado'" class="layout-match">
+        <span class="match-label">Final del partido:</span>
+        <div class="scoreboard">
+          <div class="team">
+            <img [src]="'http://localhost:3000/' + n.data.logoLocal" class="team-logo">
+            <span>{{n.data.nombreLocal}}</span>
+          </div>
+          <span class="score">{{n.data.golesLocal}} - {{n.data.golesVisitante}}</span>
+          <div class="team">
+            <img [src]="'http://localhost:3000/' + n.data.logoVisitante" class="team-logo">
+            <span>{{n.data.nombreVisitante}}</span>
+          </div>
+        </div>
+        <span class="timestamp">a las {{ n.creada_en | date:'HH:mm' }}</span>
+      </div>
+
+      <div *ngSwitchDefault class="layout-simple">
+        <div class="info info-sistema">
+          <p>
+            <i class="icon-info"></i> {{ n.data.mensaje }}
+          </p>
+          <span class="timestamp">a las {{ n.creada_en | date:'HH:mm' }}</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="ver-mas-wrapper" *ngIf="limite < notificaciones.length">
+    <button class="btn-ver-mas" (click)="verMas()">VER MÁS ACTIVIDAD</button>
+  </div>
+</div>

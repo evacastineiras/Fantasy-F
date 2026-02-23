@@ -14,6 +14,10 @@ export class UserService
         return JSON.parse(localStorage.getItem('usuario')|| '{}');
     }
 
+    setUsuario(user: any): void {
+        localStorage.setItem('usuario', JSON.stringify(user));
+    }
+
     logout()
     {
         localStorage.removeItem('usuario');

@@ -12,6 +12,10 @@ export class PlayerService {
     return this.http.get(`${this.baseUrl}/getTopStats/${criterio}`);
   }
 
+  getFeed(id: number) {
+    return this.http.get(`${this.baseUrl}/getFeed/${id}`);
+  }
+
   getPlayerInfo(data: any)
   {
     return this.http.post(`${this.baseUrl}/getPlayerInfo`, data);

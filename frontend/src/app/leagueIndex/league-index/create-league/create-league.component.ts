@@ -53,7 +53,7 @@ export class CreateLeagueComponent implements OnInit {
     this.volverAtrasEvent.emit();
   }
 
-  crearLiga()
+ async crearLiga()
   {
     const newLeague = {
       id_liga: this.codigoLiga,
@@ -62,10 +62,25 @@ export class CreateLeagueComponent implements OnInit {
     }
     
   this.UserService.crearLiga(newLeague).subscribe({
-      next: (res:any) => {
+      next: async (res:any) => {
         console.log("Liga creada", res);
         this.authService.justRegistered = false;
-        this.router.navigate(['/home']);
+        const usuarioActual = this.UserService.getUsuario();
+        const usuarioActualizado = {
+        ...usuarioActual,
+        id_liga: res.id_liga,
+        presupuesto: res.presupuesto,
+        id_plantilla: res.id_plantilla
+      };
+        this.UserService.setUsuario(usuarioActualizado);
+      await new Promise(f => setTimeout(f, 600));
+
+      
+      this.router.navigate(['/home']).then(nav => {
+        if (!nav) {
+          console.error("La navegación fue rechazada por el Guard. ");
+        }
+      });
       },
       error: (error:any) => {
         console.error("Error en la creacion de la liga", error)

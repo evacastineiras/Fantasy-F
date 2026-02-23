@@ -14,4 +14,19 @@ export class MarketService {
    getMarketPlayers(idUsuario: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/marketPlayers/${idUsuario}`);
   }
+
+   modifyClause(data: any)
+  {
+    return this.http.post(`${this.apiUrl}/modifyClause`, data)
+  }
+
+   payClause(data: any)
+  {
+    return this.http.post(`${this.apiUrl}/payClause`, data)
+  }
+
+  marketSell(data:any)
+  {
+    return this.http.post(`${this.apiUrl}/marketSell`, data)
+  }
 }

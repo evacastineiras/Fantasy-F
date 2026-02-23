@@ -61,7 +61,16 @@ const login = async (req, res) => {
       return res.status(401).json({ message: 'Usuario no encontrado' });
     }
 
+ 
     const user = users[0];
+
+    const [idPlantillas] = await pool.query('SELECT id_plantilla FROM plantilla WHERE id_usuario = ? AND id_liga = ?', [user.id_usuario, user.id_liga] );
+
+    const [presupuestos] = await pool.query('SELECT presupuesto FROM plantilla WHERE id_usuario = ? AND id_liga = ?', [user.id_usuario, user.id_liga] );
+
+   const plantillaRow = idPlantillas[0];
+    const presupuestoRow = presupuestos[0];
+
 
     // Comparar contraseñas
     const match = await bcrypt.compare(password, user.password_hash);
@@ -70,7 +79,8 @@ const login = async (req, res) => {
     }
 
     // Login correcto
-    res.json({ message: 'Login correcto', user: { id: user.id_usuario, email: user.email, username: user.nombre_usuario, nombre: user.nombre, profileImage: user.foto_perfil_url } });
+    res.json({ message: 'Login correcto', user: { id: user.id_usuario, email: user.email, username: user.nombre_usuario, nombre: user.nombre, profileImage: user.foto_perfil_url , id_liga: user.id_liga, id_plantilla: plantillaRow ? plantillaRow.id_plantilla : null, 
+        presupuesto: presupuestoRow ? presupuestoRow.presupuesto : null} });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Error interno' });

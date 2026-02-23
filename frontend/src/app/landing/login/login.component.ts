@@ -35,6 +35,7 @@ export class LoginComponent {
       next: (res: any) => {
         console.log('Login correcto', res);
         localStorage.setItem('usuario', JSON.stringify(res.user));
+        console.log(res.user)
         this.router.navigate(['/home']);
       },
       error: (err: any) => {

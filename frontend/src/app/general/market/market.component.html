@@ -51,7 +51,7 @@
             PUJAR
           </button>
 
-          <button *ngIf="jugadora.nombre_usuario && jugadora.id_propietario !== idUsuarioLogueado" 
+          <button [routerLink]="['/jugadora', jugadora.id_jugadora]"  *ngIf="jugadora.nombre_usuario && jugadora.id_propietario !== idUsuarioLogueado" 
                   class="btn-negociar">
             NEGOCIAR
           </button>
