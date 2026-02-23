@@ -82,8 +82,8 @@ async function marketSell(req, res) {
 
         
         await connection.query(
-            'UPDATE plantilla SET presupuesto = presupuesto + ? WHERE id_usuario = ? AND id_liga = ?',
-            [valor, id_usuario, id_liga]
+            'UPDATE plantilla SET presupuesto = presupuesto + ?, n_jugadoras = n_jugadoras - 1 , valor_equipo = valor_equipo - ? WHERE id_usuario = ? AND id_liga = ?',
+            [valor, valor, id_usuario, id_liga]
         );
 
         await connection.commit();
@@ -189,8 +189,8 @@ async function payClause(req, res) {
         }
 
        
-        await connection.query('UPDATE plantilla SET presupuesto = presupuesto - ? WHERE id_plantilla = ?', [id_clausula, pComprador.id_plantilla]);
-        await connection.query('UPDATE plantilla SET presupuesto = presupuesto + ? WHERE id_plantilla = ?', [id_clausula, pVendedor.id_plantilla]);
+        await connection.query('UPDATE plantilla SET presupuesto = presupuesto - ?, n_jugadoras=n_jugadoras+1, valor_equipo = valor_equipo + ? WHERE id_plantilla = ?', [id_clausula, id_clausula, pComprador.id_plantilla]);
+        await connection.query('UPDATE plantilla SET presupuesto = presupuesto + ?, n_jugadoras=n_jugadoras-1, valor_equipo = valor_equipo - ? WHERE id_plantilla = ?', [id_clausula, id_clausula, pVendedor.id_plantilla]);
         await connection.query(
             'UPDATE plantilla_jugadora SET id_plantilla = ?, clausula = ?, es_titular_default = 0 WHERE id_entry = ?',
             [pComprador.id_plantilla, valorActual, id_entry]

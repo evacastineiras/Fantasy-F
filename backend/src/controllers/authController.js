@@ -251,41 +251,22 @@ const changePassword = async (req, res) =>
 async function getBudgetValue(req, res)
 {
   try {
-        const {id_usuario} = req.params;
+    const { id_usuario } = req.params;
 
-    if (!id_usuario)
-        return res.status(400).json({message: 'No se encuentra el ID del usuario'});
-
-    const [presupuestoRows] = await pool.query(
-      'SELECT id_plantilla, presupuesto FROM plantilla WHERE id_usuario = ?', 
+    const [rows] = await pool.query(
+      'SELECT presupuesto, valor_equipo FROM plantilla WHERE id_usuario = ?', 
       [id_usuario]
     );
 
-    if (presupuestoRows.length === 0) {
-      return res.status(404).json({ message: 'Plantilla no encontrada' });
-    }
+    if (rows.length === 0) return res.status(404).json({ message: 'No hay datos' });
 
-    const id_plantilla = presupuestoRows[0].id_plantilla;
-    const presupuesto = presupuestoRows[0].presupuesto;
-
-  
-    const [valorRows] = await pool.query(
-      'SELECT IFNULL(SUM(valor), 0) AS valor_total FROM plantilla_jugadora WHERE id_plantilla = ?',
-      [id_plantilla]
-    );
-
-    const valor_total = valorRows[0].valor_total;
-
-    
     res.status(200).json({
-      presupuesto: presupuesto,
-      valor_plantilla: valor_total
+      presupuesto: rows[0].presupuesto,
+      valor_plantilla: rows[0].valor_equipo
     });
     
-  } catch (error)
-  {
-    console.error('Error al obtener datos de presupuesto:', error);
-    res.status(500).json({ message: 'Error interno del servidor' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error interno' });
   }
 }
 
