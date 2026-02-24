@@ -29,4 +29,9 @@ export class MarketService {
   {
     return this.http.post(`${this.apiUrl}/marketSell`, data)
   }
+
+   makeOffer(data:any)
+  {
+    return this.http.post(`${this.apiUrl}/makeOffer`, data)
+  }
 }

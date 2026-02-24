@@ -196,7 +196,6 @@ async function payClause(req, res) {
             [pComprador.id_plantilla, valorActual, id_entry]
         );
 
-        // 3. Obtener info de nombres y fotos
         const [[uComp]] = await connection.query('SELECT nombre_usuario, foto_perfil_url FROM usuario WHERE id_usuario = ?', [id_usuario]);
         const [[uVend]] = await connection.query('SELECT nombre_usuario, foto_perfil_url FROM usuario WHERE id_usuario = ?', [id_propietario]);
         const [[jugadora]] = await connection.query('SELECT apodo, imagen FROM jugadora WHERE id_jugadora = ?', [id_jugadora]);
@@ -241,7 +240,6 @@ async function payClause(req, res) {
             connection.query('INSERT INTO notificacion (id_usuario, tipo, payload) VALUES (?, "clausulazo_priv", ?)', [id_usuario, payloadComprador])
         ];
 
-        // Ejecutamos todas las inserciones
         await Promise.all([...queriesGlobales, ...queriesPersonales]);
 
         await connection.commit();
@@ -254,12 +252,91 @@ async function payClause(req, res) {
         if (connection) connection.release();
     }
 }
+async function makeOffer(req, res) {
+    const { id_comprador, id_vendedor, id_jugadora, id_liga, montante } = req.body;
 
+    if (!id_comprador || !id_jugadora || !id_liga || !montante || !id_vendedor) {
+        return res.status(400).json({ message: "Faltan datos obligatorios" });
+    }
 
+    let connection;
+    try {
+        connection = await pool.getConnection();
+        await connection.beginTransaction();
+
+        const [[entryData]] = await connection.query(
+            'SELECT id_entry FROM plantilla_jugadora WHERE id_jugadora = ? AND id_liga = ?',
+            [id_jugadora, id_liga]
+        );
+
+        if (!entryData) {
+            await connection.rollback();
+            return res.status(404).json({ message: "La jugadora no está en esta liga" });
+        }
+        const id_entry = entryData.id_entry;
+
+        const [[comprador]] = await connection.query(
+            'SELECT presupuesto FROM plantilla WHERE id_usuario = ? AND id_liga = ?',
+            [id_comprador, id_liga]
+        );
+
+        if (!comprador || comprador.presupuesto < montante) {
+            await connection.rollback();
+            return res.status(400).json({ message: "No tienes suficiente presupuesto" });
+        }
+
+        const [[pujaExistente]] = await connection.query(
+            'SELECT id_puja FROM puja WHERE id_comprador = ? AND id_entry = ? AND estado = "pendiente"',
+            [id_comprador, id_entry]
+        );
+
+        let id_puja_final;
+
+        if (pujaExistente) {
+            await connection.query(
+                'UPDATE puja SET montante = ?, creada_en = CURRENT_TIMESTAMP WHERE id_puja = ?',
+                [montante, pujaExistente.id_puja]
+            );
+            id_puja_final = pujaExistente.id_puja;
+        } else {
+            const [insertResult] = await connection.query(
+                'INSERT INTO puja (id_liga, id_entry, id_comprador, id_vendedor, montante, estado) VALUES (?, ?, ?, ?, ?, "pendiente")',
+                [id_liga, id_entry, id_comprador, id_vendedor, montante]
+            );
+            id_puja_final = insertResult.insertId;
+        }
+
+        const [[uComp]] = await connection.query('SELECT nombre_usuario FROM usuario WHERE id_usuario = ?', [id_comprador]);
+        const [[jData]] = await connection.query('SELECT apodo FROM jugadora WHERE id_jugadora = ?', [id_jugadora]);
+
+        const payloadVendedor = JSON.stringify({
+            titulo: 'Nueva oferta',
+            mensaje: `${uComp.nombre_usuario} ofrece ${montante.toLocaleString()}€ por ${jData.apodo}`,
+            id_entry: id_entry,
+            montante: montante
+        });
+
+        await connection.query(
+            'INSERT INTO notificacion (id_usuario, tipo, payload) VALUES (?, "nueva_oferta", ?)',
+            [id_vendedor, payloadVendedor]
+        );
+
+        await connection.commit();
+        res.status(200).json({ message: "Oferta realizada con éxito" });
+
+    } catch (error) {
+        if (connection) await connection.rollback();
+        console.error("Error en makeOffer:", error);
+        res.status(500).json({ message: "Error al procesar la puja" });
+    } finally {
+        if (connection) connection.release();
+    }
+}
 
 module.exports = {
     getMarketPlayers,
     modifyClause,
     marketSell, 
-    payClause
+    payClause, 
+    makeOffer
 };

@@ -6,10 +6,14 @@
         <div class="profile-container">
             <div class="profile-wrapper" (click)="toggleDropdown()">
                 <img class="img-p" [src]="profileImagePreview" alt="Foto de perfil">
+
+                <div *ngIf="unreadNotifications > 0" class="badge-dot"></div>
                     
                 <ul class="dropdown-menu" [class.show]="dropdownOpen">
                     <li (click)="goToProfile()">Mi perfil</li>
-                    <li (click)="goToNotifications()">Notificaciones</li>
+                    <li (click)="goToNotifications()">Notificaciones
+                        <span *ngIf="unreadNotifications > 0" class="badge-number">{{ unreadNotifications }}</span>
+                    </li>
                     <li (click)="logout()">Salir</li>
                  </ul>
             </div>

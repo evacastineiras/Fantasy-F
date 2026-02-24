@@ -56,9 +56,44 @@ export class PlayerDetailComponent implements OnInit {
 }
 
 confirmarOferta() {
-  console.log(`Oferta enviada por ${this.jugadora.apodo}: ${this.ofertaRealizada}€`);
-  // Aquí irá la lógica para guardar la puja en la base de datos
-  this.showModalOfrecer = false;
+ 
+  if (!this.ofertaRealizada || this.ofertaRealizada <= 0) {
+    window.alert("Por favor, introduce un montante válido para la oferta.");
+    return;
+  }
+
+   if (this.UserService.getUsuario().presupuesto < this.ofertaRealizada) {
+    window.alert("No dispones del presupuesto suficiente para realizar esa oferta.");
+    return;
+  }
+
+  const usuarioActual = this.UserService.getUsuario();
+
+
+  const body = {
+    id_comprador: usuarioActual.id,
+    id_vendedor: this.jugadora.id_propietario, 
+    id_jugadora: this.id,
+    id_liga: usuarioActual.id_liga,
+    montante: this.ofertaRealizada
+  };
+  console.log(body)
+
+
+  this.marketService.makeOffer(body).subscribe({
+    next: (res:any) => {
+      console.log('Oferta procesada:', res.message);
+      this.showModalOfrecer = false;
+      
+      alert(`¡Oferta de ${this.ofertaRealizada}€ enviada a su dueño!`);
+      
+      this.ofertaRealizada = 0;
+    },
+    error: (err) => {
+      console.error('Error al enviar oferta:', err);
+      alert(err.error.message || "Error al procesar la oferta. Inténtalo de nuevo.");
+    }
+  });
 }
 
 abrirVender() { this.showModalVender = true; }

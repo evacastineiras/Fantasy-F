@@ -97,7 +97,6 @@ const getPlayerInfo = async (req, res) => {
             return res.status(404).json({ message: 'Jugadora no encontrada' });
         }
 
-        // 3. Respuesta limpia para el frontend
         const playerDetails = rows[0];
 
         res.json({ 

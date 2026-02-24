@@ -647,7 +647,7 @@ CREATE TABLE puja (
   id_liga        INT UNSIGNED NOT NULL,
   id_entry       INT UNSIGNED NOT NULL,
   id_comprador   INT UNSIGNED NOT NULL,
-  id_vendedor    INT UNSIGNED NOT NULL,
+  id_vendedor    INT UNSIGNED,
   montante       INT UNSIGNED NOT NULL,
   estado         ENUM('pendiente','aceptada','rechazada','retirada','expirada') NOT NULL DEFAULT 'pendiente',
   creada_en      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -733,3 +733,4 @@ SELECT
 FROM jugadora;
 
 update plantilla_jugadora set id_plantilla = 1 where id_entry=4 and id_jugadora = 204;
+update plantilla_jugadora set id_plantilla = 1 where id_entry=21 and id_jugadora = 701;
