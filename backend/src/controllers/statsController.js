@@ -131,8 +131,75 @@ const getFeed = async (req, res) => {
     }
 };
 
+const getPersonalFeed = async (req, res) => {
+   
+    const { id_usuario } = req.params; 
+
+    try {
+        if (!id_usuario) {
+            return res.status(400).json({ message: 'Faltan datos' });
+        }
+
+        const query = `
+            SELECT * FROM notificacion 
+            WHERE id_usuario = ? 
+            AND tipo IN (
+                'puja_superada', 
+                'clausulazo_priv', 
+                'oferta_aceptada', 
+                'oferta_rechazada', 
+                'nueva_oferta', 
+                'oferta_expirada'
+            )
+            ORDER BY creada_en DESC
+        `;
+
+        const [notificaciones] = await pool.query(query, [id_usuario]);
+
+        const rows = notificaciones.map(n => ({
+            ...n,
+            payload: typeof n.payload === 'string' ? JSON.parse(n.payload) : n.payload
+        }));
+
+        res.json(rows);
+    } catch (error) {
+        console.error('Error al obtener notificaciones:', error);
+        res.status(500).json({ message: 'Error interno' });
+    }
+};
+
+const markAsRead = async (req, res) => {
+    const { id_usuario } = req.body; 
+
+    try {
+        await pool.query(
+            'UPDATE notificacion SET leida = 1 WHERE id_usuario = ? AND leida = 0',
+            [id_usuario]
+        );
+        res.json({ message: 'Notificaciones marcadas como leídas' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error al actualizar notificaciones' });
+    }
+};
+
+const getUnreadCount = async (req, res) => {
+    const { id_usuario } = req.params;
+    try {
+        const [rows] = await pool.query(
+            'SELECT COUNT(*) as total FROM notificacion WHERE id_usuario = ? AND leida = 0 AND tipo IN ("puja_superada", "clausulazo_priv", "oferta_aceptada", "oferta_rechazada", "nueva_oferta", "oferta_expirada")',
+            [id_usuario]
+        );
+        res.json({ unreadCount: rows[0].total });
+    } catch (error) {
+        res.status(500).json({ message: 'Error al contar' });
+    }
+};
+
 module.exports = {
     getTopStats,
     getPlayerInfo,
-    getFeed
+    getPersonalFeed,
+    markAsRead,
+    getFeed,
+    getUnreadCount
 };

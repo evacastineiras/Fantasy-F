@@ -16,6 +16,18 @@ export class PlayerService {
     return this.http.get(`${this.baseUrl}/getFeed/${id}`);
   }
 
+   getPersonalFeed(id: number) {
+    return this.http.get(`${this.baseUrl}/getPersonalFeed/${id}`);
+  }
+
+   getUnreadCount(id: number) {
+    return this.http.get(`${this.baseUrl}/getUnreadCount/${id}`);
+  }
+   markAsRead(data: any)
+  {
+    return this.http.post(`${this.baseUrl}/markAsRead`, data);
+  }
+
   getPlayerInfo(data: any)
   {
     return this.http.post(`${this.baseUrl}/getPlayerInfo`, data);

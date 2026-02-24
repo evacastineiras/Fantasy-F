@@ -1,0 +1,121 @@
+.outside-box {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--background-grey);
+    min-height: 100vh;
+}
+
+.banner {
+    background-color: #D9D9D9;
+    height: 10vh;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.logo-container img {
+    height: 10vh;
+    padding-left: 30px;
+    cursor: pointer;
+}
+
+.notifications-container {
+    padding: 20px;
+    max-width: 45vw;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.notif-card {
+    background: var(--primary-grey);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 22px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    border-left: 5px solid var(--primary-green); 
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+
+.notif-card.leida {
+    opacity: 0.6;
+    border-left: 5px solid #ccc;
+    filter: grayscale(20%);
+}
+
+.notif-content {
+    display: flex;
+    gap: 15px;
+    align-items: flex-start;
+}
+
+.notif-icon {
+    font-size: 1.5rem;
+}
+
+.notif-text p {
+    margin: 5px 0;
+    color: var(--light-grey);
+    font-size: 0.9rem;
+}
+
+.notif-date {
+    display: block;
+    font-size: 0.75rem;
+    color: #999;
+    margin-top: 10px;
+    text-align: right;
+}
+
+
+.actions {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+}
+
+.btn-accept, .btn-reject {
+    padding: 6px 12px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.8rem;
+}
+
+.btn-accept {
+    background-color: var(--primary-green);
+    color: white;
+}
+
+.btn-reject {
+    background-color: #dc3545;
+    color: white;
+}
+
+.no-notif {
+    text-align: center;
+    margin-top: 50px;
+    color: #888;
+}
+
+.back-icon-container {
+  align-self: flex-start;
+  margin-top: 4vh;
+  margin-left: 4vw;
+  margin-bottom: 2vh;
+}
+
+.back-icon-container img {
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+}
+
+strong {
+    color: var(--primary-green);
+}

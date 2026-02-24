@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule} from '@angular/common/http';
+import { DatePipe } from '@angular/common'; 
 import { FormsModule } from '@angular/forms';
 import { LOCALE_ID } from '@angular/core'; 
 import { registerLocaleData } from '@angular/common';
@@ -57,6 +58,7 @@ registerLocaleData(localeEs, 'es');
   ],
   imports: [
     BrowserModule,
+    DatePipe,
     FormsModule,
     HttpClientModule,
     AppRoutingModule

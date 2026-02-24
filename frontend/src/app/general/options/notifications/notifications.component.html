@@ -1,1 +1,51 @@
-<p>notifications works!</p>
+<div class="outside-box">
+    <div class="banner">
+        <div class="logo-container">
+            <img src="../../assets/logogray.png" alt="Logo" (click)="goHome()">
+        </div>
+    </div>
+
+    <div class="back-icon-container">
+            <img src="../../../../assets/icons/flecha-izq-w.png" alt="" (click)="goHome()">
+        </div>
+    <div class="notifications-container">
+        <div *ngIf="notificaciones.length === 0" class="no-notif">
+            No tienes notificaciones pendientes.
+        </div>
+
+        <div *ngFor="let n of notificaciones" class="notif-card" [class.leida]="n.leida">
+            <div [ngSwitch]="n.tipo">
+                
+                <div *ngSwitchCase="'clausulazo_priv'" class="notif-content">
+                    <div class="notif-icon">💸</div>
+                    <div class="notif-text">
+                        <strong>{{ n.payload.titulo }}</strong>
+                        <p>{{ n.payload.mensaje }}</p>
+                    </div>
+                </div>
+
+                <div *ngSwitchCase="'nueva_oferta'" class="notif-content">
+                    <div class="notif-icon">🤝</div>
+                    <div class="notif-text">
+                        <strong>Nueva Oferta Recibida</strong>
+                        <p>{{ n.payload.mensaje }}</p>
+                        <div class="actions" *ngIf="!n.leida">
+                            <button class="btn-accept" (click)="aceptarOferta(n)">Aceptar</button>
+                            <button class="btn-reject" (click)="rechazarOferta(n)">Rechazar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div *ngSwitchDefault class="notif-content">
+                    <div class="notif-icon">🔔</div>
+                    <div class="notif-text">
+                        <strong>{{ n.payload.titulo || 'Notificación' }}</strong>
+                        <p>{{ n.payload.mensaje }}</p>
+                    </div>
+                </div>
+
+            </div>
+            <span class="notif-date">{{ n.creada_en | date:'short' }}</span>
+        </div>
+    </div>
+</div>
