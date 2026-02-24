@@ -264,6 +264,7 @@ async function makeOffer(req, res) {
         connection = await pool.getConnection();
         await connection.beginTransaction();
 
+        
         const [[entryData]] = await connection.query(
             'SELECT id_entry FROM plantilla_jugadora WHERE id_jugadora = ? AND id_liga = ?',
             [id_jugadora, id_liga]
@@ -275,6 +276,7 @@ async function makeOffer(req, res) {
         }
         const id_entry = entryData.id_entry;
 
+       
         const [[comprador]] = await connection.query(
             'SELECT presupuesto FROM plantilla WHERE id_usuario = ? AND id_liga = ?',
             [id_comprador, id_liga]
@@ -285,13 +287,13 @@ async function makeOffer(req, res) {
             return res.status(400).json({ message: "No tienes suficiente presupuesto" });
         }
 
+        
         const [[pujaExistente]] = await connection.query(
             'SELECT id_puja FROM puja WHERE id_comprador = ? AND id_entry = ? AND estado = "pendiente"',
             [id_comprador, id_entry]
         );
 
         let id_puja_final;
-
         if (pujaExistente) {
             await connection.query(
                 'UPDATE puja SET montante = ?, creada_en = CURRENT_TIMESTAMP WHERE id_puja = ?',
@@ -306,6 +308,23 @@ async function makeOffer(req, res) {
             id_puja_final = insertResult.insertId;
         }
 
+        
+        
+        const [notifsPrevias] = await connection.query(
+            `SELECT id_notificacion, payload FROM notificacion 
+             WHERE id_usuario = ? AND tipo = 'nueva_oferta'`,
+            [id_vendedor]
+        );
+
+        for (const n of notifsPrevias) {
+            const p = typeof n.payload === 'string' ? JSON.parse(n.payload) : n.payload;
+          
+            if (p.id_entry === id_entry) {
+                await connection.query('DELETE FROM notificacion WHERE id_notificacion = ?', [n.id_notificacion]);
+            }
+        }
+
+        
         const [[uComp]] = await connection.query('SELECT nombre_usuario FROM usuario WHERE id_usuario = ?', [id_comprador]);
         const [[jData]] = await connection.query('SELECT apodo FROM jugadora WHERE id_jugadora = ?', [id_jugadora]);
 
@@ -313,6 +332,7 @@ async function makeOffer(req, res) {
             titulo: 'Nueva oferta',
             mensaje: `${uComp.nombre_usuario} ofrece ${montante.toLocaleString()}€ por ${jData.apodo}`,
             id_entry: id_entry,
+            id_puja: id_puja_final, 
             montante: montante
         });
 
