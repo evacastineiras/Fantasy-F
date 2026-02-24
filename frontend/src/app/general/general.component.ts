@@ -60,7 +60,7 @@ goToProfile() {
 }
 
 goToNotifications() {
-  // Navegar a notificaciones
+  this.router.navigate(['/notifications']);
 }
 
 logout() {
