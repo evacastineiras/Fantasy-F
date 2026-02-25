@@ -242,6 +242,12 @@ async function payClause(req, res) {
 
         await Promise.all([...queriesGlobales, ...queriesPersonales]);
 
+        await limpiarNotificacionesAntiguas(id_usuario, connection); 
+        await limpiarNotificacionesAntiguas(id_propietario, connection); 
+        for (const u of usuariosLiga) {
+            await limpiarNotificacionesAntiguas(u.id_usuario, connection); 
+}
+
         await connection.commit();
         res.status(200).json({ message: 'Operación completada' });
 
@@ -341,6 +347,8 @@ async function makeOffer(req, res) {
             [id_vendedor, payloadVendedor]
         );
 
+        await limpiarNotificacionesAntiguas(id_vendedor, connection);
+
         await connection.commit();
         res.status(200).json({ message: "Oferta realizada con éxito" });
 
@@ -363,7 +371,7 @@ async function acceptOffer(req, res) {
         await connection.beginTransaction();
 
         const [[puja]] = await connection.query(
-            `SELECT p.*, j.valor as valor_jugadora, j.apodo, 
+            `SELECT p.*, pj.valor as valor_jugadora, j.apodo, 
              uComp.nombre_usuario as nombre_comprador, 
              uVend.nombre_usuario as nombre_vendedor
              FROM puja p 
@@ -404,7 +412,6 @@ async function acceptOffer(req, res) {
         const [[plantillaComp]] = await connection.query('SELECT id_plantilla FROM plantilla WHERE id_usuario = ? AND id_liga = ?', [id_comprador, id_liga]);
         await connection.query('UPDATE plantilla_jugadora SET id_plantilla = ? WHERE id_entry = ?', [plantillaComp.id_plantilla, id_entry]);
 
-        // 5. ESTADOS DE PUJAS
         await connection.query('UPDATE puja SET estado = "aceptada", resuelta_en = NOW() WHERE id_puja = ?', [id_puja]);
         await connection.query('UPDATE puja SET estado = "expirada", resuelta_en = NOW() WHERE id_entry = ? AND id_puja != ? AND estado = "pendiente"', [id_entry, id_puja]);
 
@@ -417,18 +424,44 @@ async function acceptOffer(req, res) {
         const payloadVend = JSON.stringify({ titulo: 'Venta!', mensaje: `Has vendido a ${apodo} por ${montante.toLocaleString()}€` });
         await connection.query('INSERT INTO notificacion (id_usuario, tipo, payload) VALUES (?, "oferta_aceptada", ?)', [id_vendedor, payloadVend]);
 
-        const [usuariosLiga] = await connection.query('SELECT id_usuario FROM usuario_liga WHERE id_liga = ?', [id_liga]);
+
+        const [[uComp]] = await connection.query('SELECT foto_perfil_url FROM usuario WHERE id_usuario = ?', [id_comprador]);
+        const [[uVend]] = await connection.query('SELECT foto_perfil_url FROM usuario WHERE id_usuario = ?', [id_vendedor]);
         
+        
+        const [[jugData]] = await connection.query(
+            'SELECT j.imagen FROM jugadora j JOIN plantilla_jugadora pj ON j.id_jugadora = pj.id_jugadora WHERE pj.id_entry = ?', 
+            [id_entry]
+        );
+
         const payloadPublico = JSON.stringify({
             titulo: 'Traspaso en la liga',
-            mensaje: `${nombre_vendedor} ha vendido a ${apodo} a ${nombre_comprador} por ${montante.toLocaleString()}€`,
-            tipo_notif: 'venta_publica'
+            vendedor: nombre_vendedor,
+            avatarVendedor: uVend.foto_perfil_url,
+            comprador: nombre_comprador,
+            avatarComprador: uComp.foto_perfil_url,
+            jugadora: apodo,
+            fotoJugadora: jugData.imagen,
+            montante: montante,
+            mensaje: `${nombre_vendedor} ha vendido a ${apodo} a ${nombre_comprador} por ${montante.toLocaleString()}€`
         });
 
+     
+        const [usuariosLiga] = await connection.query('SELECT id_usuario FROM usuario WHERE id_liga = ?', [id_liga]);
+
         const notifPromises = usuariosLiga.map(u => {
-            return connection.query('INSERT INTO notificacion (id_usuario, tipo, payload) VALUES (?, "venta", ?)', [u.id_usuario, payloadPublico]);
+            return connection.query(
+                'INSERT INTO notificacion (id_usuario, tipo, payload) VALUES (?, "venta", ?)', 
+                [u.id_usuario, payloadPublico]
+            );
         });
         await Promise.all(notifPromises);
+
+        await limpiarNotificacionesAntiguas(id_comprador, connection);
+        await limpiarNotificacionesAntiguas(id_vendedor, connection);
+        for (const u of usuariosLiga) {
+            await limpiarNotificacionesAntiguas(u.id_usuario, connection);
+        }
 
         await connection.commit();
         res.status(200).json({ message: "Venta realizada y publicada" });
@@ -482,6 +515,9 @@ async function rejectOffer(req, res) {
         });
         await connection.query('INSERT INTO notificacion (id_usuario, tipo, payload) VALUES (?, "oferta_rechazada", ?)', [puja.id_vendedor, payloadRechazadaVend]);
 
+        await limpiarNotificacionesAntiguas(puja.id_comprador, connection); 
+        await limpiarNotificacionesAntiguas(puja.id_vendedor, connection); 
+
         await connection.commit();
         res.status(200).json({ message: "Oferta rechazada" });
 
@@ -493,6 +529,22 @@ async function rejectOffer(req, res) {
     }
 }
 
+async function limpiarNotificacionesAntiguas(id_usuario, connection) {
+    
+    await connection.query(
+        `DELETE FROM notificacion 
+         WHERE id_usuario = ? 
+         AND id_notificacion NOT IN (
+             SELECT id_notificacion FROM (
+                 SELECT id_notificacion FROM notificacion 
+                 WHERE id_usuario = ? 
+                 ORDER BY creada_en DESC 
+                 LIMIT 50
+             ) AS temp
+         )`,
+        [id_usuario, id_usuario]
+    );
+}
 
 module.exports = {
     getMarketPlayers,

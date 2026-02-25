@@ -9,43 +9,48 @@
             <img src="../../../../assets/icons/flecha-izq-w.png" alt="" (click)="goHome()">
         </div>
     <div class="notifications-container">
-        <div *ngIf="notificaciones.length === 0" class="no-notif">
-            No tienes notificaciones pendientes.
-        </div>
+    <div *ngIf="notificaciones.length === 0" class="no-notif">
+        No tienes notificaciones pendientes.
+    </div>
 
-        <div *ngFor="let n of notificaciones" class="notif-card" [class.leida]="n.leida">
-            <div [ngSwitch]="n.tipo">
-                
-                <div *ngSwitchCase="'clausulazo_priv'" class="notif-content">
-                    <div class="notif-icon">💸</div>
-                    <div class="notif-text">
-                        <strong>{{ n.payload.titulo }}</strong>
-                        <p>{{ n.payload.mensaje }}</p>
+    <div *ngFor="let n of notificaciones | slice:0:limite" class="notif-card" [class.leida]="n.leida">
+        <div [ngSwitch]="n.tipo">
+            
+            <div *ngSwitchCase="'nueva_oferta'" class="notif-content">
+                <div class="notif-icon">🤝</div>
+                <div class="notif-text">
+                    <strong>Nueva Oferta</strong>
+                    <p>{{ n.payload.mensaje }}</p>
+                    <div class="actions" *ngIf="!n.leida && !n.gestionada">
+                        <button class="btn-accept" (click)="aceptarOferta(n)">Aceptar</button>
+                        <button class="btn-reject" (click)="rechazarOferta(n)">Rechazar</button>
                     </div>
+                    <p *ngIf="n.gestionada" class="txt-gestionada">Procesando traspaso...</p>
                 </div>
-
-                <div *ngSwitchCase="'nueva_oferta'" class="notif-content">
-                    <div class="notif-icon">🤝</div>
-                    <div class="notif-text">
-                        <strong>Nueva Oferta Recibida</strong>
-                        <p>{{ n.payload.mensaje }}</p>
-                        <div class="actions" *ngIf="!n.leida">
-                            <button class="btn-accept" (click)="aceptarOferta(n)">Aceptar</button>
-                            <button class="btn-reject" (click)="rechazarOferta(n)">Rechazar</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div *ngSwitchDefault class="notif-content">
-                    <div class="notif-icon">🔔</div>
-                    <div class="notif-text">
-                        <strong>{{ n.payload.titulo || 'Notificación' }}</strong>
-                        <p>{{ n.payload.mensaje }}</p>
-                    </div>
-                </div>
-
             </div>
-            <span class="notif-date">{{ n.creada_en | date:'short' }}</span>
+
+            <div *ngSwitchCase="'venta'" class="notif-content">
+                <div class="notif-icon">📣</div>
+                <div class="notif-text">
+                    <strong>Mercado</strong>
+                    <p>{{ n.payload.mensaje }}</p>
+                </div>
+            </div>
+
+            <div *ngSwitchDefault class="notif-content">
+                <div class="notif-icon">
+                    {{ n.tipo.includes('aceptada') ? '✅' : n.tipo.includes('rechazada') ? '❌' : '🔔' }}
+                </div>
+                <div class="notif-text">
+                    <strong>{{ n.payload.titulo || 'Notificación' }}</strong>
+                    <p>{{ n.payload.mensaje }}</p>
+                </div>
+            </div>
+
         </div>
+        <span class="notif-date">{{ n.creada_en | date:'short' }}</span>
+    </div>
+    <div class="ver-mas-wrapper" *ngIf="limite < notificaciones.length">
+        <button class="btn-ver-mas" (click)="verMas()">VER MÁS</button>
     </div>
 </div>

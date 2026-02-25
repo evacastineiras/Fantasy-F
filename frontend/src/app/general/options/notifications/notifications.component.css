@@ -119,3 +119,24 @@
 strong {
     color: var(--primary-green);
 }
+
+.ver-mas-wrapper {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.btn-ver-mas {
+    background-color: #444;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s;
+}
+
+.btn-ver-mas:hover {
+    background-color: #666;
+}
