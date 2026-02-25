@@ -353,10 +353,153 @@ async function makeOffer(req, res) {
     }
 }
 
+async function acceptOffer(req, res) {
+    const { id_puja } = req.body;
+    if (!id_puja) return res.status(400).json({ message: "ID de puja necesario" });
+
+    let connection;
+    try {
+        connection = await pool.getConnection();
+        await connection.beginTransaction();
+
+        const [[puja]] = await connection.query(
+            `SELECT p.*, j.valor as valor_jugadora, j.apodo, 
+             uComp.nombre_usuario as nombre_comprador, 
+             uVend.nombre_usuario as nombre_vendedor
+             FROM puja p 
+             JOIN plantilla_jugadora pj ON p.id_entry = pj.id_entry 
+             JOIN jugadora j ON pj.id_jugadora = j.id_jugadora 
+             JOIN usuario uComp ON p.id_comprador = uComp.id_usuario
+             JOIN usuario uVend ON p.id_vendedor = uVend.id_usuario
+             WHERE p.id_puja = ? AND p.estado = "pendiente"`,
+            [id_puja]
+        );
+
+        if (!puja) {
+            await connection.rollback();
+            return res.status(404).json({ message: "La oferta ya no existe" });
+        }
+
+        const { id_comprador, id_vendedor, id_entry, id_liga, montante, valor_jugadora, apodo, nombre_comprador, nombre_vendedor } = puja;
+
+        const [[comprador]] = await connection.query(
+            'SELECT presupuesto FROM plantilla WHERE id_usuario = ? AND id_liga = ?',
+            [id_comprador, id_liga]
+        );
+
+        if (comprador.presupuesto < montante) {
+            await connection.rollback();
+            return res.status(400).json({ message: "Presupuesto insuficiente" });
+        }
+
+        await connection.query(
+            `UPDATE plantilla SET presupuesto = presupuesto - ?, valor_equipo = valor_equipo + ?, n_jugadoras = n_jugadoras + 1 
+             WHERE id_usuario = ? AND id_liga = ?`, [montante, valor_jugadora, id_comprador, id_liga]
+        );
+        await connection.query(
+            `UPDATE plantilla SET presupuesto = presupuesto + ?, valor_equipo = valor_equipo - ?, n_jugadoras = n_jugadoras - 1 
+             WHERE id_usuario = ? AND id_liga = ?`, [montante, valor_jugadora, id_vendedor, id_liga]
+        );
+
+        const [[plantillaComp]] = await connection.query('SELECT id_plantilla FROM plantilla WHERE id_usuario = ? AND id_liga = ?', [id_comprador, id_liga]);
+        await connection.query('UPDATE plantilla_jugadora SET id_plantilla = ? WHERE id_entry = ?', [plantillaComp.id_plantilla, id_entry]);
+
+        // 5. ESTADOS DE PUJAS
+        await connection.query('UPDATE puja SET estado = "aceptada", resuelta_en = NOW() WHERE id_puja = ?', [id_puja]);
+        await connection.query('UPDATE puja SET estado = "expirada", resuelta_en = NOW() WHERE id_entry = ? AND id_puja != ? AND estado = "pendiente"', [id_entry, id_puja]);
+
+        
+        await connection.query("DELETE FROM notificacion WHERE id_usuario = ? AND tipo = 'nueva_oferta' AND payload LIKE ?", [id_vendedor, `%\"id_puja\":${id_puja}%`]);
+        
+        const payloadComp = JSON.stringify({ titulo: 'Fichaje!', mensaje: `Has fichado a ${apodo} por ${montante.toLocaleString()}€` });
+        await connection.query('INSERT INTO notificacion (id_usuario, tipo, payload) VALUES (?, "oferta_aceptada", ?)', [id_comprador, payloadComp]);
+        
+        const payloadVend = JSON.stringify({ titulo: 'Venta!', mensaje: `Has vendido a ${apodo} por ${montante.toLocaleString()}€` });
+        await connection.query('INSERT INTO notificacion (id_usuario, tipo, payload) VALUES (?, "oferta_aceptada", ?)', [id_vendedor, payloadVend]);
+
+        const [usuariosLiga] = await connection.query('SELECT id_usuario FROM usuario_liga WHERE id_liga = ?', [id_liga]);
+        
+        const payloadPublico = JSON.stringify({
+            titulo: 'Traspaso en la liga',
+            mensaje: `${nombre_vendedor} ha vendido a ${apodo} a ${nombre_comprador} por ${montante.toLocaleString()}€`,
+            tipo_notif: 'venta_publica'
+        });
+
+        const notifPromises = usuariosLiga.map(u => {
+            return connection.query('INSERT INTO notificacion (id_usuario, tipo, payload) VALUES (?, "venta", ?)', [u.id_usuario, payloadPublico]);
+        });
+        await Promise.all(notifPromises);
+
+        await connection.commit();
+        res.status(200).json({ message: "Venta realizada y publicada" });
+
+    } catch (error) {
+        if (connection) await connection.rollback();
+        console.error(error);
+        res.status(500).json({ message: "Error en el traspaso" });
+    } finally {
+        if (connection) connection.release();
+    }
+}
+
+async function rejectOffer(req, res) {
+    const { id_puja } = req.body;
+    let connection;
+    try {
+        connection = await pool.getConnection();
+        await connection.beginTransaction();
+
+        const [[puja]] = await connection.query(
+            `SELECT p.*, j.apodo 
+             FROM puja p 
+             JOIN plantilla_jugadora pj ON p.id_entry = pj.id_entry 
+             JOIN jugadora j ON pj.id_jugadora = j.id_jugadora 
+             WHERE p.id_puja = ?`, 
+            [id_puja]
+        );
+        
+        if (!puja) return res.status(404).json({ message: "Oferta no encontrada" });
+
+        await connection.query('UPDATE puja SET estado = "rechazada", resuelta_en = NOW() WHERE id_puja = ?', [id_puja]);
+
+        
+        await connection.query(
+            "DELETE FROM notificacion WHERE id_usuario = ? AND tipo = 'nueva_oferta' AND payload LIKE ?",
+            [puja.id_vendedor, `%\"id_puja\":${id_puja}%`]
+        );
+
+        // Notificación
+        const payloadRechazadaComp = JSON.stringify({
+            titulo: 'Oferta rechazada',
+            mensaje: `Tu oferta por ${puja.apodo} ha sido rechazada.`
+        });
+        await connection.query('INSERT INTO notificacion (id_usuario, tipo, payload) VALUES (?, "oferta_rechazada", ?)', [puja.id_comprador, payloadRechazadaComp]);
+
+       
+        const payloadRechazadaVend = JSON.stringify({
+            titulo: 'Oferta rechazada',
+            mensaje: `Has rechazado la oferta por ${puja.apodo}.`
+        });
+        await connection.query('INSERT INTO notificacion (id_usuario, tipo, payload) VALUES (?, "oferta_rechazada", ?)', [puja.id_vendedor, payloadRechazadaVend]);
+
+        await connection.commit();
+        res.status(200).json({ message: "Oferta rechazada" });
+
+    } catch (error) {
+        if (connection) await connection.rollback();
+        res.status(500).json({ message: "Error al rechazar" });
+    } finally {
+        if (connection) connection.release();
+    }
+}
+
+
 module.exports = {
     getMarketPlayers,
     modifyClause,
     marketSell, 
     payClause, 
-    makeOffer
+    makeOffer,
+    acceptOffer,
+    rejectOffer
 };

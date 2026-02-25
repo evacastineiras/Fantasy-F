@@ -34,4 +34,14 @@ export class MarketService {
   {
     return this.http.post(`${this.apiUrl}/makeOffer`, data)
   }
+
+   acceptOffer(data:any)
+  {
+    return this.http.post(`${this.apiUrl}/acceptOffer`, data)
+  }
+
+   rejectOffer(data:any)
+  {
+    return this.http.post(`${this.apiUrl}/rejectOffer`, data)
+  }
 }
