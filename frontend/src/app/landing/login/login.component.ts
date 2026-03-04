@@ -35,8 +35,13 @@ export class LoginComponent {
       next: (res: any) => {
         console.log('Login correcto', res);
         localStorage.setItem('usuario', JSON.stringify(res.user));
-        console.log(res.user)
+        if(this.userService.getUsuario().id === 1)
+        {
+          this.router.navigate(['/master-panel']);
+        }else {
         this.router.navigate(['/home']);
+        }
+        
       },
       error: (err: any) => {
         console.error('Error en login', err)

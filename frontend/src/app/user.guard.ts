@@ -11,6 +11,7 @@ import { UserService } from './services/user.service';
 export class UserGuard implements CanActivate {
     constructor(private auth: AuthService, private router: Router, private userService: UserService) {}
 
+
     canActivate() : boolean
     {
         const usuario = this.userService.getUsuario();

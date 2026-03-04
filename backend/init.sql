@@ -696,7 +696,15 @@ JOIN rendimiento_jornada rj ON rj.id_jugadora = pj.id_jugadora
 GROUP BY u.id_liga, u.id_usuario, u.nombre_usuario;
 
 
+-- =====================
+-- INSERTAMOS UN SUPERUSUARIO cont. superadmin
+-- =====================
 
+SET @hash_master = '$2b$10$hGCbiRAkXWvJK2yGnqSr9uRDBASyiWuTcCbhxV2CVvzw/R9xgAosa';
+
+
+INSERT INTO usuario (id_usuario, id_liga, nombre_usuario, nombre, email, password_hash, foto_perfil_url) VALUES
+(1, null, 'Admin', 'admin' ,'admin', @hash_master, null);
 
 -- =====================
 -- DATOS DE PRUEBA 
