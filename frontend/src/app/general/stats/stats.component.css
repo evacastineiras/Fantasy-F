@@ -46,7 +46,28 @@
     color: #333; 
 }
 
+.stat-item-mini {
+    display: flex;
+    flex-direction: row; 
+    align-items: center;
+    min-width: 45px;
+}
 
+.stat-item-mini label {
+    font-size: 0.7rem;
+    color: #aaa;
+    margin-bottom: 2px;
+}
+
+.stat-item-mini span {
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.stat-item-mini.highlight span {
+    color: var(--primary-green);
+    font-size: 1.1rem;
+}
 .market-list {
   display: flex;
   flex-direction: column;
@@ -54,7 +75,7 @@
   max-width: 80vw; 
   margin: 20px auto;
   padding: 5vh 15px;
-  min-width: 45vw;
+  min-width: 50vw;
 }
 
 .player-row {
@@ -65,6 +86,20 @@
   padding: 8px 20px;
   color: white;
   min-height: 7vh;
+  justify-content: space-between;
+
+}
+
+.player-row:has(.stat-team-row) .section.right {
+    flex: 3; 
+    justify-content: flex-end;
+    width: 70%;
+}
+
+.stat-team-row {
+    display: flex;
+    gap: 25px; 
+    align-items: center;
 }
 
 .section {
@@ -73,14 +108,15 @@
 }
 
 .section.left {
-  flex: 1.5;
+  flex: 2;
   gap: 15px;
+  min-width: 250px;
 }
 
 .section.center {
   flex: 2;
   justify-content: center;
-  gap: 40px; 
+  gap: 30px; 
 }
 
 .section.right {
@@ -110,8 +146,9 @@
 }
 
 .team-shield {
-  width: 30px;
-  height: auto;
+  padding-top: 2px;
+ height: 43px;
+ width: auto;
 }
 
 .player-name {
@@ -144,3 +181,35 @@
 }
 .trend.up { color: #44ff00; }
 .trend.down { color: #ff4444; }
+
+.stat-cards {
+  display: flex;
+  gap: 15px;
+}
+.card {
+  width: 12px;
+  height: 18px;
+  display: inline-block;
+  border-radius: 2px;
+  margin-right: 5px;
+}
+.yellow { background-color: #ffeb3b; }
+.red { background-color: #f44336; }
+
+.stat-grid-mini {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  text-align: center;
+}
+.grid-item label {
+  display: block;
+  font-size: 0.7rem;
+  color: #aaa;
+}
+.grid-item span {
+  font-weight: bold;
+}
+.grid-item.highlight span {
+  color: #00ff88;
+}

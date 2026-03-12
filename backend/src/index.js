@@ -7,6 +7,7 @@ const authRoutes = require('./routes/auth');
 const joinLeagues = require('./routes/leagueJoin');
 const playerRoutes = require('./routes/playerRoutes'); 
 const statsRoutes = require ('./routes/statsRoutes');
+const masterRoutes = require('./routes/masterRoutes');
 
 
 const app = express();
@@ -22,6 +23,7 @@ app.use('/api/league', joinLeagues)
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/api/market', playerRoutes);
 app.use('/api/stats', statsRoutes);
+app.use('/api/master', masterRoutes);
 
 
 const PORT = process.env.PORT || 3000;

@@ -1,1 +1,85 @@
-<p>master-panel works!</p>
+<div class="admin-page-wrapper">
+  <div class="main-content-area">
+    
+    <header class="top-header">
+      <h1 class="page-title">Master Control Panel</h1>
+      
+      <div class="header-actions">
+        <button class="btn-logout" (click)="cerrarSesion()">Cerrar sesión</button>
+        
+        <div class="date-display">
+          <span>{{ estado.fechaVirtual | date:'fullDate' }}</span>
+        </div>
+      </div>
+    </header>
+
+    <section class="stats-container">
+      <div class="stat-card">
+        <span class="card-label">usuarios</span>
+        <span class="card-value">{{ estado.totalUsuarios }}</span>
+      </div>
+
+      <div class="stat-card">
+        <span class="card-label">ligas activas</span>
+        <span class="card-value">{{ estado.totalLigas }}</span>
+      </div>
+
+      <div class="stat-card">
+        <span class="card-label">jornada actual</span>
+        <span class="card-value highlight-green">{{ estado.jornadaActualNumero }}</span>
+      </div>
+
+      <div class="stat-card">
+        <span class="card-label">mercado</span>
+        <span class="card-value" [ngClass]="estado.mercadoAbierto ? 'highlight-green' : 'highlight-red'">
+          {{ estado.mercadoAbierto ? 'Abierto' : 'Cerrado' }}
+        </span>
+      </div>
+    </section>
+
+    <section class="actions-grid">
+      
+      <div class="action-block">
+        <h2 class="block-title">Simulador de tiempo</h2>
+        <p class="block-desc">
+          Avanza la fecha del sistema para simular el transcurso del tiempo en el juego.
+        </p>
+        <div class="block-footer align-right">
+          <button class="btn-primary" (click)="avanzarTiempo()">Avanzar 24h</button>
+        </div>
+      </div>
+
+      <div class="action-block">
+        <h2 class="block-title">Importar datos de FotMob</h2>
+        <p class="block-desc">
+          Sube el archivo JSON de la jornada para calcular el rendimiento y repartir puntos automáticamente a los usuarios.
+        </p>
+        
+        <div class="block-footer between">
+          <input type="file" id="jsonFile" (change)="onFileSelected($event)" hidden #fInput>
+          
+          <div class="file-selector-container">
+          <label for="jsonFile" class="btn-outline">
+            {{ archivoSeleccionado ? archivoSeleccionado.name : 'Seleccionar datos' }}
+          </label>
+
+          <span class="remove-file" *ngIf="archivoSeleccionado" (click)="cancelarSeleccion(fInput)">
+           &times;
+            </span>
+            </div>
+          <button class="btn-primary" 
+                  [disabled]="!archivoSeleccionado"
+                  [style.opacity]="archivoSeleccionado ? '1' : '0.4'"
+                  (click)="procesarPuntos()">
+            Ejecutar reparto
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <div class="alert-toast" *ngIf="mensaje" [ngClass]="tipoMensaje">
+      {{ mensaje }}
+    </div>
+
+  </div>
+</div>

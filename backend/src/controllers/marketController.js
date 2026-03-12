@@ -17,6 +17,7 @@ async function getMarketPlayers(req, res) {
         j.valor_base,
         pj.valor, 
         pj.id_entry,
+         ((pj.valor - j.valor_base) / j.valor_base * 100) AS tendencia,
         u.nombre AS nombre_usuario,
         p.id_usuario AS id_propietario, -- Añadimos la ID para la lógica de comparación
         (SELECT MAX(montante) 
