@@ -602,10 +602,12 @@ CREATE TABLE rendimiento_jornada (
   goles             SMALLINT UNSIGNED NOT NULL DEFAULT 0,
   asistencias       SMALLINT UNSIGNED NOT NULL DEFAULT 0,
   porterias_cero    SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+  goles_encajados SMALLINT UNSIGNED NOT NULL DEFAULT 0,
   amarillas         SMALLINT UNSIGNED NOT NULL DEFAULT 0,
   rojas             SMALLINT UNSIGNED NOT NULL DEFAULT 0,
   minutos_jugados   SMALLINT UNSIGNED NOT NULL DEFAULT 0,
   puntos            SMALLINT NOT NULL DEFAULT 0,
+  valoracion 		DECIMAL(3,1) NULL DEFAULT NULL,
   PRIMARY KEY (id_jugadora, id_jornada),
   CONSTRAINT fk_rj_jugadora FOREIGN KEY (id_jugadora) REFERENCES jugadora(id_jugadora)
     ON UPDATE CASCADE ON DELETE RESTRICT,
@@ -745,4 +747,4 @@ update plantilla_jugadora set id_plantilla = 1 where id_entry=4 and id_jugadora 
 update plantilla_jugadora set id_plantilla = 1 where id_entry=21 and id_jugadora = 701;
 
 
-update plantilla set n_jugadoras = 1, valor_equipo= 15000000 +  47500000  where id_plantilla = 1;
+update plantilla set n_jugadoras = 2, valor_equipo= 15000000 +  47500000  where id_plantilla = 1;

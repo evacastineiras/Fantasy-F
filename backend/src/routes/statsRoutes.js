@@ -10,5 +10,6 @@ router.get('/getPersonalFeed/:id_usuario', statsController.getPersonalFeed);
 router.get('/getUnreadCount/:id_usuario', statsController.getUnreadCount);
 router.post('/getPlayerInfo', statsController.getPlayerInfo);
 router.post('/markAsRead', statsController.markAsRead);
+router.post('/getPlayerValueHistory', statsController.getPlayerValueHistory);
 
 module.exports = router; 

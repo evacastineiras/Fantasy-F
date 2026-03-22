@@ -8,7 +8,9 @@
                 <img class="img-p" [src]="profileImagePreview" alt="Foto de perfil">
                 <ul class="dropdown-menu" [class.show]="dropdownOpen">
                     <li (click)="goToProfile()">Mi perfil</li>
-                    <li (click)="goToNotifications()">Notificaciones</li>
+                    <li (click)="goToNotifications()">Notificaciones
+                        <span *ngIf="unreadNotifications > 0" class="badge-number">{{ unreadNotifications }}</span>
+                    </li>
                     <li (click)="logout()">Salir</li>
                 </ul>
             </div>
@@ -83,10 +85,15 @@
                     
                     
                     <div *ngIf="activeTab === 'valor'" class="animate-fade">
-                        <div class="dummy-graph"></div>
+                        <div class="chart-wrapper">
+                            <canvas #valueChartCanvas></canvas>
+                        </div>
                     </div>
                      
-                    <div *ngIf="activeTab === 'rendimiento'" class="stats-grid animate-fade">
+                    <div *ngIf="activeTab === 'rendimiento'" class="animate-fade">
+
+                        <!-- Grid jugadoras de campo -->
+                        <div *ngIf="jugadora.posicion !== 'POR'" class="stats-grid animate-fade">
                             <div class="stat-group">
                                 <p class="par">Pierna buena</p>
                                 <h6 class="har">{{jugadora.pierna_buena}}</h6>
@@ -95,7 +102,6 @@
                                 <p class="par">Asistencias</p>
                                 <h6 class="har">{{jugadora?.asistencias_total}}</h6>
                             </div>
-                            
                             <div class="stat-group">
                                 <p class="par">Media puntos</p>
                                 <h6 class="har">{{ (jugadora?.media_puntos | number) ?? '0' }}</h6>
@@ -104,7 +110,6 @@
                                 <p class="par">Tarjetas (A/R)</p>
                                 <h6 class="har">{{jugadora?.total_tarjetas}} ({{jugadora?.amarillas_total}}/{{jugadora?.rojas_total}})</h6>
                             </div>
-
                             <div class="stat-group">
                                 <p class="par">Puntos últ. partido</p>
                                 <h6 class="har">{{ (jugadora?.puntos_ultima_jornada | number) ?? '0' }}</h6>
@@ -113,7 +118,6 @@
                                 <p class="par">Goles esperados</p>
                                 <h6 class="har">{{ (jugadora?.media_goles | number) ?? '0' }}</h6>
                             </div>
-
                             <div class="stat-group">
                                 <p class="par">Goles</p>
                                 <h6 class="har">{{jugadora?.goles_total}}</h6>
@@ -122,6 +126,44 @@
                                 <p class="par">Asist. esperadas</p>
                                 <h6 class="har">{{ (jugadora?.media_asistencias | number) ?? '0' }}</h6>
                             </div>
+                        </div>
+
+                        <!-- Grid porteras -->
+                        <div *ngIf="jugadora.posicion === 'POR'" class="stats-grid animate-fade">
+                            <div class="stat-group">
+                                <p class="par">Pierna buena</p>
+                                <h6 class="har">{{jugadora.pierna_buena}}</h6>
+                            </div>
+                            <div class="stat-group">
+                                <p class="par">Porterías a cero</p>
+                                <h6 class="har">{{jugadora?.porterias_cero ?? '0'}}</h6>
+                            </div>
+                            <div class="stat-group">
+                                <p class="par">Media puntos</p>
+                                <h6 class="har">{{ (jugadora?.media_puntos | number) ?? '0' }}</h6>
+                            </div>
+                            <div class="stat-group">
+                                <p class="par">Tarjetas (A/R)</p>
+                                <h6 class="har">{{jugadora?.total_tarjetas}} ({{jugadora?.amarillas_total}}/{{jugadora?.rojas_total}})</h6>
+                            </div>
+                            <div class="stat-group">
+                                <p class="par">Puntos últ. partido</p>
+                                <h6 class="har">{{ (jugadora?.puntos_ultima_jornada | number) ?? '0' }}</h6>
+                            </div>
+                            <div class="stat-group">
+                                <p class="par">P. cero esperadas</p>
+                                <h6 class="har">{{ (jugadora?.media_porterias_cero | number) ?? '0' }}</h6>
+                            </div>
+                            <div class="stat-group">
+                                <p class="par">Goles encajados</p>
+                                <h6 class="har">{{jugadora?.goles_encajados_total ?? '0'}}</h6>
+                            </div>
+                            <div class="stat-group">
+                                <p class="par">Goles enc. esperados</p>
+                                <h6 class="har">{{ (jugadora?.media_goles_encajados | number) ?? '0' }}</h6>
+                            </div>
+                        </div>
+
                     </div>    
                         <h4 class="valor-texto">{{ (jugadora?.valor | number) ?? '0' }}€</h4>
                     </div> 

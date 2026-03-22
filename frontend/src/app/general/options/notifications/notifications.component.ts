@@ -29,27 +29,26 @@ export class NotificationsComponent implements OnInit {
 
 
 
-  cargarNotificaciones() {
+cargarNotificaciones() {
     this.playerService.getPersonalFeed(this.id_usuario).subscribe({
-      next: (res: any) => {
-        this.notificaciones = res;
-        this.marcarComoLeidas();
-      }
+        next: (res: any) => {
+            this.notificaciones = res;
+            console.log(this.notificaciones)
+            this.marcarComoLeidas();
+        }
     });
-  }
+}
 
   marcarComoLeidas() {
     this.playerService.markAsRead({ id_usuario: this.id_usuario }).subscribe();
   }
 
   aceptarOferta(notif: any) {
-    if (notif.gestionada) return;
     const id_puja = notif.payload.id_puja;
     
     if (confirm(`¿Aceptar la oferta de ${notif.payload.montante.toLocaleString()}€?`)) {
-      this.marketService.acceptOffer({ id_puja }).subscribe({
+      this.marketService.acceptOffer({ id_puja , id_notificacion: notif.id_notificacion }).subscribe({
         next: () => {
-          notif.gestionada = true;
           alert('¡Venta realizada!');
           this.cargarNotificaciones(); 
         },
@@ -59,10 +58,9 @@ export class NotificationsComponent implements OnInit {
   }
 
   rechazarOferta(notif: any) {
-    if (notif.gestionada) return;
-    this.marketService.rejectOffer({ id_puja: notif.payload.id_puja }).subscribe({
+    this.marketService.rejectOffer({ id_puja: notif.payload.id_puja , id_notificacion: notif.id_notificacion}).subscribe({
       next: () => {
-        notif.gestionada = true;
+        console.log(notif)
         this.cargarNotificaciones();
       }
     });

@@ -6,7 +6,7 @@
 }
 
 .notificacion-card {
-  background-color: #3e3e3e; /* El gris oscuro de tu mockup */
+  background-color: var( --primary-grey); 
   border-radius: 8px;
   margin-bottom: 15px;
   padding: 20px;
@@ -14,7 +14,7 @@
   box-shadow: 0 4px 6px rgba(0,0,0,0.3);
 }
 
-/* Colores Neón */
+
 .highlight { color: #76ff03; font-weight: bold; }
 .highlight-player { color: #00e676; font-weight: bold; }
 .money { font-weight: bold; }
@@ -72,33 +72,58 @@
 
 /* Scoreboard */
 .layout-match {
-  text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 .match-label {
-  display: block;
-  text-align: left;
-  font-size: 0.9rem;
-  color: #ccc;
-  margin-bottom: 10px;
+    font-size: 0.8rem;
+    color: #aaa;
+    margin: 0;
 }
 
 .scoreboard {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 30px;
-  font-size: 3rem;
-  font-weight: bold;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 10px;
+    background-color: var(--primary-grey);
+}
+
+.team {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.team:last-child {
+    flex-direction: row-reverse;
+    text-align: right;
 }
 
 .team-logo {
-  width: 70px;
-  height: 70px;
-  object-fit: contain;
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    flex-shrink: 0;
 }
 
-/* Botón Ver Más */
+.team span {
+    font-size: 1rem;
+    font-weight: bold;
+    color: white;
+}
+
+.score {
+    font-size: 2rem;
+    font-weight: 900;
+    color: white;
+    text-align: center;
+    letter-spacing: 4px;
+    white-space: nowrap;
+}
+
 .ver-mas-wrapper {
   text-align: center;
   margin-top: 30px;
@@ -149,7 +174,7 @@
     align-items: center;
     justify-content: space-around;
     margin-top: 10px;
-    background: #f8f9fa;
+    background: var(--primary-grey);
     padding: 10px;
     border-radius: 8px;
 }

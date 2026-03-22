@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { PlayerService } from 'src/app/services/player.service';
 import { UserService } from 'src/app/services/user.service';
 import { AuthService } from 'src/app/services/auth.service';
+import { MasterService } from 'src/app/services/master.service';
 
 @Component({
   selector: 'app-home',
@@ -11,11 +12,13 @@ import { AuthService } from 'src/app/services/auth.service';
 export class HomeComponent implements OnInit {
   notificaciones: any[] = [];
   limite: number = 20;
+  fechaVirtual: Date = new Date();
 
   constructor(
     private playerService: PlayerService, 
     private userService: UserService, 
-    private authService: AuthService
+    private authService: AuthService, 
+    private masterService: MasterService
   ) { }
 
   ngOnInit(): void {
@@ -23,6 +26,7 @@ export class HomeComponent implements OnInit {
     if (usuario && usuario.id) {
       this.cargarFeed(usuario.id);
     }
+    this.masterService.cargarEstadoMercado().subscribe();
   }
 
   cargarFeed(id: number) {
@@ -61,5 +65,20 @@ export class HomeComponent implements OnInit {
 
   verMas() {
     this.limite += 10;
+  }
+
+  formatearFecha(fechaStr: string): string {
+      const fecha = new Date(fechaStr);
+      const virtual = new Date(this.masterService.fechaVirtual);
+
+      const mismaFecha = fecha.getDate() === virtual.getDate() &&
+                        fecha.getMonth() === virtual.getMonth() &&
+                        fecha.getFullYear() === virtual.getFullYear();
+
+      if (mismaFecha) {
+          return `a las ${fecha.getHours().toString().padStart(2, '0')}:${fecha.getMinutes().toString().padStart(2, '0')}`;
+      } else {
+          return fecha.toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' });
+      }
   }
 }

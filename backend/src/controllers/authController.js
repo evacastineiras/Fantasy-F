@@ -18,7 +18,6 @@ async function register (req, res)  {
       return res.status(400).json({ message: 'Faltan datos' });
     }
 
-    // Comprobar si email o username ya existe
     const [existing] = await pool.query(
       'SELECT id_usuario FROM usuario WHERE email = ? OR nombre_usuario = ?',
       [email, username]
@@ -72,13 +71,13 @@ const login = async (req, res) => {
     const presupuestoRow = presupuestos[0];
 
 
-    // Comparar contraseñas
+    // comp contraseñas
     const match = await bcrypt.compare(password, user.password_hash);
     if (!match) {
       return res.status(401).json({ message: 'Contraseña incorrecta' });
     }
 
-    // Login correcto
+   
     res.json({ message: 'Login correcto', user: { id: user.id_usuario, email: user.email, username: user.nombre_usuario, nombre: user.nombre, profileImage: user.foto_perfil_url , id_liga: user.id_liga, id_plantilla: plantillaRow ? plantillaRow.id_plantilla : null, 
         presupuesto: presupuestoRow ? presupuestoRow.presupuesto : null} });
   } catch (error) {
@@ -185,16 +184,7 @@ const deleteProfile = async(req, res) => {
         // borramos usuario y por cascada se borra plantilla
         await connection.query('DELETE FROM usuario WHERE id_usuario = ?', [id]);
 
-       /* // 4. Si todo ha ido bien en la DB, borramos el archivo de imagen del servidor
-        if (fotoPath && fotoPath.startsWith('/uploads/')) {
-            const fullPath = path.join(__dirname, '..', 'public', fotoPath);
-            try {
-                await fs.unlink(fullPath);
-            } catch (err) {
-                console.warn('No se pudo eliminar el archivo físico:', fullPath);
-            }
-        }
-            */
+     
 
         await connection.commit();
         res.json({ message: 'Perfil y datos asociados eliminados correctamente' });

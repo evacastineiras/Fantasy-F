@@ -470,3 +470,14 @@
 .modal-input {
     padding-right: 35px !important; 
 }
+
+.chart-wrapper {
+    width: 95%;
+    height: 220px;
+    margin-top: 10px;
+    margin-bottom: 5vh;
+    background-color: #1a1a1a;
+    border-radius: 8px;
+    padding: 15px;
+    border: 1px solid #2e2e2e;
+}

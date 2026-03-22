@@ -23,17 +23,22 @@
 
       <div class="section center" *ngIf="filtroSeleccionado !== 'equipo'">
         <div class="info-item">
-          <span class="value"><label class="stat-label" >Valor: </label> {{ jugadora.valor_actual | number:'1.0-0' }}€</span>
-          <span [ngClass]="jugadora.tendencia >= 0 ? 'trend up' : 'trend down'">
-             {{ jugadora.tendencia >= 0 ? '▲' : '▼' }}{{ jugadora.tendencia | number:'1.0-0' }}%
-          </span>
+            <span class="value">
+                <label class="stat-label">Valor: </label> 
+                {{ jugadora.valor_actual | number:'1.0-0' }}€
+            </span>
+            <span *ngIf="getTendencia(jugadora) as tendencia"
+                  [ngClass]="tendencia.sube ? 'trend up' : 'trend down'">
+                {{ tendencia.sube ? '▲' : '▼' }} {{ tendencia.valor }}%
+            </span>
         </div>
         <div class="info-item">
-          <span class="owner-status" [ngClass]="{'has-owner': jugadora.propietario}">
-            <label class="stat-label">Propietario: </label> {{ jugadora.propietario ? jugadora.propietario : 'libre' }}
-          </span>
+            <span class="owner-status" [ngClass]="{'has-owner': jugadora.propietario}">
+                <label class="stat-label">Propietario: </label> 
+                {{ jugadora.propietario ? jugadora.propietario : 'libre' }}
+            </span>
         </div>
-      </div>
+    </div>
 
       <div class="section right">
         
@@ -43,7 +48,7 @@
         </div>
 
         <div *ngIf="filtroSeleccionado === 'porteria'" class="stat-porteria">
-          <div class="sub-stat"><span><label class="stat-label">G.Encajados: </label> {{ jugadora.goles_encajados }}</span></div>
+          <div class="sub-stat"><span><label class="stat-label">G.Encajados: </label> {{ jugadora.goles_encajados_total }}</span></div>
           <div class="divider"></div>
           <div class="sub-stat"><span><label class="stat-label">Porterías a 0: </label>{{ jugadora.porterias_cero }}</span></div>
         </div>
@@ -54,11 +59,17 @@
         </div>
 
         <div *ngIf="filtroSeleccionado === 'equipo'" class="stat-team-row">
-        <div class="stat-item-mini"><label>PJ: </label><span>{{ jugadora.partidos_jugados }}</span></div>
-        <div class="stat-item-mini"><label>Goles: </label><span>{{ jugadora.goles }}</span></div>
-        <div class="stat-item-mini"><label>Asist: </label><span>{{ jugadora.asistencias }}</span></div>
-        <div class="stat-item-mini"><label>VM:   </label><span>{{ jugadora.valoracion_media }}</span></div>
-        <div class="stat-item-mini highlight"><label>PM: </label><span>{{ jugadora.puntos_media }}</span></div>
+            <div class="stat-item-mini"><label>PJ: </label><span>{{ jugadora.partidos_jugados }}</span></div>
+            <div class="stat-item-mini"><label>Goles: </label><span>{{ jugadora.goles }}</span></div>
+            <div class="stat-item-mini"><label>Asistencias: </label><span>{{ jugadora.asistencias }}</span></div>
+            <div class="stat-item-mini">
+              <span class="card yellow"></span><span>: {{ jugadora.amarillas }}</span>
+            </div>
+            <div class="stat-item-mini">
+              <span class="card red"></span><span>: {{ jugadora.rojas }}</span>
+            </div>
+            <div class="stat-item-mini"><label>V.M: </label><span>{{ jugadora.valoracion_media }}</span></div>
+            <div class="stat-item-mini highlight"><label>P.M: </label><span>{{ jugadora.puntos_media }}</span></div>
       </div>
 
       </div>

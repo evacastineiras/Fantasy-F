@@ -90,18 +90,40 @@
 
 }
 
+.player-row:has(.stat-team-row) .section.center {
+  display: none;
+}
+
 .player-row:has(.stat-team-row) .section.right {
     flex: 3; 
     justify-content: flex-end;
     width: 70%;
+    gap: 20px;
 }
 
+.stat-porteria {
+  gap: 20px;
+}
 .stat-team-row {
     display: flex;
     gap: 25px; 
     align-items: center;
+    flex-wrap: nowrap;
 }
 
+.stat-item-mini label {
+  font-size: 0.75rem;
+  margin-right: 0.25vw;
+}
+.stat-item-mini span {
+  font-weight: bold;
+  font-size: 0.95rem;
+}
+
+.stat-item-mini.highlight span {
+  color: var(--primary-green);
+  font-size: 1rem;
+}
 .section {
   display: flex;
   align-items: center;

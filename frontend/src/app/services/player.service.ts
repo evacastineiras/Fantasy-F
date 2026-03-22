@@ -37,4 +37,9 @@ export class PlayerService {
   {
     return this.http.post(`${this.baseUrl}/getPlayerInfo`, data);
   }
+
+  getPlayerValueHistory(data:any)
+  {
+    return this.http.post(`${this.baseUrl}/getPlayerValueHistory`, data);
+  }
 }

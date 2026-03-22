@@ -70,8 +70,8 @@
           <button class="btn-primary" 
                   [disabled]="!archivoSeleccionado"
                   [style.opacity]="archivoSeleccionado ? '1' : '0.4'"
-                  (click)="procesarPuntos()">
-            Ejecutar reparto
+                  (click)="procesarPuntos()"  [disabled]="cargando">
+             {{ cargando ? 'Procesando...' : 'Importar jornada' }}
           </button>
         </div>
       </div>

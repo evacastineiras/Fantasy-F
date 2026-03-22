@@ -140,3 +140,8 @@ strong {
 .btn-ver-mas:hover {
     background-color: #666;
 }
+
+.notif-card.expirada {
+    border-left: 5px solid #888;
+    opacity: 0.7;
+}

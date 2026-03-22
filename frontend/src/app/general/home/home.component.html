@@ -7,7 +7,7 @@
         <img [src]="n.data.avatar || 'assets/default-user.png'" class="avatar-circle">
         <div class="info">
           <p><span class="highlight">{{n.data.usuario}}</span> se ha unido a la liga</p>
-          <span class="timestamp">a las {{ n.creada_en | date:'HH:mm' }}</span>
+          <span class="timestamp">{{ formatearFecha(n.creada_en) }}</span>
         </div>
       </div>
 
@@ -15,7 +15,7 @@
         <img [src]="n.data.avatar || 'assets/default-user.png'" class="avatar-circle grayscale">
         <div class="info">
           <p><span class="highlight-exit">{{n.data.usuario}}</span> ha abandonado la liga</p>
-          <span class="timestamp">a las {{ n.creada_en | date:'HH:mm' }}</span>
+          <span class="timestamp">{{ formatearFecha(n.creada_en) }}</span>
         </div>
       </div>
 
@@ -32,7 +32,7 @@
             <span *ngIf="n.tipo === 'clausulazo'" class="badge-clausulazo">CLAUSULAZO</span>
             {{ n.data.mensaje }}
           </p>
-          <span class="timestamp">a las {{ n.creada_en | date:'HH:mm' }}</span>
+          <span class="timestamp">{{ formatearFecha(n.creada_en) }}</span>
         </div>
       </div>
 
@@ -49,16 +49,28 @@
             <span>{{n.data.nombreVisitante}}</span>
           </div>
         </div>
-        <span class="timestamp">a las {{ n.creada_en | date:'HH:mm' }}</span>
+        <span class="timestamp">{{ formatearFecha(n.creada_en) }}</span>
+      </div>
+
+      <div *ngSwitchCase="'inicio_traspasos'" class="layout-simple">
+          <div class="info info-sistema">
+              <p>🟢 {{ n.data.mensaje }}</p>
+              <span class="timestamp">{{ formatearFecha(n.creada_en) }}</span>
+          </div>
+      </div>
+
+      <div *ngSwitchCase="'fin_traspasos'" class="layout-simple">
+          <div class="info info-sistema">
+              <p>🔴 {{ n.data.mensaje }}</p>
+              <span class="timestamp">{{ formatearFecha(n.creada_en) }}</span>
+          </div>
       </div>
 
       <div *ngSwitchDefault class="layout-simple">
-        <div class="info info-sistema">
-          <p>
-            <i class="icon-info"></i> {{ n.data.mensaje }}
-          </p>
-          <span class="timestamp">a las {{ n.creada_en | date:'HH:mm' }}</span>
-        </div>
+          <div class="info info-sistema">
+              <p><i class="icon-info"></i> {{ n.data.mensaje }}</p>
+              <span class="timestamp">{{ formatearFecha(n.creada_en) }}</span>
+          </div>
       </div>
 
     </div>

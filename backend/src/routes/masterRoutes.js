@@ -6,6 +6,9 @@ const masterController = require('../controllers/masterController');
 router.get('/getInitialData/:id_usuario', masterController.getInitialData);
 router.get('/getVirtualDate', masterController.getVirtualDate);
 router.post('/nextDay', masterController.nextDay);
+router.post('/importarJornada',        masterController.upload.single('file'), masterController.importarJornada);
+router.post('/calcularPuntos/:numero', masterController.calcularPuntosJornada);
+router.get('/mercado-estado', masterController.getMercadoEstado);
 
 module.exports = router; 
 

@@ -21,7 +21,6 @@ export class StatsComponent implements OnInit {
 
   cambiarFiltro(nuevoFiltro: string) {
     this.filtroSeleccionado = nuevoFiltro;
-    let criterioBack = '';
 if (nuevoFiltro === 'equipo') {
       this.playerService.getMyTeamStats(this.id_usuario).subscribe({
         next: (data: any) => this.jugadoras = data,
@@ -41,4 +40,13 @@ if (nuevoFiltro === 'equipo') {
       });
     }
   }
+
+  getTendencia(jugadora: any) {
+    const valor = jugadora.valor_actual ?? jugadora.valor;
+    const base = jugadora.valor_base;
+    if (!base || valor === base) return null;
+    const diferencia = valor - base;
+    const porcentaje = (diferencia / base) * 100;
+    return { valor: Math.abs(porcentaje).toFixed(0), sube: diferencia > 0 };
+}
 }

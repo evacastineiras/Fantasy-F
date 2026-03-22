@@ -1,4 +1,4 @@
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, HostListener } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common'; //funcion de angular que funciona como un paso atrás. Mantiene filters y scroll.
 import { UserService } from '../services/user.service';
@@ -6,6 +6,7 @@ import { AuthService } from '../services/auth.service';
 import { MarketService } from '../services/market.service';
 import { PlayerService } from '../services/player.service';
 import { Router } from '@angular/router';
+import { Chart } from 'chart.js/auto';
 
 @Component({
   selector: 'app-player-detail',
@@ -27,8 +28,15 @@ export class PlayerDetailComponent implements OnInit {
   showModalPagar: boolean = false;
   showModalOfrecer: boolean = false;
   ofertaRealizada: number = 0;
+  valueChart: Chart | null = null;
+  @ViewChild('valueChartCanvas') valueChartCanvas!: ElementRef<HTMLCanvasElement>;
+  unreadNotifications = 0;
 
   constructor( private route: ActivatedRoute, private location: Location, private UserService: UserService, private AuthService: AuthService, private router: Router, private playerService: PlayerService, private marketService: MarketService) { }
+
+  ngOnDestroy() {
+    if (this.valueChart) this.valueChart.destroy();
+}
 
   ngOnInit(): void {
     this.id = this.route.snapshot.paramMap.get('id');
@@ -42,12 +50,18 @@ export class PlayerDetailComponent implements OnInit {
       next: (res:any) => {
          this.jugadora = res.player;
          this.jugadora.total_tarjetas = (this.jugadora.amarillas_total || 0) + (this.jugadora.rojas_total || 0);
-         console.log(this.jugadora);
+          setTimeout(() => this.cargarGraficoValor(), 0);
       },
       error: (error:any) => {
         console.error('Error al recibir informacion', error);
       }
     });
+
+    this.playerService.getUnreadCount(this.UserService.getUsuario().id).subscribe({
+    next: (res: any) => {
+      this.unreadNotifications = res.unreadCount;
+    }
+  });
   }
 
   abrirOfrecer() {
@@ -190,6 +204,9 @@ confirmarNuevaClausula() {
   selectTab(tab: string)
   {
     this.activeTab = tab;
+     if (tab === 'valor') {
+        setTimeout(() => this.cargarGraficoValor(), 0);
+    }
   }
 
   volver() {
@@ -215,7 +232,7 @@ goToProfile() {
 }
 
 goToNotifications() {
-  // Navegar a notificaciones
+  this.router.navigate(['/notifications']);
 }
 
 goHome()
@@ -233,6 +250,83 @@ pujar()
   
 }
 
+cargarGraficoValor() {
+    const body = { id_jugadora: this.id, id_usuario: this.idUsuarioLogueado };
 
+    this.playerService.getPlayerValueHistory(body).subscribe({
+        next: (res: any) => {
+            // Actualizar el valor mostrado debajo del gráfico
+            this.jugadora.valor = this.redondearValor(res.valorActual);
+
+            const labels = res.historial.map((p: any) =>
+                p.jornada === 0 ? 'Inicio' : `J${p.jornada}`
+            );
+            const valores = res.historial.map((p: any) => p.valor);
+
+            if (this.valueChart) {
+                this.valueChart.destroy();
+            }
+
+            const ctx = this.valueChartCanvas.nativeElement.getContext('2d');
+            if (!ctx) return;
+
+            this.valueChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Valor de mercado',
+                        data: valores,
+                        borderColor: '#b46ee6',
+                        backgroundColor: 'rgba(188, 30, 255, 0.08)',
+                        pointBackgroundColor: '#b46ee6',
+                        pointBorderColor: '#1a1a1a',
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.35,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx: any) => ` ${ctx.parsed.y.toLocaleString('es-ES')}€`
+                            },
+                            backgroundColor: '#1e1e1e',
+                            titleColor: '#aaa',
+                            bodyColor: '#b46ee6',
+                            borderColor: '#333',
+                            borderWidth: 1,
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: '#888' },
+                            grid: { color: '#2a2a2a' }
+                        },
+                        y: {
+                            ticks: {
+                                color: '#888',
+                                callback: (v) => `${Number(v).toLocaleString('es-ES')}€`
+                            },
+                            grid: { color: '#2a2a2a' }
+                        }
+                    }
+                }
+            });
+        },
+        error: (err) => console.error('Error al cargar historial de valor:', err)
+    });
+}
+
+redondearValor(valor: number): number {
+    if (valor >= 1000000)  return Math.round(valor / 10000) * 10000;   // ≥1M  → redondeo a 10.000
+    return Math.round(valor / 1000) * 1000;                             // resto → redondeo a 1.000
+}
 
 }

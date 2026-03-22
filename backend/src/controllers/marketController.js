@@ -1,4 +1,45 @@
 const pool = require('../db');
+const fs = require('fs');
+const path = require('path');
+
+const pathFecha = path.join(__dirname, '../data/config_liga.json');
+
+const getVirtualDate = () => {
+    if (!fs.existsSync(pathFecha)) {
+        return new Date('2024-09-15');
+    }
+    const data = JSON.parse(fs.readFileSync(pathFecha));
+    return new Date(data.fecha);
+};
+
+const getFechaVirtualConHoraReal = () => {
+    const virtual = getVirtualDate();
+    const ahora = new Date();
+    virtual.setHours(ahora.getHours(), ahora.getMinutes(), ahora.getSeconds());
+    return virtual.toISOString().slice(0, 19).replace('T', ' ');
+};
+
+const calcularMercadoAbierto = async () => {
+    const hoy = getVirtualDate().toISOString().split('T')[0];
+
+    const [partidosHoy] = await pool.query(
+        `SELECT COUNT(*) as total FROM partido WHERE DATE(fecha) = ?`, [hoy]
+    );
+    if (partidosHoy[0].total > 0) return false;
+
+    const [[ultimoPartido]] = await pool.query(
+        `SELECT MAX(DATE(fecha)) as ultima_fecha FROM partido WHERE DATE(fecha) <= ?`, [hoy]
+    );
+    if (!ultimoPartido?.ultima_fecha) return false;
+
+    const apertura = new Date(ultimoPartido.ultima_fecha);
+    apertura.setDate(apertura.getDate() + 1);
+    const cierre = new Date(apertura);
+    cierre.setDate(cierre.getDate() + 3);
+
+    const fechaHoy = new Date(hoy);
+    return fechaHoy >= apertura && fechaHoy < cierre;
+};
 
 async function getMarketPlayers(req, res) {
     try {
@@ -8,30 +49,24 @@ async function getMarketPlayers(req, res) {
             return res.status(400).json({ message: 'No se encuentra el ID del usuario' });
 
         const [players] = await pool.query(`
-    SELECT 
-        j.id_jugadora, 
-        j.apodo, 
-        j.posicion, 
-        j.imagen AS foto, 
-        c.escudo_url AS club_escudo,
-        j.valor_base,
-        pj.valor, 
-        pj.id_entry,
-         ((pj.valor - j.valor_base) / j.valor_base * 100) AS tendencia,
-        u.nombre AS nombre_usuario,
-        p.id_usuario AS id_propietario, -- Añadimos la ID para la lógica de comparación
-        (SELECT MAX(montante) 
-         FROM puja 
-         WHERE id_entry = pj.id_entry 
-         AND estado = 'pendiente') AS ultima_puja
-    FROM plantilla_jugadora pj 
-    JOIN jugadora j ON pj.id_jugadora = j.id_jugadora 
-    JOIN club c ON j.id_club = c.id_club 
-    LEFT JOIN plantilla p ON pj.id_plantilla = p.id_plantilla
-    LEFT JOIN usuario u ON p.id_usuario = u.id_usuario
-    WHERE pj.id_liga = (SELECT id_liga FROM usuario WHERE id_usuario = ?) 
-    ORDER BY pj.valor DESC;
-`, [id_usuario]);
+            SELECT 
+                j.id_jugadora, j.apodo, j.posicion, 
+                j.imagen AS foto, c.escudo_url AS club_escudo,
+                j.valor_base, pj.valor, pj.id_entry,
+                u.nombre AS nombre_usuario,
+                p.id_usuario AS id_propietario,
+                (SELECT MAX(montante) 
+                 FROM puja 
+                 WHERE id_entry = pj.id_entry 
+                 AND estado = 'pendiente') AS ultima_puja
+            FROM plantilla_jugadora pj 
+            JOIN jugadora j ON pj.id_jugadora = j.id_jugadora 
+            JOIN club c ON j.id_club = c.id_club 
+            LEFT JOIN plantilla p ON pj.id_plantilla = p.id_plantilla
+            LEFT JOIN usuario u ON p.id_usuario = u.id_usuario
+            WHERE pj.id_liga = (SELECT id_liga FROM usuario WHERE id_usuario = ?) 
+            ORDER BY pj.valor DESC;
+        `, [id_usuario]);
 
         res.status(200).json(players);
     } catch (error) {
@@ -46,12 +81,15 @@ async function marketSell(req, res) {
     if (!id_usuario || !id_jugadora || !id_liga)
         return res.status(400).json({ message: "No se encuentran todos los datos" });
 
+    const mercadoAbierto = await calcularMercadoAbierto();
+    if (!mercadoAbierto)
+        return res.status(403).json({ message: 'El mercado está cerrado. No se pueden realizar ventas.' });
+
     let connection;
     try {
         connection = await pool.getConnection();
         await connection.beginTransaction();
 
-     
         const [rows] = await connection.query(
             'SELECT id_plantilla, valor FROM plantilla_jugadora WHERE id_jugadora = ? AND id_liga = ?', 
             [id_jugadora, id_liga]
@@ -64,7 +102,6 @@ async function marketSell(req, res) {
 
         const { id_plantilla, valor } = rows[0];
 
-    
         const [[plantillaUser]] = await connection.query(
             'SELECT id_plantilla FROM plantilla WHERE id_usuario = ? AND id_liga = ?',
             [id_usuario, id_liga]
@@ -75,15 +112,13 @@ async function marketSell(req, res) {
             return res.status(403).json({ message: 'No eres el propietario de esta jugadora' });
         }
 
-        
         await connection.query(
             'UPDATE plantilla_jugadora SET id_plantilla = NULL, clausula = 0, es_titular_default = 0 WHERE id_jugadora = ? AND id_liga = ?',
             [id_jugadora, id_liga]
         );
 
-        
         await connection.query(
-            'UPDATE plantilla SET presupuesto = presupuesto + ?, n_jugadoras = n_jugadoras - 1 , valor_equipo = valor_equipo - ? WHERE id_usuario = ? AND id_liga = ?',
+            'UPDATE plantilla SET presupuesto = presupuesto + ?, n_jugadoras = n_jugadoras - 1, valor_equipo = valor_equipo - ? WHERE id_usuario = ? AND id_liga = ?',
             [valor, valor, id_usuario, id_liga]
         );
 
@@ -99,57 +134,47 @@ async function marketSell(req, res) {
     }
 }
 
+async function modifyClause(req, res) {
+    const { id_usuario, id_jugadora, nueva_clausula } = req.body;
 
-async function modifyClause(req, res)
-{
-    //necesito id del usuario, id de la jugadora.
+    if (!id_usuario)
+        return res.status(400).json({ message: 'No se encuentra el ID del usuario' });
+    if (!id_jugadora)
+        return res.status(400).json({ message: 'No se encuentra el ID de la jugadora' });
+    if (!nueva_clausula)
+        return res.status(400).json({ message: 'No se encuentra la nueva clausula' });
 
-    const {id_usuario, id_jugadora, nueva_clausula} = req.body;
-    
-        if (!id_usuario)
-            return res.status(400).json({ message: 'No se encuentra el ID del usuario' });
-        
-        if (!id_jugadora)
-            return res.status(400).json({ message: 'No se encuentra el ID de la jugadora' });
+    const mercadoAbierto = await calcularMercadoAbierto();
+    if (!mercadoAbierto)
+        return res.status(403).json({ message: 'El mercado está cerrado. No se pueden modificar cláusulas.' });
 
-         if (!nueva_clausula)
-            return res.status(400).json({ message: 'No se encuentra la nueva clausula' });
+    const [users] = await pool.query('SELECT id_usuario FROM usuario WHERE id_usuario = ?', [id_usuario]);
+    if (users.length < 1)
+        return res.status(400).json({ message: 'El usuario no existe en la BD' });
 
-        const [users] = await pool.query('SELECT id_usuario FROM usuario WHERE id_usuario = ? ', [id_usuario]);
+    const [players] = await pool.query('SELECT id_jugadora FROM jugadora WHERE id_jugadora = ?', [id_jugadora]);
+    if (players.length < 1)
+        return res.status(400).json({ message: 'La jugadora no existe en la BD' });
 
-        if(users.length < 1)
-            return res.status(400).json({message: 'El usuario no existe en la BD'});
-
-        const [players] = await pool.query('SELECT id_jugadora FROM jugadora WHERE id_jugadora = ? ', [id_jugadora]);
-
-        if(players.length < 1)
-            return res.status(400).json({message: 'La jugadora no existe en la BD'});
-
-        try {
-        
+    try {
         const [rows] = await pool.query(`
-            SELECT  pj.valor 
+            SELECT pj.valor 
             FROM plantilla_jugadora pj
             JOIN plantilla p ON pj.id_plantilla = p.id_plantilla
             WHERE pj.id_jugadora = ? AND p.id_usuario = ?
         `, [id_jugadora, id_usuario]);
 
-        if (rows.length === 0) {
+        if (rows.length === 0)
             return res.status(403).json({ message: 'No eres el propietario de esta jugadora' });
-        }
 
-        const  valor  = rows[0];
-
-       //tope del 40% sobre el valor
+        const valor = rows[0].valor;
         const limiteMaximo = valor * 1.40;
 
-        if (nueva_clausula > limiteMaximo) {
+        if (nueva_clausula > limiteMaximo)
             return res.status(400).json({ 
                 message: `La nueva cláusula no puede superar el 40% del valor de mercado (${limiteMaximo}€)` 
             });
-        }
 
-       
         await pool.query(`
             UPDATE plantilla_jugadora pj
             JOIN plantilla p ON pj.id_plantilla = p.id_plantilla
@@ -160,7 +185,6 @@ async function modifyClause(req, res)
         return res.status(200).json({
             message: 'Cláusula actualizada correctamente',
             nueva_clausula,
-            nueva_clausula: nueva_clausula,
             limite_permitido: limiteMaximo
         });
 
@@ -173,37 +197,61 @@ async function modifyClause(req, res)
 async function payClause(req, res) {
     const { id_usuario, id_jugadora, id_clausula, id_propietario, id_entry } = req.body;
 
+    const mercadoAbierto = await calcularMercadoAbierto();
+    if (!mercadoAbierto)
+        return res.status(403).json({ message: 'El mercado está cerrado. No se pueden pagar cláusulas.' });
+
+    const fechaNotif = getFechaVirtualConHoraReal();
+
     let connection;
     try {
         connection = await pool.getConnection();
         await connection.beginTransaction();
 
-        
-        const [pjData] = await connection.query('SELECT id_liga, valor FROM plantilla_jugadora WHERE id_entry = ?', [id_entry]);
+        const [pjData] = await connection.query(
+            'SELECT id_liga, valor FROM plantilla_jugadora WHERE id_entry = ?', [id_entry]
+        );
         const { id_liga, valor: valorActual } = pjData[0];
-        const [[pComprador]] = await connection.query('SELECT id_plantilla, presupuesto FROM plantilla WHERE id_usuario = ?', [id_usuario]);
-        const [[pVendedor]] = await connection.query('SELECT id_plantilla, presupuesto FROM plantilla WHERE id_usuario = ?', [id_propietario]);
+
+        const [[pComprador]] = await connection.query(
+            'SELECT id_plantilla, presupuesto FROM plantilla WHERE id_usuario = ?', [id_usuario]
+        );
+        const [[pVendedor]] = await connection.query(
+            'SELECT id_plantilla, presupuesto FROM plantilla WHERE id_usuario = ?', [id_propietario]
+        );
 
         if (pComprador.presupuesto < id_clausula) {
             await connection.rollback();
             return res.status(400).json({ message: 'Presupuesto insuficiente' });
         }
 
-       
-        await connection.query('UPDATE plantilla SET presupuesto = presupuesto - ?, n_jugadoras=n_jugadoras+1, valor_equipo = valor_equipo + ? WHERE id_plantilla = ?', [id_clausula, id_clausula, pComprador.id_plantilla]);
-        await connection.query('UPDATE plantilla SET presupuesto = presupuesto + ?, n_jugadoras=n_jugadoras-1, valor_equipo = valor_equipo - ? WHERE id_plantilla = ?', [id_clausula, id_clausula, pVendedor.id_plantilla]);
+        await connection.query(
+            'UPDATE plantilla SET presupuesto = presupuesto - ?, n_jugadoras = n_jugadoras + 1, valor_equipo = valor_equipo + ? WHERE id_plantilla = ?', 
+            [id_clausula, valorActual, pComprador.id_plantilla]
+        );
+        await connection.query(
+            'UPDATE plantilla SET presupuesto = presupuesto + ?, n_jugadoras = n_jugadoras - 1, valor_equipo = valor_equipo - ? WHERE id_plantilla = ?', 
+            [id_clausula, valorActual, pVendedor.id_plantilla]
+        );
         await connection.query(
             'UPDATE plantilla_jugadora SET id_plantilla = ?, clausula = ?, es_titular_default = 0 WHERE id_entry = ?',
             [pComprador.id_plantilla, valorActual, id_entry]
         );
 
-        const [[uComp]] = await connection.query('SELECT nombre_usuario, foto_perfil_url FROM usuario WHERE id_usuario = ?', [id_usuario]);
-        const [[uVend]] = await connection.query('SELECT nombre_usuario, foto_perfil_url FROM usuario WHERE id_usuario = ?', [id_propietario]);
-        const [[jugadora]] = await connection.query('SELECT apodo, imagen FROM jugadora WHERE id_jugadora = ?', [id_jugadora]);
+        const [[uComp]] = await connection.query(
+            'SELECT nombre_usuario, foto_perfil_url FROM usuario WHERE id_usuario = ?', [id_usuario]
+        );
+        const [[uVend]] = await connection.query(
+            'SELECT nombre_usuario, foto_perfil_url FROM usuario WHERE id_usuario = ?', [id_propietario]
+        );
+        const [[jugadora]] = await connection.query(
+            'SELECT apodo, imagen FROM jugadora WHERE id_jugadora = ?', [id_jugadora]
+        );
 
-        //notificacion global
-        const [usuariosLiga] = await connection.query('SELECT id_usuario FROM usuario WHERE id_liga = ?', [id_liga]);
-        
+        const [usuariosLiga] = await connection.query(
+            'SELECT id_usuario FROM usuario WHERE id_liga = ?', [id_liga]
+        );
+
         const payloadGlobal = JSON.stringify({
             vendedor: uVend.nombre_usuario,
             avatarVendedor: uVend.foto_perfil_url,
@@ -215,63 +263,73 @@ async function payClause(req, res) {
             mensaje: `${uComp.nombre_usuario} ha pagado la cláusula de ${jugadora.apodo} por ${id_clausula.toLocaleString()}€`
         });
 
-        const queriesGlobales = usuariosLiga.map(u => {
-            return connection.query(
-                'INSERT INTO notificacion (id_usuario, tipo, payload) VALUES (?, "clausulazo", ?)',
-                [u.id_usuario, payloadGlobal]
-            );
-        });
+        const queriesGlobales = usuariosLiga.map(u =>
+            connection.query(
+                'INSERT INTO notificacion (id_usuario, tipo, payload, creada_en) VALUES (?, "clausulazo", ?, ?)',
+                [u.id_usuario, payloadGlobal, fechaNotif]
+            )
+        );
 
-        // notificacion vendedor
         const payloadVendedor = JSON.stringify({
             titulo: '¡Has perdido una jugadora!',
             mensaje: `${uComp.nombre_usuario} ha pagado la cláusula de ${jugadora.apodo}. Has recibido ${id_clausula.toLocaleString()}€.`,
-            id_jugadora: id_jugadora
+            id_jugadora
         });
 
-        // notificacion comprador
         const payloadComprador = JSON.stringify({
             titulo: '¡Fichaje completado!',
             mensaje: `Has pagado la cláusula de ${jugadora.apodo} por ${id_clausula.toLocaleString()}€.`,
-            id_jugadora: id_jugadora
+            id_jugadora
         });
 
         const queriesPersonales = [
-            connection.query('INSERT INTO notificacion (id_usuario, tipo, payload) VALUES (?, "clausulazo_priv", ?)', [id_propietario, payloadVendedor]),
-            connection.query('INSERT INTO notificacion (id_usuario, tipo, payload) VALUES (?, "clausulazo_priv", ?)', [id_usuario, payloadComprador])
+            connection.query(
+                'INSERT INTO notificacion (id_usuario, tipo, payload, creada_en) VALUES (?, "clausulazo_priv", ?, ?)', 
+                [id_propietario, payloadVendedor, fechaNotif]
+            ),
+            connection.query(
+                'INSERT INTO notificacion (id_usuario, tipo, payload, creada_en) VALUES (?, "clausulazo_priv", ?, ?)', 
+                [id_usuario, payloadComprador, fechaNotif]
+            )
         ];
 
         await Promise.all([...queriesGlobales, ...queriesPersonales]);
 
-        await limpiarNotificacionesAntiguas(id_usuario, connection); 
-        await limpiarNotificacionesAntiguas(id_propietario, connection); 
+        await limpiarNotificacionesAntiguas(id_usuario, connection);
+        await limpiarNotificacionesAntiguas(id_propietario, connection);
         for (const u of usuariosLiga) {
-            await limpiarNotificacionesAntiguas(u.id_usuario, connection); 
-}
+            await limpiarNotificacionesAntiguas(u.id_usuario, connection);
+        }
 
         await connection.commit();
         res.status(200).json({ message: 'Operación completada' });
 
     } catch (error) {
         if (connection) await connection.rollback();
+        console.error('Error detallado en payClause:', error);
         res.status(500).json({ message: 'Error en la transacción' });
     } finally {
         if (connection) connection.release();
     }
 }
+
 async function makeOffer(req, res) {
     const { id_comprador, id_vendedor, id_jugadora, id_liga, montante } = req.body;
 
-    if (!id_comprador || !id_jugadora || !id_liga || !montante || !id_vendedor) {
+    if (!id_comprador || !id_jugadora || !id_liga || !montante || !id_vendedor)
         return res.status(400).json({ message: "Faltan datos obligatorios" });
-    }
+
+    const mercadoAbierto = await calcularMercadoAbierto();
+    if (!mercadoAbierto)
+        return res.status(403).json({ message: 'El mercado está cerrado. No se pueden realizar ofertas.' });
+
+    const fechaNotif = getFechaVirtualConHoraReal();
 
     let connection;
     try {
         connection = await pool.getConnection();
         await connection.beginTransaction();
 
-        
         const [[entryData]] = await connection.query(
             'SELECT id_entry FROM plantilla_jugadora WHERE id_jugadora = ? AND id_liga = ?',
             [id_jugadora, id_liga]
@@ -283,7 +341,6 @@ async function makeOffer(req, res) {
         }
         const id_entry = entryData.id_entry;
 
-       
         const [[comprador]] = await connection.query(
             'SELECT presupuesto FROM plantilla WHERE id_usuario = ? AND id_liga = ?',
             [id_comprador, id_liga]
@@ -294,7 +351,6 @@ async function makeOffer(req, res) {
             return res.status(400).json({ message: "No tienes suficiente presupuesto" });
         }
 
-        
         const [[pujaExistente]] = await connection.query(
             'SELECT id_puja FROM puja WHERE id_comprador = ? AND id_entry = ? AND estado = "pendiente"',
             [id_comprador, id_entry]
@@ -303,49 +359,47 @@ async function makeOffer(req, res) {
         let id_puja_final;
         if (pujaExistente) {
             await connection.query(
-                'UPDATE puja SET montante = ?, creada_en = CURRENT_TIMESTAMP WHERE id_puja = ?',
-                [montante, pujaExistente.id_puja]
+                'UPDATE puja SET montante = ?, creada_en = ? WHERE id_puja = ?',
+                [montante, fechaNotif, pujaExistente.id_puja]
             );
             id_puja_final = pujaExistente.id_puja;
         } else {
             const [insertResult] = await connection.query(
-                'INSERT INTO puja (id_liga, id_entry, id_comprador, id_vendedor, montante, estado) VALUES (?, ?, ?, ?, ?, "pendiente")',
-                [id_liga, id_entry, id_comprador, id_vendedor, montante]
+                'INSERT INTO puja (id_liga, id_entry, id_comprador, id_vendedor, montante, estado, creada_en) VALUES (?, ?, ?, ?, ?, "pendiente", ?)',
+                [id_liga, id_entry, id_comprador, id_vendedor, montante, fechaNotif]
             );
             id_puja_final = insertResult.insertId;
         }
 
-        
-        
         const [notifsPrevias] = await connection.query(
-            `SELECT id_notificacion, payload FROM notificacion 
-             WHERE id_usuario = ? AND tipo = 'nueva_oferta'`,
+            `SELECT id_notificacion, payload FROM notificacion WHERE id_usuario = ? AND tipo = 'nueva_oferta'`,
             [id_vendedor]
         );
 
         for (const n of notifsPrevias) {
             const p = typeof n.payload === 'string' ? JSON.parse(n.payload) : n.payload;
-          
-            if (p.id_entry === id_entry) {
+            if (p.id_entry === id_entry)
                 await connection.query('DELETE FROM notificacion WHERE id_notificacion = ?', [n.id_notificacion]);
-            }
         }
 
-        
-        const [[uComp]] = await connection.query('SELECT nombre_usuario FROM usuario WHERE id_usuario = ?', [id_comprador]);
-        const [[jData]] = await connection.query('SELECT apodo FROM jugadora WHERE id_jugadora = ?', [id_jugadora]);
+        const [[uComp]] = await connection.query(
+            'SELECT nombre_usuario FROM usuario WHERE id_usuario = ?', [id_comprador]
+        );
+        const [[jData]] = await connection.query(
+            'SELECT apodo FROM jugadora WHERE id_jugadora = ?', [id_jugadora]
+        );
 
         const payloadVendedor = JSON.stringify({
             titulo: 'Nueva oferta',
             mensaje: `${uComp.nombre_usuario} ofrece ${montante.toLocaleString()}€ por ${jData.apodo}`,
-            id_entry: id_entry,
-            id_puja: id_puja_final, 
-            montante: montante
+            id_entry,
+            id_puja: id_puja_final,
+            montante
         });
 
         await connection.query(
-            'INSERT INTO notificacion (id_usuario, tipo, payload) VALUES (?, "nueva_oferta", ?)',
-            [id_vendedor, payloadVendedor]
+            'INSERT INTO notificacion (id_usuario, tipo, payload, creada_en) VALUES (?, "nueva_oferta", ?, ?)',
+            [id_vendedor, payloadVendedor, fechaNotif]
         );
 
         await limpiarNotificacionesAntiguas(id_vendedor, connection);
@@ -363,8 +417,14 @@ async function makeOffer(req, res) {
 }
 
 async function acceptOffer(req, res) {
-    const { id_puja } = req.body;
-    if (!id_puja) return res.status(400).json({ message: "ID de puja necesario" });
+    const { id_puja, id_notificacion } = req.body;
+    if (!id_puja || !id_notificacion) return res.status(400).json({ message: "ID de puja e ID notificación necesarios" });
+
+    const mercadoAbierto = await calcularMercadoAbierto();
+    if (!mercadoAbierto)
+        return res.status(403).json({ message: 'El mercado está cerrado. No se pueden aceptar ofertas.' });
+
+    const fechaNotif = getFechaVirtualConHoraReal();
 
     let connection;
     try {
@@ -403,33 +463,62 @@ async function acceptOffer(req, res) {
 
         await connection.query(
             `UPDATE plantilla SET presupuesto = presupuesto - ?, valor_equipo = valor_equipo + ?, n_jugadoras = n_jugadoras + 1 
-             WHERE id_usuario = ? AND id_liga = ?`, [montante, valor_jugadora, id_comprador, id_liga]
+             WHERE id_usuario = ? AND id_liga = ?`, 
+            [montante, valor_jugadora, id_comprador, id_liga]
         );
         await connection.query(
             `UPDATE plantilla SET presupuesto = presupuesto + ?, valor_equipo = valor_equipo - ?, n_jugadoras = n_jugadoras - 1 
-             WHERE id_usuario = ? AND id_liga = ?`, [montante, valor_jugadora, id_vendedor, id_liga]
+             WHERE id_usuario = ? AND id_liga = ?`, 
+            [montante, valor_jugadora, id_vendedor, id_liga]
         );
 
-        const [[plantillaComp]] = await connection.query('SELECT id_plantilla FROM plantilla WHERE id_usuario = ? AND id_liga = ?', [id_comprador, id_liga]);
-        await connection.query('UPDATE plantilla_jugadora SET id_plantilla = ? WHERE id_entry = ?', [plantillaComp.id_plantilla, id_entry]);
+        const [[plantillaComp]] = await connection.query(
+            'SELECT id_plantilla FROM plantilla WHERE id_usuario = ? AND id_liga = ?', 
+            [id_comprador, id_liga]
+        );
+        await connection.query(
+            'UPDATE plantilla_jugadora SET id_plantilla = ? WHERE id_entry = ?', 
+            [plantillaComp.id_plantilla, id_entry]
+        );
 
-        await connection.query('UPDATE puja SET estado = "aceptada", resuelta_en = NOW() WHERE id_puja = ?', [id_puja]);
-        await connection.query('UPDATE puja SET estado = "expirada", resuelta_en = NOW() WHERE id_entry = ? AND id_puja != ? AND estado = "pendiente"', [id_entry, id_puja]);
+        await connection.query(
+            'UPDATE puja SET estado = "aceptada", resuelta_en = ? WHERE id_puja = ?', 
+            [fechaNotif, id_puja]
+        );
+        await connection.query(
+            'UPDATE puja SET estado = "expirada", resuelta_en = ? WHERE id_entry = ? AND id_puja != ? AND estado = "pendiente"', 
+            [fechaNotif, id_entry, id_puja]
+        );
 
-        
-        await connection.query("DELETE FROM notificacion WHERE id_usuario = ? AND tipo = 'nueva_oferta' AND payload LIKE ?", [id_vendedor, `%\"id_puja\":${id_puja}%`]);
-        
-        const payloadComp = JSON.stringify({ titulo: 'Fichaje!', mensaje: `Has fichado a ${apodo} por ${montante.toLocaleString()}€` });
-        await connection.query('INSERT INTO notificacion (id_usuario, tipo, payload) VALUES (?, "oferta_aceptada", ?)', [id_comprador, payloadComp]);
-        
-        const payloadVend = JSON.stringify({ titulo: 'Venta!', mensaje: `Has vendido a ${apodo} por ${montante.toLocaleString()}€` });
-        await connection.query('INSERT INTO notificacion (id_usuario, tipo, payload) VALUES (?, "oferta_aceptada", ?)', [id_vendedor, payloadVend]);
+        await connection.query(
+            "DELETE FROM notificacion WHERE id_usuario = ? AND tipo = 'nueva_oferta' AND id_notificacion = ?", 
+            [id_vendedor, id_notificacion]
+        );
 
+        const payloadComp = JSON.stringify({ 
+            titulo: 'Fichaje!', 
+            mensaje: `Has fichado a ${apodo} por ${montante.toLocaleString()}€` 
+        });
+        await connection.query(
+            'INSERT INTO notificacion (id_usuario, tipo, payload, creada_en) VALUES (?, "oferta_aceptada", ?, ?)', 
+            [id_comprador, payloadComp, fechaNotif]
+        );
 
-        const [[uComp]] = await connection.query('SELECT foto_perfil_url FROM usuario WHERE id_usuario = ?', [id_comprador]);
-        const [[uVend]] = await connection.query('SELECT foto_perfil_url FROM usuario WHERE id_usuario = ?', [id_vendedor]);
-        
-        
+        const payloadVend = JSON.stringify({ 
+            titulo: 'Venta!', 
+            mensaje: `Has vendido a ${apodo} por ${montante.toLocaleString()}€` 
+        });
+        await connection.query(
+            'INSERT INTO notificacion (id_usuario, tipo, payload, creada_en) VALUES (?, "oferta_aceptada", ?, ?)', 
+            [id_vendedor, payloadVend, fechaNotif]
+        );
+
+        const [[uComp]] = await connection.query(
+            'SELECT foto_perfil_url FROM usuario WHERE id_usuario = ?', [id_comprador]
+        );
+        const [[uVend]] = await connection.query(
+            'SELECT foto_perfil_url FROM usuario WHERE id_usuario = ?', [id_vendedor]
+        );
         const [[jugData]] = await connection.query(
             'SELECT j.imagen FROM jugadora j JOIN plantilla_jugadora pj ON j.id_jugadora = pj.id_jugadora WHERE pj.id_entry = ?', 
             [id_entry]
@@ -443,19 +532,20 @@ async function acceptOffer(req, res) {
             avatarComprador: uComp.foto_perfil_url,
             jugadora: apodo,
             fotoJugadora: jugData.imagen,
-            montante: montante,
+            montante,
             mensaje: `${nombre_vendedor} ha vendido a ${apodo} a ${nombre_comprador} por ${montante.toLocaleString()}€`
         });
 
-     
-        const [usuariosLiga] = await connection.query('SELECT id_usuario FROM usuario WHERE id_liga = ?', [id_liga]);
+        const [usuariosLiga] = await connection.query(
+            'SELECT id_usuario FROM usuario WHERE id_liga = ?', [id_liga]
+        );
 
-        const notifPromises = usuariosLiga.map(u => {
-            return connection.query(
-                'INSERT INTO notificacion (id_usuario, tipo, payload) VALUES (?, "venta", ?)', 
-                [u.id_usuario, payloadPublico]
-            );
-        });
+        const notifPromises = usuariosLiga.map(u =>
+            connection.query(
+                'INSERT INTO notificacion (id_usuario, tipo, payload, creada_en) VALUES (?, "venta", ?, ?)', 
+                [u.id_usuario, payloadPublico, fechaNotif]
+            )
+        );
         await Promise.all(notifPromises);
 
         await limpiarNotificacionesAntiguas(id_comprador, connection);
@@ -477,7 +567,14 @@ async function acceptOffer(req, res) {
 }
 
 async function rejectOffer(req, res) {
-    const { id_puja } = req.body;
+    const { id_puja , id_notificacion} = req.body;
+
+    const mercadoAbierto = await calcularMercadoAbierto();
+    if (!mercadoAbierto)
+        return res.status(403).json({ message: 'El mercado está cerrado. No se pueden rechazar ofertas.' });
+
+    const fechaNotif = getFechaVirtualConHoraReal();
+
     let connection;
     try {
         connection = await pool.getConnection();
@@ -491,33 +588,39 @@ async function rejectOffer(req, res) {
              WHERE p.id_puja = ?`, 
             [id_puja]
         );
-        
+
         if (!puja) return res.status(404).json({ message: "Oferta no encontrada" });
 
-        await connection.query('UPDATE puja SET estado = "rechazada", resuelta_en = NOW() WHERE id_puja = ?', [id_puja]);
-
-        
         await connection.query(
-            "DELETE FROM notificacion WHERE id_usuario = ? AND tipo = 'nueva_oferta' AND payload LIKE ?",
-            [puja.id_vendedor, `%\"id_puja\":${id_puja}%`]
+            'UPDATE puja SET estado = "rechazada", resuelta_en = ? WHERE id_puja = ?', 
+            [fechaNotif, id_puja]
         );
 
-        // Notificación
+        await connection.query(
+            "DELETE FROM notificacion WHERE id_usuario = ? AND tipo = 'nueva_oferta' AND id_notificacion = ?",
+            [puja.id_vendedor, id_notificacion]
+        );
+
         const payloadRechazadaComp = JSON.stringify({
             titulo: 'Oferta rechazada',
             mensaje: `Tu oferta por ${puja.apodo} ha sido rechazada.`
         });
-        await connection.query('INSERT INTO notificacion (id_usuario, tipo, payload) VALUES (?, "oferta_rechazada", ?)', [puja.id_comprador, payloadRechazadaComp]);
+        await connection.query(
+            'INSERT INTO notificacion (id_usuario, tipo, payload, creada_en) VALUES (?, "oferta_rechazada", ?, ?)', 
+            [puja.id_comprador, payloadRechazadaComp, fechaNotif]
+        );
 
-       
         const payloadRechazadaVend = JSON.stringify({
             titulo: 'Oferta rechazada',
             mensaje: `Has rechazado la oferta por ${puja.apodo}.`
         });
-        await connection.query('INSERT INTO notificacion (id_usuario, tipo, payload) VALUES (?, "oferta_rechazada", ?)', [puja.id_vendedor, payloadRechazadaVend]);
+        await connection.query(
+            'INSERT INTO notificacion (id_usuario, tipo, payload, creada_en) VALUES (?, "oferta_rechazada", ?, ?)', 
+            [puja.id_vendedor, payloadRechazadaVend, fechaNotif]
+        );
 
-        await limpiarNotificacionesAntiguas(puja.id_comprador, connection); 
-        await limpiarNotificacionesAntiguas(puja.id_vendedor, connection); 
+        await limpiarNotificacionesAntiguas(puja.id_comprador, connection);
+        await limpiarNotificacionesAntiguas(puja.id_vendedor, connection);
 
         await connection.commit();
         res.status(200).json({ message: "Oferta rechazada" });
@@ -531,7 +634,6 @@ async function rejectOffer(req, res) {
 }
 
 async function limpiarNotificacionesAntiguas(id_usuario, connection) {
-    
     await connection.query(
         `DELETE FROM notificacion 
          WHERE id_usuario = ? 
@@ -550,8 +652,8 @@ async function limpiarNotificacionesAntiguas(id_usuario, connection) {
 module.exports = {
     getMarketPlayers,
     modifyClause,
-    marketSell, 
-    payClause, 
+    marketSell,
+    payClause,
     makeOffer,
     acceptOffer,
     rejectOffer

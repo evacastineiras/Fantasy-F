@@ -21,7 +21,7 @@
                 <div class="notif-text">
                     <strong>Nueva Oferta</strong>
                     <p>{{ n.payload.mensaje }}</p>
-                    <div class="actions" *ngIf="!n.leida && !n.gestionada">
+                    <div class="actions">
                         <button class="btn-accept" (click)="aceptarOferta(n)">Aceptar</button>
                         <button class="btn-reject" (click)="rechazarOferta(n)">Rechazar</button>
                     </div>
@@ -36,6 +36,14 @@
                     <p>{{ n.payload.mensaje }}</p>
                 </div>
             </div>
+
+            <div *ngSwitchCase="'oferta_expirada'" class="notif-content">
+                    <div class="notif-icon">⏰</div>
+                    <div class="notif-text">
+                        <strong>{{ n.payload.titulo }}</strong>
+                        <p>{{ n.payload.mensaje }}</p>
+                    </div>
+                </div>
 
             <div *ngSwitchDefault class="notif-content">
                 <div class="notif-icon">

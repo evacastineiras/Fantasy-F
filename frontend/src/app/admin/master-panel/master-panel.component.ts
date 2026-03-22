@@ -10,7 +10,7 @@ import { Router } from '@angular/router';
 })
 export class MasterPanelComponent implements OnInit {
 
-  // Objeto para almacenar la respuesta del backend
+  
   estado: any = {
     totalLigas: 0,
     totalUsuarios: 0,
@@ -23,6 +23,7 @@ export class MasterPanelComponent implements OnInit {
   mensaje: string = '';
   tipoMensaje: 'success' | 'error' = 'success';
   id_usuario:number = 1;
+  cargando: boolean = false;
 
   constructor(private masterService: MasterService, private userService: UserService, private Router: Router) { }
 
@@ -30,6 +31,7 @@ export class MasterPanelComponent implements OnInit {
     
     this.id_usuario = this.userService.getUsuario().id;
     this.cargarDatos();
+    this.masterService.cargarEstadoMercado().subscribe();
   }
 
   cargarDatos() {
@@ -52,6 +54,7 @@ export class MasterPanelComponent implements OnInit {
       next: (res: any) => {
         this.mostrarMensaje(`¡Tiempo avanzado! Nueva fecha: ${res.nuevaFecha}`, 'success');
         this.cargarDatos();
+        this.masterService.cargarEstadoMercado().subscribe();
       },
       error: (err) => {
         console.error('Error al avanzar día:', err);
@@ -69,24 +72,30 @@ export class MasterPanelComponent implements OnInit {
   }
 
 
-  procesarPuntos() {
-    if (!this.archivoSeleccionado) {
-      this.mostrarMensaje('Debes seleccionar un archivo JSON de FotMob', 'error');
-      return;
-    }
-
-    // Aquí llamarías a la función de tu servicio para subir el archivo
-    // Por ahora simulamos la llamada hasta que definamos el endpoint del back
-    console.log('Procesando jornada con archivo:', this.archivoSeleccionado.name);
-    
-    // Ejemplo de cómo sería la llamada real:
-    /*
-    const formData = new FormData();
-    formData.append('jsonFotmob', this.archivoSeleccionado);
-    this.masterService.uploadJornada(formData).subscribe(...);
-    */
+procesarPuntos() {
+  if (!this.archivoSeleccionado) {
+    this.mostrarMensaje('Debes seleccionar un archivo JSON de jornada', 'error');
+    return;
   }
 
+  const formData = new FormData();
+  formData.append('file', this.archivoSeleccionado);  // 'file' = upload.single('file')
+
+  this.cargando = true;
+
+  this.masterService.uploadJornada(formData).subscribe({
+    next: (res: any) => {
+      this.mostrarMensaje(res.message || 'Jornada importada correctamente', 'success');
+      this.archivoSeleccionado = null;
+      this.cargarDatos();
+    },
+    error: (err) => {
+      console.error('Error al importar jornada:', err);
+      this.mostrarMensaje(err.error?.message || 'Error al procesar la jornada', 'error');
+    },
+    complete: () => { this.cargando = false; }
+  });
+}
  
   private mostrarMensaje(texto: string, tipo: 'success' | 'error') {
     this.mensaje = texto;
