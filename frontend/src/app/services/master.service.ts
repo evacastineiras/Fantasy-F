@@ -49,6 +49,10 @@ export class MasterService {
     );
   }
 
+  getCalendario(mes: number, anyo: number): Observable<any> {
+    return this.http.get(`${this.baseUrl}/calendario/${mes}/${anyo}`);
+}
+
   nextDay(data:any) {
     return this.http.post(`${this.baseUrl}/nextDay`, data);
   }

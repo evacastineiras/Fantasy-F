@@ -26,6 +26,7 @@ export class MarketComponent implements OnInit {
     this.marketService.getMarketPlayers(idUsuario).subscribe({
       next: (data) => {
         this.jugadoras = data;
+        console.log(this.jugadoras)
         
      
         this.jugadorasFiltradas = this.jugadoras.filter(j => !j.nombre_usuario);

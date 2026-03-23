@@ -169,6 +169,9 @@
     </div>
 
     <div class="calendar-container" *ngIf= "mostrarAux == 3">
-        
+         <div class="arrow-back-container">
+            <img src="../../../assets/icons/flecha-izq-w.png" (click)="mostrarBasico()" alt="">
+        </div>
+        <app-calendar></app-calendar>
     </div>
 </div>

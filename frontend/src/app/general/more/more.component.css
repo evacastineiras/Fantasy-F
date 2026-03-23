@@ -1,8 +1,10 @@
+
 .gen-container { 
   justify-content: center;
   width: 100vw;
   display: flex;
   min-height: 85vh;
+  overflow-x: hidden;
 }
 
 .options-container {
@@ -141,3 +143,6 @@
   margin-top: 10vh;
 }
 
+.calendar-container {
+  width: 50vw;
+}

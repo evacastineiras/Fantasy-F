@@ -1,0 +1,90 @@
+<div class="calendar-wrapper">
+
+    <div class="cal-header">
+        <button class="nav-btn" (click)="mesAnterior()">‹</button>
+        <div class="mes-titulo">
+            <h2>{{ nombreMesActual }}</h2>
+            <span>{{ anyoActual }}</span>
+        </div>
+        <button class="nav-btn" (click)="mesSiguiente()">›</button>
+    </div>
+
+    <div class="leyenda">
+        <span class="leyenda-item"><span class="dot hoy"></span> Hoy</span>
+        <span class="leyenda-item">⚽ Partido</span>
+        <span class="leyenda-item"><span class="dot mercado-abre"></span> Mercado abre</span>
+        <span class="leyenda-item"><span class="dot mercado-cierra"></span> Mercado cierra</span>
+    </div>
+
+    <div class="dias-semana">
+        <span *ngFor="let d of diasSemana">{{ d }}</span>
+    </div>
+
+    <div class="grid-dias">
+        <div *ngFor="let dia of diasCalendario"
+             class="dia-cell"
+             [class.vacio]="!dia"
+             [class.hoy]="dia?.esHoy"
+             [class.pasado]="dia?.esPasado && !dia?.esHoy"
+             [class.tiene-partido]="dia?.tienePartido"
+             [class.mercado-abre]="dia?.mercadoAbre"
+             [class.mercado-cierra]="dia?.mercadoCierra"
+             [class.seleccionado]="diaSeleccionado?.fecha === dia?.fecha"
+             (click)="seleccionarDia(dia)">
+
+            <span class="num-dia" *ngIf="dia">{{ dia.dia }}</span>
+
+            <div class="indicadores" *ngIf="dia">
+                <span *ngIf="dia.jornada" class="badge-jornada">J{{ dia.jornada.numero }}</span>
+                <span *ngIf="dia.tienePartido" class="dot-partido">⚽</span>
+                <span *ngIf="dia.mercadoAbre" class="dot-mercado abre">🟢</span>
+                <span *ngIf="dia.mercadoCierra" class="dot-mercado cierra">🔴</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel de detalle del día seleccionado -->
+    <div class="detalle-dia" *ngIf="diaSeleccionado">
+        <div class="detalle-header">
+            <span class="detalle-fecha">
+                {{ diaSeleccionado.dia }} de {{ nombreMesActual }} de {{ anyoActual }}
+            </span>
+            <span *ngIf="diaSeleccionado.jornada" class="detalle-jornada">
+                Jornada {{ diaSeleccionado.jornada.numero }}
+            </span>
+        </div>
+
+        <div *ngIf="diaSeleccionado.mercadoAbre" class="detalle-evento mercado-evento abre">
+            🟢 El mercado de fichajes abre hoy
+        </div>
+        <div *ngIf="diaSeleccionado.mercadoCierra" class="detalle-evento mercado-evento cierra">
+            🔴 El mercado de fichajes cierra hoy
+        </div>
+
+        <div *ngIf="diaSeleccionado.partidos.length === 0 && !diaSeleccionado.mercadoAbre && !diaSeleccionado.mercadoCierra && !diaSeleccionado.jornada"
+             class="detalle-vacio">
+            Sin eventos este día
+        </div>
+
+        <div *ngFor="let p of diaSeleccionado.partidos" class="partido-detalle">
+            <div class="partido-equipos">
+                <div class="equipo">
+                    <img [src]="'http://localhost:3000/' + p.logo_local" class="escudo-mini">
+                    <span>{{ p.nombre_local }}</span>
+                </div>
+                <div class="resultado-detalle" *ngIf="p.goles_local !== null && diaSeleccionado.esPasado || diaSeleccionado.esHoy">
+                    <span class="marcador">{{ p.goles_local }} — {{ p.goles_visitante }}</span>
+                    <span class="resultado-label">Final</span>
+                </div>
+                <div class="resultado-detalle" *ngIf="p.goles_local === null || (!diaSeleccionado.esPasado && !diaSeleccionado.esHoy)">
+                    <span class="marcador pendiente">vs</span>
+                </div>
+                <div class="equipo visitante">
+                    <img [src]="'http://localhost:3000/' + p.logo_visitante" class="escudo-mini">
+                    <span>{{ p.nombre_visitante }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

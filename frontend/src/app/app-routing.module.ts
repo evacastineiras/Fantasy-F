@@ -10,6 +10,7 @@ import { ProfileComponent } from './general/options/profile/profile.component';
 import { PlayerDetailComponent } from './player-detail/player-detail.component';
 import { NotificationsComponent } from './general/options/notifications/notifications.component';
 import { MasterPanelComponent } from './admin/master-panel/master-panel.component';
+import { CalendarComponent } from './general/options/calendar/calendar.component';
 
 const routes: Routes = [
     {path: '', component: LandingBaseComponent},
@@ -18,7 +19,8 @@ const routes: Routes = [
      {path: 'master-panel', component: MasterPanelComponent, canActivate: [MasterGuard]},
      {path: 'profile', component: ProfileComponent},
      {path: 'notifications', component: NotificationsComponent},
-     { path: 'jugadora/:id', component: PlayerDetailComponent }
+     { path: 'jugadora/:id', component: PlayerDetailComponent },
+     {path: 'calendar', component: CalendarComponent}
 
 ];
 

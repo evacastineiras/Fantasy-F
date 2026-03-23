@@ -2,6 +2,7 @@
     background-color: var(--background-grey);
     height: fit-content;
     min-height: 100%;
+    overflow-x: hidden;
 }
 
 .banner{

@@ -1,0 +1,283 @@
+.calendar-wrapper {
+    background-color: var(--background-grey);
+    color: white;
+    padding: 20px;
+    max-width: 700px;
+    margin: 0 auto;
+    overflow-x: hidden;
+}
+
+.cal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.nav-btn {
+    background: #333;
+    border: none;
+    color: white;
+    font-size: 1.8rem;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.nav-btn:hover {
+    background: var(--primary-green);
+    color: black;
+}
+
+.mes-titulo {
+    text-align: center;
+}
+
+.mes-titulo h2 {
+    margin: 0;
+    font-size: 1.6rem;
+    font-weight: bold;
+}
+
+.mes-titulo span {
+    color: #888;
+    font-size: 0.9rem;
+}
+
+.leyenda {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.leyenda-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: #aaa;
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.dot.hoy { background: var(--primary-green); }
+.dot.partido { background: #fff; }
+.dot.mercado-abre { background: #4caf50; }
+.dot.mercado-cierra { background: #f44336; }
+
+.dias-semana {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    color: #666;
+    font-size: 0.8rem;
+    margin-bottom: 8px;
+}
+
+.grid-dias {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+
+.dia-cell {
+    background: #2a2a2a;
+    border-radius: 6px;
+    min-height: 70px;
+    padding: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.dia-cell.vacio {
+    background: transparent;
+    cursor: default;
+}
+
+.dia-cell:not(.vacio):hover {
+    background: #3a3a3a;
+}
+
+.dia-cell.hoy {
+    border: 2px solid var(--primary-green);
+    background: rgba(118, 255, 3, 0.08);
+}
+
+.dia-cell.pasado {
+    opacity: 0.5;
+}
+
+.dia-cell.seleccionado {
+    background: #3d3d3d;
+    border: 2px solid #888;
+}
+
+.num-dia {
+    font-size: 0.95rem;
+    font-weight: bold;
+    color: white;
+}
+
+.dia-cell.hoy .num-dia {
+    color: var(--primary-green);
+}
+
+.indicadores {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2px;
+}
+
+.badge-jornada {
+    background: #444;
+    color: #aaa;
+    font-size: 0.6rem;
+    padding: 1px 4px;
+    border-radius: 3px;
+}
+
+.dia-cell.hoy .badge-jornada {
+    background: rgba(118, 255, 3, 0.2);
+    color: var(--primary-green);
+}
+
+.dot-partido,
+.dot-mercado {
+    font-size: 0.7rem;
+}
+
+/* Detalle del día */
+.detalle-dia {
+    margin-top: 20px;
+    background: #2a2a2a;
+    border-radius: 8px;
+    padding: 20px;
+    border-left: 4px solid var(--primary-green);
+}
+
+.detalle-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.detalle-fecha {
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.detalle-jornada {
+    background: rgba(118, 255, 3, 0.15);
+    color: var(--primary-green);
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: bold;
+}
+
+.detalle-evento {
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+}
+
+.mercado-evento.abre {
+    background: rgba(76, 175, 80, 0.15);
+    color: #4caf50;
+}
+
+.mercado-evento.cierra {
+    background: rgba(244, 67, 54, 0.15);
+    color: #f44336;
+}
+
+.detalle-vacio {
+    color: #666;
+    text-align: center;
+    padding: 20px 0;
+    font-size: 0.9rem;
+}
+
+.partido-detalle {
+    background: #333;
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 8px;
+}
+
+.partido-equipos {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 10px;
+}
+
+.equipo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.equipo.visitante {
+    flex-direction: row-reverse;
+    text-align: right;
+}
+
+.escudo-mini {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+}
+
+.equipo span {
+    font-size: 0.85rem;
+    color: #ddd;
+}
+
+.resultado-detalle {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.marcador {
+    font-size: 1.3rem;
+    font-weight: 900;
+    color: white;
+    letter-spacing: 3px;
+}
+
+.marcador.pendiente {
+    color: #666;
+    font-size: 1rem;
+    font-weight: normal;
+    letter-spacing: 0;
+}
+
+.resultado-label {
+    font-size: 0.65rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}

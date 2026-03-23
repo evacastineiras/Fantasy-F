@@ -30,6 +30,7 @@ import { BudgetBoxComponent } from './general/budget-box/budget-box.component';
 import { PlayerDetailComponent } from './player-detail/player-detail.component';
 import { NotificationsComponent } from './general/options/notifications/notifications.component';
 import { MasterPanelComponent } from './admin/master-panel/master-panel.component';
+import { CalendarComponent } from './general/options/calendar/calendar.component';
 
 registerLocaleData(localeEs, 'es');
 
@@ -57,6 +58,7 @@ registerLocaleData(localeEs, 'es');
     PlayerDetailComponent,
     NotificationsComponent,
     MasterPanelComponent,
+    CalendarComponent,
   ],
   imports: [
     BrowserModule,

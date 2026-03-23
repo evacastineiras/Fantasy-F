@@ -12,6 +12,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 // ─── Helpers internos ────────────────────────────────────────────────────────
 
 const getVirtualDate = () => {
+
     if (!fs.existsSync(pathFecha)) {
         const inicial = { fecha: '2024-09-15' };
         fs.writeFileSync(pathFecha, JSON.stringify(inicial));
@@ -585,6 +586,102 @@ const getMercadoEstado = async (req, res) => {
     }
 };
 
+//______________getCalendario__________________
+const getCalendario = async (req, res) => {
+
+    const mes = parseInt(req.params.mes);
+    const anyo = parseInt(req.params.anyo);
+
+   
+    try {
+        const fechaVirtual = getVirtualDate();
+        const hoyStr = fechaVirtual.toISOString().split('T')[0];
+
+        let mesNum, anyoNum;
+        
+        if(mes == 0 && anyo == 0)
+    {
+        mesNum = fechaVirtual.getMonth() + 1;
+        anyoNum = fechaVirtual.getFullYear();
+    } else{
+        mesNum = mes;
+        anyoNum = anyo;
+    }
+    
+
+        const primerDia = `${anyoNum}-${String(mesNum).padStart(2, '0')}-01`;
+        const ultimoDia = new Date(anyoNum, mesNum, 0); // día 0 del mes siguiente = último del actual
+        const ultimoDiaStr = ultimoDia.toISOString().split('T')[0];
+
+        const [partidos] = await pool.query(
+            `SELECT 
+                p.id_partido, p.fecha, p.goles_local, p.goles_visitante,
+                cl.nombre AS nombre_local, cl.escudo_url AS logo_local,
+                cv.nombre AS nombre_visitante, cv.escudo_url AS logo_visitante,
+                j.numero AS numero_jornada
+             FROM partido p
+             JOIN club cl ON p.id_local = cl.id_club
+             JOIN club cv ON p.id_visitante = cv.id_club
+             JOIN jornada j ON p.id_jornada = j.id_jornada
+             WHERE YEAR(p.fecha) = ? AND MONTH(p.fecha) = ?
+             ORDER BY p.fecha ASC`,
+            [anyoNum, mesNum]
+        );
+
+      
+        const [jornadas] = await pool.query(
+            `SELECT numero, f_inicio, f_fin
+             FROM jornada
+             WHERE (YEAR(f_inicio) = ? AND MONTH(f_inicio) = ?)
+                OR (YEAR(f_fin) = ? AND MONTH(f_fin) = ?)
+                OR (f_inicio <= ? AND f_fin >= ?)
+             ORDER BY numero ASC`,
+            [anyoNum, mesNum, anyoNum, mesNum, primerDia, ultimoDiaStr]
+        );
+
+   
+        const [todosPartidos] = await pool.query(
+            `SELECT DATE(fecha) as fecha_partido FROM partido 
+             WHERE goles_local IS NOT NULL
+             ORDER BY fecha ASC`
+        );
+
+        const ventanasMercado = [];
+        for (let i = 0; i < todosPartidos.length; i++) {
+            const actual = todosPartidos[i];
+            const siguiente = todosPartidos[i + 1];
+            const esUltimoDelGrupo = !siguiente || 
+                (new Date(siguiente.fecha_partido) - new Date(actual.fecha_partido)) > 86400000;
+
+            if (esUltimoDelGrupo) {
+                const abre = new Date(actual.fecha_partido);
+                abre.setDate(abre.getDate() + 1);
+                const cierra = new Date(abre);
+                cierra.setDate(cierra.getDate() + 3);
+
+                if ((abre.getMonth() + 1 === mesNum && abre.getFullYear() === anyoNum) ||
+                    (cierra.getMonth() + 1 === mesNum && cierra.getFullYear() === anyoNum)) {
+                    ventanasMercado.push({
+                        abre: abre.toISOString().split('T')[0],
+                        cierra: cierra.toISOString().split('T')[0]
+                    });
+                }
+            }
+        }
+
+        res.json({
+            fechaVirtual: hoyStr,
+            partidos,
+            jornadas,
+            ventanasMercado
+        });
+
+    } catch (error) {
+        console.error('Error en getCalendario:', error);
+        res.status(500).json({ message: 'Error interno del servidor' });
+    }
+};
+
 module.exports = {
     getInitialData,
     getVirtualDate,
@@ -594,4 +691,5 @@ module.exports = {
     upload,
     importarJornada,
     calcularPuntosJornada,
+    getCalendario
 };

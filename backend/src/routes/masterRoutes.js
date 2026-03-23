@@ -9,6 +9,7 @@ router.post('/nextDay', masterController.nextDay);
 router.post('/importarJornada',        masterController.upload.single('file'), masterController.importarJornada);
 router.post('/calcularPuntos/:numero', masterController.calcularPuntosJornada);
 router.get('/mercado-estado', masterController.getMercadoEstado);
+router.get('/calendario/:mes/:anyo', masterController.getCalendario);
 
 module.exports = router; 
 
