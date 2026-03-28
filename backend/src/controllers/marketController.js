@@ -50,23 +50,29 @@ async function getMarketPlayers(req, res) {
 
         const [players] = await pool.query(`
             SELECT 
-                j.id_jugadora, j.apodo, j.posicion, 
-                j.imagen AS foto, c.escudo_url AS club_escudo,
-                j.valor_base, pj.valor, pj.id_entry,
-                u.nombre AS nombre_usuario,
-                p.id_usuario AS id_propietario,
-                (SELECT MAX(montante) 
-                 FROM puja 
-                 WHERE id_entry = pj.id_entry 
-                 AND estado = 'pendiente') AS ultima_puja
-            FROM plantilla_jugadora pj 
-            JOIN jugadora j ON pj.id_jugadora = j.id_jugadora 
-            JOIN club c ON j.id_club = c.id_club 
-            LEFT JOIN plantilla p ON pj.id_plantilla = p.id_plantilla
-            LEFT JOIN usuario u ON p.id_usuario = u.id_usuario
-            WHERE pj.id_liga = (SELECT id_liga FROM usuario WHERE id_usuario = ?) 
-            ORDER BY pj.valor DESC;
-        `, [id_usuario]);
+        j.id_jugadora, j.apodo, j.posicion, 
+        j.imagen AS foto, c.escudo_url AS club_escudo,
+        j.valor_base, pj.valor, pj.id_entry,
+        u.nombre AS nombre_usuario,
+        p.id_usuario AS id_propietario,
+        (SELECT MAX(montante) 
+         FROM puja 
+         WHERE id_entry = pj.id_entry 
+         AND estado = 'pendiente') AS ultima_puja,
+        (SELECT id_comprador
+         FROM puja
+         WHERE id_entry = pj.id_entry
+         AND estado = 'pendiente'
+         ORDER BY montante DESC
+         LIMIT 1) AS id_ultimo_pujador
+    FROM plantilla_jugadora pj 
+    JOIN jugadora j ON pj.id_jugadora = j.id_jugadora 
+    JOIN club c ON j.id_club = c.id_club 
+    LEFT JOIN plantilla p ON pj.id_plantilla = p.id_plantilla
+    LEFT JOIN usuario u ON p.id_usuario = u.id_usuario
+    WHERE pj.id_liga = (SELECT id_liga FROM usuario WHERE id_usuario = ?) 
+    ORDER BY pj.valor DESC;
+`, [id_usuario]);
 
         res.status(200).json(players);
     } catch (error) {
@@ -649,6 +655,174 @@ async function limpiarNotificacionesAntiguas(id_usuario, connection) {
     );
 }
 
+async function getPresupuesto(req, res) {
+     const { id_usuario, id_liga } = req.params;
+ 
+    try {
+        const [[row]] = await pool.query(
+            'SELECT presupuesto FROM plantilla WHERE id_usuario = ? AND id_liga = ?',
+            [id_usuario, id_liga]
+        );
+ 
+        if (!row)
+            return res.status(404).json({ message: 'Plantilla no encontrada' });
+ 
+        res.json({ presupuesto: row.presupuesto });
+ 
+    } catch (error) {
+        console.error('Error en getPresupuesto:', error);
+        res.status(500).json({ message: 'Error interno' });
+    }
+}
+
+async function placeBidFree(req, res) {
+   const { id_comprador, id_jugadora, id_liga, montante } = req.body;
+ 
+    if (!id_comprador || !id_jugadora || !id_liga || !montante)
+        return res.status(400).json({ message: 'Faltan datos obligatorios' });
+ 
+    const mercadoAbierto = await calcularMercadoAbierto();
+    if (!mercadoAbierto)
+        return res.status(403).json({ message: 'El mercado está cerrado.' });
+ 
+    const fechaNotif = getFechaVirtualConHoraReal();
+ 
+    let connection;
+    try {
+        connection = await pool.getConnection();
+        await connection.beginTransaction();
+ 
+        const [[entryData]] = await connection.query(
+            `SELECT id_entry, valor FROM plantilla_jugadora
+             WHERE id_jugadora = ? AND id_liga = ? AND id_plantilla IS NULL`,
+            [id_jugadora, id_liga]
+        );
+ 
+        if (!entryData) {
+            await connection.rollback();
+            return res.status(404).json({ message: 'La jugadora no está libre en esta liga' });
+        }
+        const { id_entry, valor: valorJugadora } = entryData;
+ 
+        const [[maxPuja]] = await connection.query(
+            `SELECT MAX(montante) AS max_montante FROM puja
+             WHERE id_entry = ? AND estado = 'pendiente'`,
+            [id_entry]
+        );
+        const pujaMasAlta     = maxPuja?.max_montante ?? valorJugadora;
+        const minimoRequerido = pujaMasAlta + 250_000;
+ 
+        if (montante < minimoRequerido) {
+            await connection.rollback();
+            return res.status(400).json({
+                message: `La puja mínima es ${minimoRequerido.toLocaleString()}€`,
+                minimo: minimoRequerido
+            });
+        }
+ 
+        const [[plantillaComp]] = await connection.query(
+            'SELECT id_plantilla, presupuesto FROM plantilla WHERE id_usuario = ? AND id_liga = ?',
+            [id_comprador, id_liga]
+        );
+ 
+        if (!plantillaComp) {
+            await connection.rollback();
+            return res.status(404).json({ message: 'Plantilla del comprador no encontrada' });
+        }
+ 
+        const [[pujaPropia]] = await connection.query(
+            `SELECT id_puja, montante AS montante_previo FROM puja
+             WHERE id_comprador = ? AND id_entry = ? AND estado = 'pendiente'`,
+            [id_comprador, id_entry]
+        );
+ 
+        const montantePrevio      = pujaPropia?.montante_previo ?? 0;
+        const presupuestoEfectivo = plantillaComp.presupuesto + montantePrevio;
+ 
+        if (presupuestoEfectivo < montante) {
+            await connection.rollback();
+            return res.status(400).json({ message: 'Presupuesto insuficiente' });
+        }
+ 
+        const [[jugData]] = await connection.query(
+            'SELECT apodo FROM jugadora WHERE id_jugadora = ?', [id_jugadora]
+        );
+        const [[uComp]] = await connection.query(
+            'SELECT nombre_usuario FROM usuario WHERE id_usuario = ?', [id_comprador]
+        );
+ 
+        const [pujasSuperar] = await connection.query(
+            `SELECT id_puja, id_comprador, montante AS montante_superado FROM puja
+             WHERE id_entry = ? AND estado = 'pendiente' AND id_comprador != ?`,
+            [id_entry, id_comprador]
+        );
+ 
+        for (const p of pujasSuperar) {
+            // Marcar como retirada
+            await connection.query(
+                `UPDATE puja SET estado = 'retirada', resuelta_en = ? WHERE id_puja = ?`,
+                [fechaNotif, p.id_puja]
+            );
+ 
+            // Devolver presupuesto
+            await connection.query(
+                `UPDATE plantilla SET presupuesto = presupuesto + ?
+                 WHERE id_usuario = ? AND id_liga = ?`,
+                [p.montante_superado, p.id_comprador, id_liga]
+            );
+ 
+            // Notificar
+            const payload = JSON.stringify({
+                titulo: 'Tu puja ha sido superada',
+                mensaje: `${uComp.nombre_usuario} ha superado tu puja por ${jugData.apodo} con ${montante.toLocaleString()}€.`,
+                id_jugadora
+            });
+            await connection.query(
+                `INSERT INTO notificacion (id_usuario, tipo, payload, creada_en)
+                 VALUES (?, 'puja_superada', ?, ?)`,
+                [p.id_comprador, payload, fechaNotif]
+            );
+            await limpiarNotificacionesAntiguas(p.id_comprador, connection);
+        }
+ 
+        if (pujaPropia) {
+            
+            const diferencia = montante - montantePrevio;
+            await connection.query(
+                'UPDATE puja SET montante = ?, creada_en = ? WHERE id_puja = ?',
+                [montante, fechaNotif, pujaPropia.id_puja]
+            );
+            await connection.query(
+                `UPDATE plantilla SET presupuesto = presupuesto - ?
+                 WHERE id_usuario = ? AND id_liga = ?`,
+                [diferencia, id_comprador, id_liga]
+            );
+        } else {
+           
+            await connection.query(
+                `INSERT INTO puja (id_liga, id_entry, id_comprador, id_vendedor, montante, estado, creada_en)
+                 VALUES (?, ?, ?, NULL, ?, 'pendiente', ?)`,
+                [id_liga, id_entry, id_comprador, montante, fechaNotif]
+            );
+            await connection.query(
+                `UPDATE plantilla SET presupuesto = presupuesto - ?
+                 WHERE id_usuario = ? AND id_liga = ?`,
+                [montante, id_comprador, id_liga]
+            );
+        }
+ 
+        await connection.commit();
+        res.status(200).json({ message: 'Puja registrada correctamente' });
+ 
+    } catch (error) {
+        if (connection) await connection.rollback();
+        console.error('Error en placeBidFree:', error);
+        res.status(500).json({ message: 'Error al registrar la puja' });
+    } finally {
+        if (connection) connection.release();
+    }
+}
+
 module.exports = {
     getMarketPlayers,
     modifyClause,
@@ -656,5 +830,7 @@ module.exports = {
     payClause,
     makeOffer,
     acceptOffer,
-    rejectOffer
+    rejectOffer,
+    getPresupuesto,
+    placeBidFree
 };

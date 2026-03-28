@@ -31,6 +31,12 @@ export class PlayerDetailComponent implements OnInit {
   valueChart: Chart | null = null;
   @ViewChild('valueChartCanvas') valueChartCanvas!: ElementRef<HTMLCanvasElement>;
   unreadNotifications = 0;
+  showModalPuja: boolean = false;
+  montante: number = 0;
+  presupuesto: number = 0;
+  pujaMasAlta: number = 0;
+  enviando: boolean = false;
+  mercadoAbierto: boolean = false;
 
   constructor( private route: ActivatedRoute, private location: Location, private UserService: UserService, private AuthService: AuthService, private router: Router, private playerService: PlayerService, private marketService: MarketService) { }
 
@@ -41,6 +47,11 @@ export class PlayerDetailComponent implements OnInit {
   ngOnInit(): void {
     this.id = this.route.snapshot.paramMap.get('id');
     this.idUsuarioLogueado = this.UserService.getUsuario().id;
+
+    this.marketService.getMercadoEstado().subscribe({
+        next: (estado: any) => { this.mercadoAbierto = estado.abierto; }
+    });
+    this.cargarDatosJugadora();
     const toSend = {
       id_jugadora: this.id,
       id_usuario: this.idUsuarioLogueado
@@ -62,6 +73,16 @@ export class PlayerDetailComponent implements OnInit {
       this.unreadNotifications = res.unreadCount;
     }
   });
+  }
+
+  cargarDatosJugadora() {
+    const toSend = { id_jugadora: this.id, id_usuario: this.idUsuarioLogueado };
+    this.playerService.getPlayerInfo(toSend).subscribe({
+      next: (res: any) => {
+        this.jugadora = res.player;
+        this.jugadora.total_tarjetas = (this.jugadora.amarillas_total || 0) + (this.jugadora.rojas_total || 0);
+        setTimeout(() => this.cargarGraficoValor(), 0);
+      }});
   }
 
   abrirOfrecer() {
@@ -247,7 +268,17 @@ logout() {
 
 pujar()
 {
-  
+  if (!this.mercadoAbierto) return;
+   
+    this.pujaMasAlta = this.jugadora.ultima_puja ?? this.jugadora.valor;
+    this.montante = this.pujaMasAlta + 250000;
+    this.showModalPuja = true;
+
+    
+    const usuario = this.UserService.getUsuario();
+    this.marketService.getPresupuesto(usuario.id, usuario.id_liga).subscribe({
+      next: (data: any) => { this.presupuesto = data.presupuesto; }
+    });
 }
 
 cargarGraficoValor() {
@@ -328,5 +359,60 @@ redondearValor(valor: number): number {
     if (valor >= 1000000)  return Math.round(valor / 10000) * 10000;   // ≥1M  → redondeo a 10.000
     return Math.round(valor / 1000) * 1000;                             // resto → redondeo a 1.000
 }
+
+cerrarPuja() {
+    this.showModalPuja = false;
+    this.enviando = false;
+  }
+
+  setPuja(valor: number) {
+    this.montante = valor;
+  }
+
+  validarMontante() {
+    if (!this.montante || this.montante < 0) this.montante = 0;
+  }
+
+  pujaValida(): boolean {
+    return (
+      this.montante >= this.pujaMasAlta + 250000 &&
+      this.montante <= this.presupuesto &&
+      !this.enviando
+    );
+  }
+
+  calcularPorcentajePresupuesto(): number {
+    if (!this.presupuesto) return 0;
+    return Math.min((this.montante / this.presupuesto) * 100, 100);
+  }
+
+  confirmarPuja() {
+    if (!this.pujaValida()) return;
+
+    this.enviando = true;
+    const usuario = this.UserService.getUsuario();
+
+    const payload = {
+      id_comprador: usuario.id,
+      id_jugadora: this.jugadora.id_jugadora,
+      id_liga: usuario.id_liga,
+      montante: this.montante
+    };
+
+    this.marketService.placeBid(payload).subscribe({
+      next: () => {
+        this.UserService.refreshUsuario().subscribe();
+      this.cerrarPuja();
+      this.cargarDatosJugadora();
+        alert('¡Puja realizada con éxito!');
+        this.cerrarPuja();
+        this.cargarDatosJugadora(); 
+      },
+      error: (err) => {
+        console.error('Error al pujar:', err);
+        this.enviando = false;
+      }
+    });
+  }
 
 }

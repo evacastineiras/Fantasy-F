@@ -79,7 +79,7 @@ procesarPuntos() {
   }
 
   const formData = new FormData();
-  formData.append('file', this.archivoSeleccionado);  // 'file' = upload.single('file')
+  formData.append('file', this.archivoSeleccionado);  
 
   this.cargando = true;
 
@@ -116,5 +116,7 @@ cancelarSeleccion(input: HTMLInputElement) {
   input.value = ''; 
   this.mostrarMensaje('Archivo eliminado', 'success');
 }
+
+
 }
 

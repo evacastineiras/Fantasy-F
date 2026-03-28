@@ -121,6 +121,166 @@ const nextDay = async (req, res) => {
                     [u.id_usuario, tipo, payload, fechaNotif]
                 )
             );
+
+
+            //asunto de las pujas ──────────────────────────
+
+
+            if (!estadoDespues) {
+
+                // ligas con pujas pendientes de jugadoras libres
+                const [ligasConPujas] = await pool.query(
+                    `SELECT DISTINCT id_liga FROM puja WHERE estado = 'pendiente' AND id_vendedor IS NULL`
+                );
+
+            for (const { id_liga } of ligasConPujas) {
+
+                // encontramos la puja más alta
+                const [pujaGanadoras] = await pool.query(
+                    `SELECT p.id_entry, p.id_comprador, p.montante, p.id_puja,
+                            j.apodo, j.id_jugadora, j.imagen AS foto_jugadora,
+                            pj.valor AS valor_jugadora,
+                            u.nombre_usuario AS nombre_comprador,
+                            u.foto_perfil_url AS avatar_comprador
+                    FROM puja p
+                    JOIN plantilla_jugadora pj ON p.id_entry = pj.id_entry
+                    JOIN jugadora j ON pj.id_jugadora = j.id_jugadora
+                    JOIN usuario u ON p.id_comprador = u.id_usuario
+                    WHERE p.id_liga = ?
+                    AND p.estado = 'pendiente'
+                    AND p.id_vendedor IS NULL
+                    AND pj.id_plantilla IS NULL
+                    AND p.montante = (
+                        SELECT MAX(p2.montante) FROM puja p2
+                        WHERE p2.id_entry = p.id_entry
+                            AND p2.estado = 'pendiente'
+                            AND p2.id_vendedor IS NULL
+                    )`,
+                    [id_liga]
+                );
+
+            // 3. Obtener todos los usuarios de la liga para notificación pública
+            const [usuariosLiga] = await pool.query(
+                `SELECT id_usuario FROM usuario WHERE id_liga = ?`, [id_liga]
+            );
+
+            for (const ganadora of pujaGanadoras) {
+                const {
+                    id_entry, id_comprador, montante, id_puja,
+                    apodo, id_jugadora, foto_jugadora,
+                    valor_jugadora, nombre_comprador, avatar_comprador
+                } = ganadora;
+
+                let connection;
+                try {
+                    connection = await pool.getConnection();
+                    await connection.beginTransaction();
+
+                    const [[plantillaGanador]] = await connection.query(
+                        `SELECT id_plantilla FROM plantilla WHERE id_usuario = ? AND id_liga = ?`,
+                        [id_comprador, id_liga]
+                    );
+
+                await connection.query(
+                    `UPDATE plantilla_jugadora
+                     SET id_plantilla = ?, clausula = ?, es_titular_default = 0
+                     WHERE id_entry = ?`,
+                    [plantillaGanador.id_plantilla, Math.round(valor_jugadora), id_entry]
+                );
+
+                await connection.query(
+                    `UPDATE plantilla
+                     SET n_jugadoras = n_jugadoras + 1,
+                         valor_equipo = valor_equipo + ?
+                     WHERE id_usuario = ? AND id_liga = ?`,
+                    [valor_jugadora, id_comprador, id_liga]
+                );
+                
+
+                await connection.query(
+                    `UPDATE puja SET estado = 'aceptada', resuelta_en = ?
+                     WHERE id_puja = ?`,
+                    [fechaNotif, id_puja]
+                );
+
+                const [pujasPerdedoras] = await connection.query(
+                    `SELECT id_puja, id_comprador, montante FROM puja
+                     WHERE id_entry = ?
+                       AND estado = 'pendiente'
+                       AND id_puja != ?`,
+                    [id_entry, id_puja]
+                );
+
+                for (const perdedora of pujasPerdedoras) {
+                    // marcar como retirada
+                    await connection.query(
+                        `UPDATE puja SET estado = 'retirada', resuelta_en = ?
+                         WHERE id_puja = ?`,
+                        [fechaNotif, perdedora.id_puja]
+                    );
+
+                    await connection.query(
+                        `UPDATE plantilla SET presupuesto = presupuesto + ?
+                         WHERE id_usuario = ? AND id_liga = ?`,
+                        [perdedora.montante, perdedora.id_comprador, id_liga]
+                    );
+
+                    const payloadPerdedor = JSON.stringify({
+                        titulo: 'Puja perdida',
+                        mensaje: `No has conseguido fichar a ${apodo}. Se han devuelto ${perdedora.montante.toLocaleString()}€ a tu presupuesto.`,
+                        id_jugadora,
+                        fotoJugadora: foto_jugadora
+                    });
+                    await connection.query(
+                        `INSERT INTO notificacion (id_usuario, tipo, payload, creada_en)
+                         VALUES (?, 'puja_superada', ?, ?)`,
+                        [perdedora.id_comprador, payloadPerdedor, fechaNotif]
+                    );
+                    
+                }
+
+            
+                const payloadGanador = JSON.stringify({
+                    titulo: '¡Fichaje completado!',
+                    mensaje: `Has fichado a ${apodo} por ${montante.toLocaleString()}€. `,
+                    id_jugadora,
+                    fotoJugadora: foto_jugadora
+                });
+                await connection.query(
+                    `INSERT INTO notificacion (id_usuario, tipo, payload, creada_en)
+                     VALUES (?, 'oferta_aceptada', ?, ?)`,
+                    [id_comprador, payloadGanador, fechaNotif]
+                );
+
+              
+
+               
+                await connection.commit();
+
+            } catch (error) {
+                if (connection) await connection.rollback();
+                console.error(`Error resolviendo puja para jugadora ${apodo}:`, error);
+            } finally {
+                if (connection) connection.release();
+            }
+        }
+
+       
+        const [pujasSinResolver] = await pool.query(
+            `SELECT p.id_puja, p.id_comprador, p.montante,
+                    j.apodo, j.id_jugadora
+             FROM puja p
+             JOIN plantilla_jugadora pj ON p.id_entry = pj.id_entry
+             JOIN jugadora j ON pj.id_jugadora = j.id_jugadora
+             WHERE p.id_liga = ?
+               AND p.estado = 'pendiente'
+               AND p.id_vendedor IS NULL`,
+            [id_liga]
+        );
+
+    
+    }
+}
             await Promise.all(queries);
         }
 

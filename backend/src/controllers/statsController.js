@@ -87,7 +87,6 @@ const getTopStats = async (req, res) => {
     }
 };
 
-
 const getPlayerInfo = async (req, res) => {
     const { id_jugadora, id_usuario } = req.body;
 
@@ -101,11 +100,16 @@ const getPlayerInfo = async (req, res) => {
 
         const [rows] = await pool.query(
             `SELECT 
-                j.nombre, j.apellidos, j.fnacimiento, j.altura, j.pierna_buena, j.posicion, j.apodo,
-                j.goles_total, j.asistencias_total, j.amarillas_total, j.rojas_total, j.imagen_carta,
+                j.id_jugadora, j.nombre, j.apellidos, j.fnacimiento, j.altura, j.pierna_buena, j.posicion, j.apodo,
+                j.goles_total, j.asistencias_total, j.amarillas_total, j.rojas_total, j.imagen_carta, j.imagen AS foto,
                 j.goles_encajados_total, j.porterias_cero,
                 pj.clausula, pj.valor, pj.id_entry,
                 (SELECT p.id_usuario FROM plantilla p WHERE p.id_plantilla = pj.id_plantilla) AS id_propietario,
+                
+                -- ESTO ES LO QUE FALTABA PARA LAS PUJAS --
+                (SELECT MAX(montante) FROM puja WHERE id_entry = pj.id_entry AND estado = 'pendiente') AS ultima_puja,
+                (SELECT id_comprador FROM puja WHERE id_entry = pj.id_entry AND estado = 'pendiente' ORDER BY montante DESC LIMIT 1) AS id_ultimo_pujador,
+
                 (SELECT rj.puntos FROM rendimiento_jornada rj WHERE rj.id_jugadora = j.id_jugadora ORDER BY rj.id_jornada DESC LIMIT 1) AS puntos_ultima_jornada,
                 ROUND(AVG(rend.puntos), 2)           AS media_puntos,
                 ROUND(AVG(rend.goles), 2)            AS media_goles,
@@ -131,7 +135,6 @@ const getPlayerInfo = async (req, res) => {
         res.status(500).json({ message: 'Error interno del servidor' });
     }
 };
-
 
 const getFeed = async (req, res) => {
     const { id } = req.params; 

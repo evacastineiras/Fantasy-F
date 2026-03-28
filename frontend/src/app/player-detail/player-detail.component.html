@@ -29,8 +29,17 @@
                 <img [src]="jugadora?.imagen_carta ? 'http://localhost:3000/' + jugadora?.imagen_carta : '../../assets/default-card.png'" alt="Carta">
                 
                 <div class="clausula-box">
-                    <p>Cláusula:</p>
-                    <h3 class="clausula-jugadora">{{ (jugadora?.clausula | number) ?? '0' }}€</h3>
+                    <ng-container *ngIf="jugadora?.id_propietario">
+                        <p>Cláusula:</p>
+                        <h3 class="clausula-jugadora">{{ (jugadora?.clausula | number) ?? '0' }}€</h3>
+                    </ng-container>
+
+                    <ng-container *ngIf="!jugadora?.id_propietario">
+                        <p>{{ jugadora?.ultima_puja ? 'Última puja:' : 'Valor de mercado:' }}</p>
+                        <h3 class="clausula-jugadora" style="color: var(--primary-green);">
+                            {{ (jugadora?.ultima_puja ? jugadora.ultima_puja : jugadora?.valor) | number }}€
+                        </h3>
+                    </ng-container>
                 </div>
 
                <div class="bottom-part">
@@ -53,7 +62,7 @@
                     </ng-container>
 
                     <ng-container *ngIf="!jugadora?.id_propietario">
-                        <div class="button-box btn-ofrecer" (click)="pujar()">
+                        <div class="button-box btn-ofrecer" [class.disabled]="!mercadoAbierto || jugadora?.id_ultimo_pujador === idUsuarioLogueado" (click)="(!mercadoAbierto || jugadora?.id_ultimo_pujador === idUsuarioLogueado) ? null : pujar()" [title]="!mercadoAbierto ? 'Mercado cerrado' : (jugadora?.id_ultimo_pujador === idUsuarioLogueado ? 'Ya tienes la puja más alta' : '')">
                             <span>Pujar</span>
                         </div>
                         </ng-container>
@@ -244,4 +253,63 @@
             <button class="btn-aceptar" (click)="confirmarOferta()">Enviar oferta</button>
         </div>
     </div>
+</div>
+
+<div class="modal-overlay" *ngIf="showModalPuja" (click)="cerrarPuja()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="player-identity">
+        <img [src]="'http://localhost:3000/' + jugadora.foto" class="player-avatar">
+        <div class="player-meta">
+          <span class="player-pos">{{ jugadora.posicion }}</span>
+          <h2 class="player-name">{{ jugadora.apodo }}</h2>
+        </div>
+      </div>
+      <button class="btn-close" (click)="cerrarPuja()">✕</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="bid-info-row">
+      <div class="bid-stat">
+        <span class="stat-label">Valor de mercado</span>
+        <span class="stat-value">{{ jugadora.valor | number:'1.0-0' }}€</span>
+      </div>
+      <div class="bid-stat highlight">
+        <span class="stat-label">Puja actual</span>
+        <span class="stat-value accent">{{ pujaMasAlta | number:'1.0-0' }}€</span>
+      </div>
+    </div>
+
+    <div class="bid-input-section">
+      <label class="input-label">Tu puja</label>
+      <div class="input-wrapper">
+        <input type="number" [(ngModel)]="montante" (input)="validarMontante()" class="bid-input">
+        <span class="currency-symbol">€</span>
+      </div>
+
+      <div class="bid-presets">
+        <button class="preset-btn" (click)="setPuja(pujaMasAlta + 250000)">+250K</button>
+        <button class="preset-btn" (click)="setPuja(pujaMasAlta + 1000000)">+1M</button>
+      </div>
+
+      <div class="budget-bar-section">
+        <div class="budget-labels">
+          <span>Presupuesto</span>
+          <span [ngClass]="{'text-danger': montante > presupuesto}">{{ presupuesto | number:'1.0-0' }}€</span>
+        </div>
+        <div class="budget-bar">
+          <div class="budget-fill" [style.width.%]="calcularPorcentajePresupuesto()" [ngClass]="{'over-budget': montante > presupuesto}"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" (click)="cerrarPuja()">Cancelar</button>
+      <button class="btn-pujar-modal" [disabled]="!pujaValida()" (click)="confirmarPuja()">
+        <span *ngIf="!enviando">CONFIRMAR PUJA</span>
+        <span *ngIf="enviando" class="spinner"></span>
+      </button>
+    </div>
+  </div>
 </div>

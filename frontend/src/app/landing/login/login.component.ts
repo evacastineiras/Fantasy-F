@@ -34,7 +34,7 @@ export class LoginComponent {
     this.authService.login( this.email, this.password).subscribe({
       next: (res: any) => {
         console.log('Login correcto', res);
-        localStorage.setItem('usuario', JSON.stringify(res.user));
+        this.userService.setUsuario(res.user);
         if(this.userService.getUsuario().id === 1)
         {
           this.router.navigate(['/master-panel']);

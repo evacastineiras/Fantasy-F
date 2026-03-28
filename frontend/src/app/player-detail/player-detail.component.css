@@ -481,3 +481,395 @@
     padding: 15px;
     border: 1px solid #2e2e2e;
 }
+
+
+/* ═══════════════════════════════════════════════
+   BID MODAL — Fantasy Liga F
+   Paleta: oscuro #1c1c2e / card #252540 / verde #39e75f
+   ═══════════════════════════════════════════════ */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.18s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Card ── */
+.modal-card {
+  background: #1e1e32;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 420px;
+  padding: 28px 28px 24px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+  animation: slideUp 0.22s cubic-bezier(0.34,1.56,0.64,1);
+  position: relative;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(24px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* ── Header ── */
+.modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 0;
+}
+
+.player-identity {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.player-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(57, 231, 95, 0.4);
+  background: #2a2a44;
+}
+
+.player-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.player-pos {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #39e75f;
+  text-transform: uppercase;
+}
+
+.player-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.club-row {
+  margin-top: 4px;
+}
+
+.club-shield {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  opacity: 0.85;
+}
+
+.btn-close {
+  background: rgba(255,255,255,0.07);
+  border: none;
+  color: rgba(255,255,255,0.5);
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.btn-close:hover {
+  background: rgba(255,255,255,0.13);
+  color: #fff;
+}
+
+/* ── Divider ── */
+.divider {
+  height: 1px;
+  background: rgba(255,255,255,0.07);
+  margin: 20px 0;
+}
+
+/* ── Stats de puja ── */
+.bid-info-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.bid-stat {
+  flex: 1;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bid-stat.highlight {
+  background: rgba(57, 231, 95, 0.06);
+  border-color: rgba(57, 231, 95, 0.2);
+}
+
+.stat-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: rgba(255,255,255,0.4);
+  font-weight: 600;
+}
+
+.stat-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.stat-value.accent {
+  color: #39e75f;
+}
+
+/* ── Input ── */
+.bid-input-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.input-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: rgba(255,255,255,0.45);
+  font-weight: 600;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.bid-input {
+  width: 100%;
+  background: rgba(255,255,255,0.05);
+  border: 1.5px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  padding: 13px 44px 13px 16px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+  /* ocultar flechas nativas del input number */
+  -moz-appearance: textfield;
+}
+
+.bid-input::-webkit-inner-spin-button,
+.bid-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+}
+
+.bid-input:focus {
+  border-color: #39e75f;
+  background: rgba(57, 231, 95, 0.04);
+}
+
+.currency-symbol {
+  position: absolute;
+  right: 16px;
+  font-size: 18px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.3);
+  pointer-events: none;
+}
+
+/* ── Presets ── */
+.bid-presets {
+  display: flex;
+  gap: 8px;
+}
+
+.preset-btn {
+  flex: 1;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  color: rgba(255,255,255,0.7);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 4px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.preset-btn:hover {
+  background: rgba(57, 231, 95, 0.1);
+  border-color: rgba(57, 231, 95, 0.35);
+  color: #39e75f;
+}
+
+/* ── Barra de presupuesto ── */
+.budget-bar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.budget-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+}
+
+.text-danger {
+  color: #ff5c5c !important;
+}
+
+.budget-bar {
+  height: 5px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.budget-fill {
+  height: 100%;
+  background: #39e75f;
+  border-radius: 99px;
+  transition: width 0.25s ease, background 0.2s;
+}
+
+.budget-fill.over-budget {
+  background: #ff5c5c;
+}
+
+/* ── Alertas ── */
+.alert-box {
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  margin-bottom: 4px;
+}
+
+.alert-box.warning {
+  background: rgba(255, 92, 92, 0.1);
+  border: 1px solid rgba(255, 92, 92, 0.25);
+  color: #ff8a8a;
+}
+
+.alert-box.info {
+  background: rgba(57, 231, 95, 0.08);
+  border: 1px solid rgba(57, 231, 95, 0.2);
+  color: #6ef08a;
+}
+
+/* ── Acciones ── */
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.btn-cancel {
+  flex: 1;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  color: rgba(255,255,255,0.6);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-cancel:hover {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+}
+
+.btn-pujar {
+  flex: 2;
+  background: #39e75f;
+  border: none;
+  border-radius: 10px;
+  color: #0a1a0f;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  padding: 14px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s, opacity 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50px;
+}
+
+.btn-pujar:hover:not(:disabled) {
+  background: #4fff72;
+  transform: translateY(-1px);
+}
+
+.btn-pujar:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-pujar:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* ── Spinner ── */
+.spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid rgba(10,26,15,0.3);
+  border-top-color: #0a1a0f;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+  .modal-card {
+    margin: 16px;
+    padding: 22px 18px 20px;
+  }
+}
+
+.btn-ofrecer.disabled {
+    background-color: #444 !important;
+    cursor: not-allowed;
+    opacity: 0.6;
+}

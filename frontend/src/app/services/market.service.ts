@@ -44,4 +44,25 @@ export class MarketService {
   {
     return this.http.post(`${this.apiUrl}/rejectOffer`, data)
   }
+
+  getPresupuesto(idUsuario: number, idLiga: number): Observable<{ presupuesto: number }> {
+  return this.http.get<{ presupuesto: number }>(
+    `${this.apiUrl}/presupuesto/${idUsuario}/${idLiga}`
+  );
+}
+
+getMercadoEstado(): Observable<{ abierto: boolean, mensaje: string }> {
+    return this.http.get<{ abierto: boolean, mensaje: string }>(
+        `${this.apiUrl}/mercadoEstado`
+    );
+}
+
+  placeBid(data: {
+  id_comprador: number;
+  id_jugadora: number;
+  id_liga: number;
+  montante: number;
+}): Observable<any> {
+  return this.http.post(`${this.apiUrl}/puja-libre`, data);
+}
 }

@@ -8,5 +8,6 @@ router.post('/editProfile', authController.editProfile);
 router.delete('/deleteProfile/:id', authController.deleteProfile);
 router.post('/changePassword', authController.changePassword);
 router.get('/getBudgetValue/:id_usuario', authController.getBudgetValue);
+router.get('/me/:id', authController.getMe);
 
 module.exports = router;

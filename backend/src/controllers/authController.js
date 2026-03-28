@@ -260,11 +260,47 @@ async function getBudgetValue(req, res)
   }
 }
 
+async function getMe(req, res) {
+    const { id } = req.params;
+ 
+    try {
+        const [[user]] = await pool.query(
+            `SELECT id_usuario, email, nombre_usuario, nombre, foto_perfil_url, id_liga
+             FROM usuario WHERE id_usuario = ?`,
+            [id]
+        );
+ 
+        if (!user) return res.status(404).json({ message: 'Usuario no encontrado' });
+ 
+        const [[plantillaRow]] = await pool.query(
+            `SELECT id_plantilla, presupuesto
+             FROM plantilla WHERE id_usuario = ? AND id_liga = ?`,
+            [user.id_usuario, user.id_liga]
+        );
+ 
+        res.json({
+            id:           user.id_usuario,
+            email:        user.email,
+            username:     user.nombre_usuario,
+            nombre:       user.nombre,
+            profileImage: user.foto_perfil_url,
+            id_liga:      user.id_liga,
+            id_plantilla: plantillaRow?.id_plantilla ?? null,
+            presupuesto:  plantillaRow?.presupuesto  ?? null
+        });
+ 
+    } catch (error) {
+        console.error('Error en getMe:', error);
+        res.status(500).json({ message: 'Error interno' });
+    }
+}
+
 module.exports = {
   register,
   login,
   editProfile,
   deleteProfile,
   changePassword,
-  getBudgetValue
+  getBudgetValue,
+  getMe
 };

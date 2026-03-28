@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { UserService } from '../services/user.service';
 import { AuthService } from '../services/auth.service';
 import { PlayerService } from '../services/player.service';
+import { Subscription } from 'rxjs';
 
 
 @Component({
@@ -16,24 +17,41 @@ export class GeneralComponent implements OnInit {
 
   presupuesto = 0;
   valorTotal = 0;
+  private usuarioSub!: Subscription;
 
   ngOnInit(): void {
 
-    const userId = this.UserService.getUsuario().id;
-    this.AuthService.getBudgetValue(userId).subscribe({
-      next: (res) => {
-        this.presupuesto = res.presupuesto;
-        this.valorTotal = res.valor_plantilla;
-      },
-      error: (err) => console.error('Error cargando presupuesto')
+     console.log('GeneralComponent init — usuario en localStorage:', this.UserService.getUsuario());
+      this.usuarioSub = this.UserService.usuario$.subscribe(usuario => {
+         console.log('usuario$ emitió:', usuario);
+      if (!usuario?.id) return;
+ 
+      this.presupuesto = usuario.presupuesto ?? 0;
+         console.log('presupuesto seteado a:', this.presupuesto);
+      const imgPath = usuario.profileImage;
+      this.profileImagePreview = imgPath
+        ? this.AuthService.backendUrl + imgPath
+        : '../../assets/default-profile.png';
     });
-
+ 
+   
+    const userId = this.UserService.getUsuario().id;
+ 
+    this.AuthService.getBudgetValue(userId).subscribe({
+      next: (res) => { this.valorTotal = res.valor_plantilla; },
+      error: (err) => console.error('Error cargando valor del equipo', err)
+    });
+ 
     this.PlayerService.getUnreadCount(userId).subscribe({
-    next: (res: any) => {
-      this.unreadNotifications = res.unreadCount;
-    }
-  });
+      next: (res: any) => { this.unreadNotifications = res.unreadCount; }
+    });
   }
+
+   ngOnDestroy(): void {
+    // Evitar memory leaks al destruir el componente
+    this.usuarioSub?.unsubscribe();
+  }
+ 
 
   dropdownOpen = false;
   visualNav = 'inicio';

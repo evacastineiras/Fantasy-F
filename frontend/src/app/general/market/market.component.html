@@ -1,11 +1,11 @@
 <div class="market-container">
   <div class="search-box">
-  <input 
-    type="text" 
-    placeholder="Busca por jugadora, posición o propietario..." 
-    (input)="filtrar($event)"
-    class="search-input">
-</div>
+    <input 
+      type="text" 
+      placeholder="Busca por jugadora, posición o propietario..." 
+      (input)="filtrar($event)"
+      class="search-input">
+  </div>
 
   <div class="market-list">
     <div *ngFor="let jugadora of jugadorasFiltradas | slice:0:limite" class="player-row">
@@ -48,14 +48,18 @@
       </div>
 
       <div class="right-section">
-          <button *ngIf="!jugadora.nombre_usuario" class="btn-pujar">
-            PUJAR
-          </button>
+        <button *ngIf="!jugadora.nombre_usuario" class="btn-pujar" (click)="mercadoAbierto && jugadora.id_ultimo_pujador !== idUsuarioLogueado && abrirPuja(jugadora)" [disabled]="!mercadoAbierto || jugadora.id_ultimo_pujador === idUsuarioLogueado"
+        [title]="!mercadoAbierto ? 'Mercado cerrado' : jugadora.id_ultimo_pujador === idUsuarioLogueado ? 'Ya tienes la puja más alta' : ''">
+          PUJAR
+        </button>
 
-          <button [routerLink]="['/jugadora', jugadora.id_jugadora]"  *ngIf="jugadora.nombre_usuario && jugadora.id_propietario !== idUsuarioLogueado" 
-                  class="btn-negociar">
-            NEGOCIAR
-          </button>
+        <button [routerLink]="['/jugadora', jugadora.id_jugadora]"
+                *ngIf="jugadora.nombre_usuario && jugadora.id_propietario !== idUsuarioLogueado" 
+                class="btn-negociar"
+                [disabled]="!mercadoAbierto"
+                [title]="!mercadoAbierto ? 'Mercado cerrado' : ''">
+          NEGOCIAR
+        </button>
       </div>
 
     </div>
@@ -66,5 +70,103 @@
       Mostrar más
     </button>
     <p class="count-text">Viendo {{ limite }} de {{ jugadorasFiltradas.length }} jugadoras</p>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="jugadoraSeleccionada" (click)="cerrarSiOverlay($event)">
+  <div class="modal-card">
+
+    <!-- Cabecera -->
+    <div class="modal-header">
+      <div class="player-identity">
+        <img [src]="'http://localhost:3000/' + jugadoraSeleccionada.foto"
+             class="player-avatar"
+             alt="{{ jugadoraSeleccionada.apodo }}">
+        <div class="player-meta">
+          <span class="player-pos">{{ jugadoraSeleccionada.posicion }}</span>
+          <h2 class="player-name">{{ jugadoraSeleccionada.apodo }}</h2>
+          <div class="club-row">
+            <img [src]="'http://localhost:3000/' + jugadoraSeleccionada.club_escudo"
+                 class="club-shield" alt="escudo">
+          </div>
+        </div>
+      </div>
+      <button class="btn-close" (click)="cerrarPuja()">✕</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Stats -->
+    <div class="bid-info-row">
+      <div class="bid-stat">
+        <span class="stat-label">Valor de mercado</span>
+        <span class="stat-value">{{ jugadoraSeleccionada.valor | number:'1.0-0' }}€</span>
+      </div>
+      <div class="bid-stat highlight">
+        <span class="stat-label">Puja actual</span>
+        <span class="stat-value accent">{{ pujaMasAlta | number:'1.0-0' }}€</span>
+      </div>
+    </div>
+
+    <!-- Input -->
+    <div class="bid-input-section">
+      <label class="input-label">Tu puja</label>
+      <div class="input-wrapper">
+        <input
+          type="number"
+          [(ngModel)]="montante"
+          [min]="pujaMasAlta + 250000"
+          step="250000"
+          class="bid-input"
+          (input)="validarMontante()">
+        <span class="currency-symbol">€</span>
+      </div>
+
+      <div class="bid-presets">
+        <button class="preset-btn" (click)="setPuja(pujaMasAlta + 250000)">+250K</button>
+        <button class="preset-btn" (click)="setPuja(pujaMasAlta + 500000)">+500K</button>
+        <button class="preset-btn" (click)="setPuja(pujaMasAlta + 1000000)">+1M</button>
+        <button class="preset-btn" (click)="setPuja(pujaMasAlta + 2500000)">+2.5M</button>
+      </div>
+
+      <!-- Barra de presupuesto -->
+      <div class="budget-bar-section">
+        <div class="budget-labels">
+          <span>Presupuesto disponible</span>
+          <span [ngClass]="{'text-danger': montante > presupuesto}">
+            {{ presupuesto | number:'1.0-0' }}€
+          </span>
+        </div>
+        <div class="budget-bar">
+          <div class="budget-fill"
+               [style.width.%]="calcularPorcentajePresupuesto()"
+               [ngClass]="{'over-budget': montante > presupuesto}">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Avisos -->
+    <div class="alert-box warning" *ngIf="montante > presupuesto">
+      ⚠️ No tienes suficiente presupuesto para esta puja.
+    </div>
+    <div class="alert-box info" *ngIf="montante <= presupuesto && montante >= pujaMasAlta + 250000">
+      ✓ Puja válida. Si nadie supera tu oferta cuando cierre el mercado, te llevas a {{ jugadoraSeleccionada.apodo }}.
+    </div>
+    <div class="alert-box warning" *ngIf="montante < pujaMasAlta + 250000 && montante > 0">
+      ⚠️ La puja mínima es {{ (pujaMasAlta + 250000) | number:'1.0-0' }}€.
+    </div>
+
+    <!-- Acciones -->
+    <div class="modal-actions">
+      <button class="btn-cancel" (click)="cerrarPuja()">Cancelar</button>
+      <button class="btn-pujar-modal"
+              [disabled]="!pujaValida()"
+              (click)="confirmarPuja()">
+        <span *ngIf="!enviando">PUJAR</span>
+        <span *ngIf="enviando" class="spinner"></span>
+      </button>
+    </div>
+
   </div>
 </div>
