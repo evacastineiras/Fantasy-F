@@ -8,6 +8,7 @@ const joinLeagues = require('./routes/leagueJoin');
 const playerRoutes = require('./routes/playerRoutes'); 
 const statsRoutes = require ('./routes/statsRoutes');
 const masterRoutes = require('./routes/masterRoutes');
+const teamRoutes = require('./routes/teamRoutes');
 
 
 const app = express();
@@ -24,7 +25,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/api/market', playerRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/master', masterRoutes);
-
+app.use('/api/team', teamRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Servidor corriendo en puerto ${PORT}`));
