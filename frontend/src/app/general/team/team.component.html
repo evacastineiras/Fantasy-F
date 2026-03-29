@@ -1,4 +1,214 @@
-<div class="gen-container">
-    <img src="../../../assets/field.png" alt="">
-</div>
+<div class="team-wrapper">
 
+  <!-- ══ SPINNER ══════════════════════════════════════════════ -->
+  <div class="spinner-overlay" *ngIf="loading">
+    <div class="spinner-ring"></div>
+    <span class="spinner-label">Cargando equipo...</span>
+  </div>
+
+  <ng-container *ngIf="!loading">
+
+    <!-- ══ CABECERA ══════════════════════════════════════════════ -->
+    <div class="team-header">
+      <div class="header-left">
+        <h1 class="team-title">Mi Equipo</h1>
+        <span class="jornada-badge" *ngIf="proximaJornada">
+          Jornada {{ proximaJornada.numero }}
+        </span>
+      </div>
+      <div class="header-right">
+        <div class="mercado-pill" [ngClass]="mercadoAbierto ? 'open' : 'closed'">
+          <span class="dot"></span>
+          {{ mercadoAbierto ? 'Mercado abierto · Edición activa' : 'Mercado cerrado · Solo lectura' }}
+        </div>
+        <button class="btn-save"
+                *ngIf="mercadoAbierto"
+                [disabled]="guardando"
+                (click)="guardarAlineacion()">
+          <span *ngIf="!guardando">Guardar alineación</span>
+          <span *ngIf="guardando" class="btn-spinner"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ══ LAYOUT PRINCIPAL ══════════════════════════════════════ -->
+    <!-- cdkDropListGroup conecta automáticamente todos los cdkDropList hijos -->
+    <div class="main-layout" cdkDropListGroup>
+
+      <!-- ── PANEL LATERAL — jugadoras no alineadas ─────────── -->
+      <div class="bench-panel" [class.collapsed]="benchCollapsed">
+        <button class="bench-toggle" (click)="benchCollapsed = !benchCollapsed">
+          <span class="toggle-icon">{{ benchCollapsed ? '▶' : '◀' }}</span>
+          <span class="toggle-label" *ngIf="!benchCollapsed">Suplentes</span>
+          <span class="bench-count">{{ suplentes.length }}</span>
+        </button>
+
+        <div class="bench-list"
+             cdkDropList
+             id="bench"
+             [cdkDropListData]="suplentes"
+             [cdkDropListSortingDisabled]="true"
+             (cdkDropListDropped)="onDrop($event)">
+
+          <div class="bench-card"
+               *ngFor="let jugadora of suplentes"
+               cdkDrag
+               [cdkDragData]="jugadora"
+               [cdkDragDisabled]="!mercadoAbierto">
+            <img [src]="backendUrl + jugadora.foto_carta"
+                 class="bench-carta"
+                 [alt]="jugadora.apodo"
+                 (error)="onImgError($event)">
+            <div class="bench-info">
+              <span class="bench-name">{{ jugadora.apodo }}</span>
+              <span class="bench-pos" [ngClass]="jugadora.posicion.toLowerCase()">
+                {{ jugadora.posicion }}
+              </span>
+            </div>
+            <div class="bench-pts" *ngIf="jugadora.puntos_ultima_jornada > 0">
+              {{ jugadora.puntos_ultima_jornada }}
+            </div>
+          </div>
+
+          <div class="bench-empty" *ngIf="suplentes.length === 0">
+            ✓ Todas en el once
+          </div>
+        </div>
+      </div>
+
+      <!-- ── CAMPO DE FÚTBOL ─────────────────────────────────── -->
+      <div class="field-container">
+
+        <!-- Césped SVG -->
+        <svg class="field-svg" viewBox="0 0 600 860" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+          <rect width="600" height="860" fill="#1a4a1a"/>
+          <rect y="0"   width="600" height="86"  fill="#1d521d" opacity="0.6"/>
+          <rect y="86"  width="600" height="86"  fill="#1a4a1a" opacity="0.6"/>
+          <rect y="172" width="600" height="86"  fill="#1d521d" opacity="0.6"/>
+          <rect y="258" width="600" height="86"  fill="#1a4a1a" opacity="0.6"/>
+          <rect y="344" width="600" height="86"  fill="#1d521d" opacity="0.6"/>
+          <rect y="430" width="600" height="86"  fill="#1a4a1a" opacity="0.6"/>
+          <rect y="516" width="600" height="86"  fill="#1d521d" opacity="0.6"/>
+          <rect y="602" width="600" height="86"  fill="#1a4a1a" opacity="0.6"/>
+          <rect y="688" width="600" height="86"  fill="#1d521d" opacity="0.6"/>
+          <rect y="774" width="600" height="86"  fill="#1a4a1a" opacity="0.6"/>
+          <rect x="20" y="20" width="560" height="820" rx="4" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+          <line x1="20" y1="430" x2="580" y2="430" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+          <circle cx="300" cy="430" r="80" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+          <circle cx="300" cy="430" r="4" fill="rgba(255,255,255,0.5)"/>
+          <rect x="120" y="20" width="360" height="130" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+          <rect x="210" y="20" width="180" height="55" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+          <rect x="120" y="710" width="360" height="130" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+          <rect x="210" y="785" width="180" height="55" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+          <circle cx="300" cy="110" r="4" fill="rgba(255,255,255,0.5)"/>
+          <circle cx="300" cy="750" r="4" fill="rgba(255,255,255,0.5)"/>
+          <path d="M 185 150 A 80 80 0 0 1 415 150" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+          <path d="M 185 710 A 80 80 0 0 0 415 710" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+        </svg>
+
+        <!-- ── FORMACIÓN 4-3-3 sobre el campo ─────────────────── -->
+        <div class="formation-grid">
+
+          <!-- DEL (3) -->
+          <div class="formation-row">
+            <ng-container *ngFor="let slot of slots['DEL']">
+              <div class="slot-wrapper"
+                   cdkDropList
+                   [id]="slot.id"
+                   [cdkDropListData]="slot.contenido"
+                   [cdkDropListEnterPredicate]="canEnterSlot(slot)"
+                   (cdkDropListDropped)="onDrop($event)">
+                <ng-container *ngIf="slot.contenido.length > 0; else emptySlotDEL">
+                  <div class="player-card" cdkDrag [cdkDragData]="slot.contenido[0]" [cdkDragDisabled]="!mercadoAbierto">
+                    <div class="pts-badge" *ngIf="slot.contenido[0].puntos_ultima_jornada > 0">{{ slot.contenido[0].puntos_ultima_jornada }}</div>
+                    <img [src]="backendUrl + slot.contenido[0].foto_carta" class="card-img" [alt]="slot.contenido[0].apodo" (error)="onImgError($event)">
+                    <span class="card-name">{{ slot.contenido[0].apodo }}</span>
+                  </div>
+                </ng-container>
+                <ng-template #emptySlotDEL>
+                  <div class="slot-empty" [class.mercado-cerrado]="!mercadoAbierto"><span class="slot-pos">DEL</span></div>
+                </ng-template>
+              </div>
+            </ng-container>
+          </div>
+
+          <!-- MED (3) -->
+          <div class="formation-row">
+            <ng-container *ngFor="let slot of slots['MED']">
+              <div class="slot-wrapper"
+                   cdkDropList
+                   [id]="slot.id"
+                   [cdkDropListData]="slot.contenido"
+                   [cdkDropListEnterPredicate]="canEnterSlot(slot)"
+                   (cdkDropListDropped)="onDrop($event)">
+                <ng-container *ngIf="slot.contenido.length > 0; else emptySlotMED">
+                  <div class="player-card" cdkDrag [cdkDragData]="slot.contenido[0]" [cdkDragDisabled]="!mercadoAbierto">
+                    <div class="pts-badge" *ngIf="slot.contenido[0].puntos_ultima_jornada > 0">{{ slot.contenido[0].puntos_ultima_jornada }}</div>
+                    <img [src]="backendUrl + slot.contenido[0].foto_carta" class="card-img" [alt]="slot.contenido[0].apodo" (error)="onImgError($event)">
+                    <span class="card-name">{{ slot.contenido[0].apodo }}</span>
+                  </div>
+                </ng-container>
+                <ng-template #emptySlotMED>
+                  <div class="slot-empty" [class.mercado-cerrado]="!mercadoAbierto"><span class="slot-pos">MED</span></div>
+                </ng-template>
+              </div>
+            </ng-container>
+          </div>
+
+          <!-- DEF (4) -->
+          <div class="formation-row">
+            <ng-container *ngFor="let slot of slots['DEF']">
+              <div class="slot-wrapper"
+                   cdkDropList
+                   [id]="slot.id"
+                   [cdkDropListData]="slot.contenido"
+                   [cdkDropListEnterPredicate]="canEnterSlot(slot)"
+                   (cdkDropListDropped)="onDrop($event)">
+                <ng-container *ngIf="slot.contenido.length > 0; else emptySlotDEF">
+                  <div class="player-card" cdkDrag [cdkDragData]="slot.contenido[0]" [cdkDragDisabled]="!mercadoAbierto">
+                    <div class="pts-badge" *ngIf="slot.contenido[0].puntos_ultima_jornada > 0">{{ slot.contenido[0].puntos_ultima_jornada }}</div>
+                    <img [src]="backendUrl + slot.contenido[0].foto_carta" class="card-img" [alt]="slot.contenido[0].apodo" (error)="onImgError($event)">
+                    <span class="card-name">{{ slot.contenido[0].apodo }}</span>
+                  </div>
+                </ng-container>
+                <ng-template #emptySlotDEF>
+                  <div class="slot-empty" [class.mercado-cerrado]="!mercadoAbierto"><span class="slot-pos">DEF</span></div>
+                </ng-template>
+              </div>
+            </ng-container>
+          </div>
+
+          <!-- POR (1) -->
+          <div class="formation-row">
+            <ng-container *ngFor="let slot of slots['POR']">
+              <div class="slot-wrapper"
+                   cdkDropList
+                   [id]="slot.id"
+                   [cdkDropListData]="slot.contenido"
+                   [cdkDropListEnterPredicate]="canEnterSlot(slot)"
+                   (cdkDropListDropped)="onDrop($event)">
+                <ng-container *ngIf="slot.contenido.length > 0; else emptySlotPOR">
+                  <div class="player-card" cdkDrag [cdkDragData]="slot.contenido[0]" [cdkDragDisabled]="!mercadoAbierto">
+                    <div class="pts-badge" *ngIf="slot.contenido[0].puntos_ultima_jornada > 0">{{ slot.contenido[0].puntos_ultima_jornada }}</div>
+                    <img [src]="backendUrl + slot.contenido[0].foto_carta" class="card-img" [alt]="slot.contenido[0].apodo" (error)="onImgError($event)">
+                    <span class="card-name">{{ slot.contenido[0].apodo }}</span>
+                  </div>
+                </ng-container>
+                <ng-template #emptySlotPOR>
+                  <div class="slot-empty" [class.mercado-cerrado]="!mercadoAbierto"><span class="slot-pos">POR</span></div>
+                </ng-template>
+              </div>
+            </ng-container>
+          </div>
+
+        </div><!-- /formation-grid -->
+      </div><!-- /field-container -->
+
+    </div><!-- /main-layout -->
+
+    <div class="closed-banner" *ngIf="!mercadoAbierto">
+      🔒 El mercado está cerrado. Podrás modificar tu alineación cuando vuelva a abrir.
+    </div>
+
+  </ng-container>
+</div>

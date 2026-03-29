@@ -76,7 +76,7 @@
 <div class="modal-overlay" *ngIf="jugadoraSeleccionada" (click)="cerrarSiOverlay($event)">
   <div class="modal-card">
 
-    <!-- Cabecera -->
+  
     <div class="modal-header">
       <div class="player-identity">
         <img [src]="'http://localhost:3000/' + jugadoraSeleccionada.foto"
@@ -89,14 +89,14 @@
             <img [src]="'http://localhost:3000/' + jugadoraSeleccionada.club_escudo"
                  class="club-shield" alt="escudo">
           </div>
-        </div>
+        </div> 
       </div>
       <button class="btn-close" (click)="cerrarPuja()">✕</button>
     </div>
 
     <div class="divider"></div>
 
-    <!-- Stats -->
+   
     <div class="bid-info-row">
       <div class="bid-stat">
         <span class="stat-label">Valor de mercado</span>
@@ -108,7 +108,7 @@
       </div>
     </div>
 
-    <!-- Input -->
+    
     <div class="bid-input-section">
       <label class="input-label">Tu puja</label>
       <div class="input-wrapper">
@@ -129,7 +129,7 @@
         <button class="preset-btn" (click)="setPuja(pujaMasAlta + 2500000)">+2.5M</button>
       </div>
 
-      <!-- Barra de presupuesto -->
+      
       <div class="budget-bar-section">
         <div class="budget-labels">
           <span>Presupuesto disponible</span>
@@ -146,7 +146,6 @@
       </div>
     </div>
 
-    <!-- Avisos -->
     <div class="alert-box warning" *ngIf="montante > presupuesto">
       ⚠️ No tienes suficiente presupuesto para esta puja.
     </div>
@@ -157,7 +156,7 @@
       ⚠️ La puja mínima es {{ (pujaMasAlta + 250000) | number:'1.0-0' }}€.
     </div>
 
-    <!-- Acciones -->
+
     <div class="modal-actions">
       <button class="btn-cancel" (click)="cerrarPuja()">Cancelar</button>
       <button class="btn-pujar-modal"

@@ -1,11 +1,238 @@
-.gen-container {
-    display: flex;
-    justify-content: center;
-    height: 100%;
-    background-color: #18181a;
+/* ═══════════════════════════════════════════════════════════
+   MY TEAM — Fantasy Liga F
+   ═══════════════════════════════════════════════════════════ */
+
+:host { display: block; }
+
+/* ── Spinner ─────────────────────────────────────────────── */
+.spinner-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10,10,20,0.85);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  z-index: 999;
+}
+.spinner-ring {
+  width: 52px; height: 52px;
+  border: 3px solid rgba(57,231,95,0.15);
+  border-top-color: #39e75f;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+.spinner-label { font-size: 13px; color: rgba(255,255,255,0.5); letter-spacing: 1px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Wrapper ─────────────────────────────────────────────── */
+.team-wrapper {
+  min-height: 100vh;
+  background: #0f0f1a;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
-.gen-container img {
-    height: 85vh;
-    width: auto;
+/* ── Header ──────────────────────────────────────────────── */
+.team-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.header-left { display: flex; align-items: center; gap: 12px; }
+.team-title { font-size: 22px; font-weight: 800; color: #fff; margin: 0; }
+.jornada-badge {
+  background: rgba(57,231,95,0.12);
+  border: 1px solid rgba(57,231,95,0.3);
+  color: #39e75f;
+  font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+  padding: 4px 10px; border-radius: 99px;
+}
+.header-right { display: flex; align-items: center; gap: 12px; }
+
+.mercado-pill {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 12px; font-weight: 600;
+  padding: 6px 14px; border-radius: 99px; border: 1px solid;
+}
+.mercado-pill.open  { background: rgba(57,231,95,0.08);  border-color: rgba(57,231,95,0.25);  color: #39e75f; }
+.mercado-pill.closed{ background: rgba(255,92,92,0.08);  border-color: rgba(255,92,92,0.25);  color: #ff8a8a; }
+.mercado-pill .dot  { width: 7px; height: 7px; border-radius: 50%; background: currentColor; animation: pulse 2s ease infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+.btn-save {
+  background: #39e75f; border: none; border-radius: 10px;
+  color: #0a1a0f; font-size: 13px; font-weight: 800;
+  padding: 10px 20px; cursor: pointer;
+  transition: background .15s, transform .1s;
+  min-width: 140px; min-height: 38px;
+  display: flex; align-items: center; justify-content: center;
+}
+.btn-save:hover:not(:disabled) { background: #4fff72; transform: translateY(-1px); }
+.btn-save:disabled { opacity: .4; cursor: not-allowed; }
+.btn-spinner {
+  width: 16px; height: 16px;
+  border: 2px solid rgba(10,26,15,.3); border-top-color: #0a1a0f;
+  border-radius: 50%; animation: spin .7s linear infinite; display: inline-block;
+}
+
+/* ── Layout ──────────────────────────────────────────────── */
+.main-layout { display: flex; gap: 16px; align-items: flex-start; }
+
+/* ── Panel suplentes ─────────────────────────────────────── */
+.bench-panel {
+  flex-shrink: 0; width: 200px;
+  background: #1a1a2e;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 14px; overflow: hidden;
+  transition: width .25s ease;
+  position: sticky; top: 20px;
+  max-height: calc(100vh - 120px);
+  display: flex; flex-direction: column;
+}
+.bench-panel.collapsed { width: 52px; }
+
+.bench-toggle {
+  display: flex; align-items: center; gap: 8px; padding: 12px;
+  background: rgba(255,255,255,.04);
+  border: none; border-bottom: 1px solid rgba(255,255,255,.06);
+  color: rgba(255,255,255,.7); cursor: pointer;
+  font-size: 12px; font-weight: 700; width: 100%;
+}
+.bench-toggle:hover { background: rgba(255,255,255,.08); }
+.toggle-icon { font-size: 10px; flex-shrink: 0; }
+.toggle-label { flex: 1; text-align: left; white-space: nowrap; }
+.bench-count {
+  background: #39e75f; color: #0a1a0f;
+  font-size: 10px; font-weight: 800;
+  width: 18px; height: 18px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+
+.bench-list {
+  overflow-y: auto; flex: 1; padding: 8px;
+  display: flex; flex-direction: column; gap: 6px;
+  min-height: 60px;
+}
+.bench-list::-webkit-scrollbar { width: 4px; }
+.bench-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 2px; }
+
+.bench-card {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 8px; padding: 6px 8px;
+  cursor: grab; position: relative;
+  transition: background .15s, border-color .15s;
+}
+.bench-card:hover { background: rgba(255,255,255,.08); border-color: rgba(57,231,95,.25); }
+.bench-card:active { cursor: grabbing; }
+.bench-carta { width: 32px; height: 44px; object-fit: cover; border-radius: 4px; flex-shrink: 0; }
+.bench-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.bench-name { font-size: 11px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px; }
+.bench-pos { font-size: 9px; font-weight: 700; letter-spacing: 1px; padding: 2px 5px; border-radius: 3px; width: fit-content; }
+.bench-pos.por { background: rgba(255,200,50,.2);  color: #ffc832; }
+.bench-pos.def { background: rgba(50,150,255,.2);  color: #3296ff; }
+.bench-pos.med { background: rgba(150,50,255,.2);  color: #9632ff; }
+.bench-pos.del { background: rgba(255,92,92,.2);   color: #ff5c5c; }
+.bench-pts { position: absolute; top: 4px; right: 4px; background: #39e75f; color: #0a1a0f; font-size: 9px; font-weight: 800; padding: 1px 4px; border-radius: 4px; }
+.bench-empty { text-align: center; color: rgba(255,255,255,.25); font-size: 11px; padding: 20px 0; }
+
+/* ── Campo ───────────────────────────────────────────────── */
+.field-container {
+  flex: 1; position: relative; border-radius: 16px; overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,.5);
+  max-width: 700px; margin: 0 auto;
+}
+.field-svg { width: 100%; height: auto; display: block; }
+
+/* ── Formación sobre el campo ────────────────────────────── */
+.formation-grid {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  justify-content: space-around;
+  padding: 5% 4%;
+}
+.formation-row { display: flex; justify-content: space-around; align-items: center; }
+
+/* ── Slot (cdkDropList) ──────────────────────────────────── */
+.slot-wrapper {
+  display: flex; align-items: center; justify-content: center;
+  width: 80px; height: 110px;
+}
+
+/* Slot vacío */
+.slot-empty {
+  width: 64px; height: 90px;
+  border: 2px dashed rgba(57,231,95,.3);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color .2s, background .2s;
+}
+.slot-empty.mercado-cerrado { border-color: rgba(255,255,255,.15); }
+.slot-empty:not(.mercado-cerrado):hover { background: rgba(57,231,95,.06); border-color: rgba(57,231,95,.5); }
+.slot-pos { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; color: rgba(255,255,255,.3); }
+
+/* ── Carta de jugadora ──────────────────────────────────── */
+.player-card {
+  position: relative; width: 68px; cursor: grab;
+  transition: transform .15s;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,.5));
+}
+.player-card:hover { transform: translateY(-4px) scale(1.04); }
+.player-card:active { cursor: grabbing; }
+.card-img { width: 100%; height: auto; display: block; border-radius: 8px; object-fit: cover; }
+.card-name {
+  display: block; text-align: center;
+  font-size: 9px; font-weight: 700; color: #fff;
+  margin-top: 4px; text-shadow: 0 1px 4px rgba(0,0,0,.8);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 72px;
+}
+.pts-badge {
+  position: absolute; top: -6px; right: -6px;
+  background: #39e75f; color: #0a1a0f;
+  font-size: 10px; font-weight: 900;
+  min-width: 20px; height: 20px; border-radius: 99px;
+  display: flex; align-items: center; justify-content: center; padding: 0 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.4); z-index: 2;
+}
+
+/* ── CDK clases globales ─────────────────────────────────── */
+.cdk-drag-preview {
+  width: 68px; border-radius: 8px; overflow: hidden;
+  opacity: .9; box-shadow: 0 8px 24px rgba(0,0,0,.5);
+}
+.cdk-drag-placeholder { opacity: 0; }
+.cdk-drag-animating { transition: transform 250ms cubic-bezier(0,0,.2,1); }
+.cdk-drop-list-dragging .player-card:not(.cdk-drag-placeholder),
+.cdk-drop-list-dragging .bench-card:not(.cdk-drag-placeholder) {
+  transition: transform 250ms cubic-bezier(0,0,.2,1);
+}
+/* Resalta el slot cuando algo flota encima */
+.cdk-drop-list-receiving .slot-empty {
+  background: rgba(57,231,95,.1);
+  border-color: #39e75f;
+}
+
+/* ── Banner mercado cerrado ──────────────────────────────── */
+.closed-banner {
+  margin-top: 16px;
+  background: rgba(255,92,92,.08);
+  border: 1px solid rgba(255,92,92,.2);
+  border-radius: 10px; padding: 12px 18px;
+  color: #ff8a8a; font-size: 13px; font-weight: 500; text-align: center;
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .main-layout { flex-direction: column-reverse; }
+  .bench-panel { width: 100%; position: static; max-height: 200px; }
+  .bench-list  { flex-direction: row; flex-wrap: wrap; overflow-x: auto; }
+  .bench-panel.collapsed { width: 100%; }
+  .slot-wrapper { width: 60px; height: 90px; }
+  .player-card  { width: 54px; }
 }
