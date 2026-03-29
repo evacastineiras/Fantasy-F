@@ -307,7 +307,7 @@
     <div class="modal-actions">
       <button class="btn-cancel" (click)="cerrarPuja()">Cancelar</button>
       <button class="btn-pujar-modal" [disabled]="!pujaValida()" (click)="confirmarPuja()">
-        <span *ngIf="!enviando">CONFIRMAR PUJA</span>
+        <span *ngIf="!enviando">PUJAR</span>
         <span *ngIf="enviando" class="spinner"></span>
       </button>
     </div>

@@ -483,11 +483,6 @@
 }
 
 
-/* ═══════════════════════════════════════════════
-   BID MODAL — Fantasy Liga F
-   Paleta: oscuro #1c1c2e / card #252540 / verde #39e75f
-   ═══════════════════════════════════════════════ */
-
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -505,9 +500,8 @@
   to   { opacity: 1; }
 }
 
-/* ── Card ── */
 .modal-card {
-  background: #1e1e32;
+  background: var(--background-grey);
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 16px;
   width: 100%;
@@ -523,7 +517,6 @@
   to   { transform: translateY(0);    opacity: 1; }
 }
 
-/* ── Header ── */
 .modal-header {
   display: flex;
   align-items: flex-start;
@@ -543,7 +536,7 @@
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid rgba(57, 231, 95, 0.4);
-  background: #2a2a44;
+  background: #333333;
 }
 
 .player-meta {
@@ -556,7 +549,7 @@
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 2px;
-  color: #39e75f;
+  color: var(--primary-green);
   text-transform: uppercase;
 }
 
@@ -645,7 +638,7 @@
 }
 
 .stat-value.accent {
-  color: #39e75f;
+  color: var(--primary-green);
 }
 
 /* ── Input ── */
@@ -692,7 +685,7 @@
 }
 
 .bid-input:focus {
-  border-color: #39e75f;
+  border-color: var(--primary-green);
   background: rgba(57, 231, 95, 0.04);
 }
 
@@ -727,7 +720,7 @@
 .preset-btn:hover {
   background: rgba(57, 231, 95, 0.1);
   border-color: rgba(57, 231, 95, 0.35);
-  color: #39e75f;
+  color: var(--primary-green);
 }
 
 /* ── Barra de presupuesto ── */
@@ -757,7 +750,7 @@
 
 .budget-fill {
   height: 100%;
-  background: #39e75f;
+  background: var(--primary-green);
   border-radius: 99px;
   transition: width 0.25s ease, background 0.2s;
 }
@@ -802,7 +795,7 @@
   border-radius: 10px;
   color: rgba(255,255,255,0.6);
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 800;
   padding: 14px;
   cursor: pointer;
   transition: background 0.15s;
@@ -813,9 +806,9 @@
   color: #fff;
 }
 
-.btn-pujar {
+.btn-pujar-modal {
   flex: 2;
-  background: #39e75f;
+  background: var(--primary-green);
   border: none;
   border-radius: 10px;
   color: #0a1a0f;
@@ -866,10 +859,4 @@
     margin: 16px;
     padding: 22px 18px 20px;
   }
-}
-
-.btn-ofrecer.disabled {
-    background-color: #444 !important;
-    cursor: not-allowed;
-    opacity: 0.6;
 }
