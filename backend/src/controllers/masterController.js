@@ -103,14 +103,14 @@ async function getJornadaParaAlinear(fechaStr) {
 
 const getInitialData = async (req, res) => {
     const id_usuario = parseInt(req.params.id_usuario);
-    const fechaActual = getVirtualDate();
+    const fechaVirtual = getVirtualDate();
     try {
         if (id_usuario !== 1)
             return res.status(403).json({ message: "La petición está bloqueada para usuarios comunes" });
 
         const [ligasRes]    = await pool.query('SELECT COUNT(*) as total FROM liga');
         const [usuariosRes] = await pool.query('SELECT COUNT(*) as total FROM usuario');
-        const [jornadaRes]  = await pool.query('SELECT numero as actual, f_inicio FROM jornada WHERE DATE(f_inicio) <= DATE(?) ORDER BY numero DESC', [fechaActual]);
+        const [jornadaRes]  = await pool.query('SELECT numero as actual, f_inicio FROM jornada WHERE DATE(f_inicio) <= DATE(?) ORDER BY numero DESC', [fechaVirtual]);
         const mercadoAbierto = await calcularMercadoAbierto();
 
 
@@ -121,6 +121,7 @@ const getInitialData = async (req, res) => {
             fechaVirtual:        fechaActual,
             mercadoAbierto
         });
+
     } catch (error) {
         console.error("Error en getInitialData Admin:", error);
         res.status(500).json({ message: "Error interno del servidor" });
