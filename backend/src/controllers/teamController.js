@@ -43,6 +43,7 @@ const calcularMercadoAbierto = async () => {
 // ─────────────────────────────────────────────────────────────────────────────
 async function getMyTeam(req, res) {
     const { id_usuario } = req.params;
+    const fechaVirtual = getVirtualDate();
 
     try {
         // 1. Plantilla del usuario
@@ -56,24 +57,41 @@ async function getMyTeam(req, res) {
 
         const { id_plantilla, id_liga } = plantilla;
 
-        // 2. Última jornada con rendimiento registrado (para mostrar puntos)
+        // 2. Última jornada YA JUGADA (f_fin <= fecha virtual) con rendimiento registrado
+        //    Solo mostramos puntos de jornadas que realmente se han disputado
         const [[ultimaJornada]] = await pool.query(
             `SELECT j.id_jornada, j.numero
              FROM jornada j
-             WHERE EXISTS (
-                 SELECT 1 FROM rendimiento_jornada rj WHERE rj.id_jornada = j.id_jornada
-             )
+             WHERE j.f_fin <= ?
+               AND EXISTS (
+                   SELECT 1 FROM rendimiento_jornada rj WHERE rj.id_jornada = j.id_jornada
+               )
              ORDER BY j.numero DESC
-             LIMIT 1`
+             LIMIT 1`,
+            [fechaVirtual]
         );
 
-        // 3. Próxima jornada a jugar (para la que se guarda la alineación)
-        const [[proximaJornada]] = await pool.query(
+        // 3. Jornada para la que alinear:
+        //    - Si hoy está dentro del rango de una jornada (f_inicio <= hoy <= f_fin) → esa
+        //    - Si no, la primera con f_inicio > hoy
+        let proximaJornada = null;
+        const [[jornadaActiva]] = await pool.query(
             `SELECT id_jornada, numero FROM jornada
-             WHERE f_inicio > NOW()
-             ORDER BY f_inicio ASC
-             LIMIT 1`
+             WHERE f_inicio <= ? AND f_fin >= ?
+             ORDER BY f_inicio ASC LIMIT 1`,
+            [fechaVirtual, fechaVirtual]
         );
+        if (jornadaActiva) {
+            proximaJornada = jornadaActiva;
+        } else {
+            const [[jornadaFutura]] = await pool.query(
+                `SELECT id_jornada, numero FROM jornada
+                 WHERE f_inicio > ?
+                 ORDER BY f_inicio ASC LIMIT 1`,
+                [fechaVirtual]
+            );
+            proximaJornada = jornadaFutura ?? null;
+        }
 
         // 4. Jugadoras de la plantilla con puntos de la última jornada
         const [jugadoras] = await pool.query(

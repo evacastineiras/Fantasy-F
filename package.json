@@ -1,5 +1,9 @@
 {
   "dependencies": {
+    "@angular/animations": "^20.3.18",
+    "@angular/cdk": "^20.2.14",
+    "@angular/common": "^20.3.18",
+    "@angular/core": "^20.3.18",
     "chart.js": "^4.5.1",
     "ngx-avatar-2": "^5.3.0",
     "ngx-image-cropper": "^9.1.5"

@@ -606,7 +606,7 @@ CREATE TABLE rendimiento_jornada (
   amarillas         SMALLINT UNSIGNED NOT NULL DEFAULT 0,
   rojas             SMALLINT UNSIGNED NOT NULL DEFAULT 0,
   minutos_jugados   SMALLINT UNSIGNED NOT NULL DEFAULT 0,
-  puntos            SMALLINT NOT NULL DEFAULT 0,
+  puntos            SMALLINT NULL DEFAULT 0,
   valoracion 		DECIMAL(3,1) NULL DEFAULT NULL,
   PRIMARY KEY (id_jugadora, id_jornada),
   CONSTRAINT fk_rj_jugadora FOREIGN KEY (id_jugadora) REFERENCES jugadora(id_jugadora)
@@ -686,16 +686,23 @@ CREATE TABLE notificacion (
 
 
 
--- =====================
--- VISTA de CLASIFICACION 
--- =====================
+DROP VIEW IF EXISTS v_clasificacion_liga;
+ 
 CREATE VIEW v_clasificacion_liga AS
-SELECT u.id_liga, u.id_usuario, u.nombre_usuario,
-       SUM(rj.puntos) AS puntos_totales
+SELECT
+    u.id_liga,
+    u.id_usuario,
+    u.nombre_usuario,
+    COALESCE(SUM(rj.puntos), 0) AS puntos_totales
 FROM usuario u
-JOIN plantilla p ON p.id_usuario = u.id_usuario
-JOIN plantilla_jugadora pj ON pj.id_plantilla = p.id_plantilla
-JOIN rendimiento_jornada rj ON rj.id_jugadora = pj.id_jugadora
+JOIN plantilla p ON p.id_usuario = u.id_usuario AND p.id_liga = u.id_liga
+-- Solo sumamos puntos de jugadoras que estaban como titulares en esa jornada
+JOIN alineacion a ON a.id_plantilla = p.id_plantilla
+JOIN alineacion_item ai ON ai.id_alineacion = a.id_alineacion AND ai.es_titular = 1
+JOIN plantilla_jugadora pj ON pj.id_entry = ai.id_entry
+JOIN rendimiento_jornada rj
+    ON rj.id_jugadora = pj.id_jugadora
+    AND rj.id_jornada = a.id_jornada  -- los puntos corresponden a la jornada de la alineación
 GROUP BY u.id_liga, u.id_usuario, u.nombre_usuario;
 
 

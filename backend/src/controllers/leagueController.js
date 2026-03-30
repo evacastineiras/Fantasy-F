@@ -1,4 +1,8 @@
 const pool = require('../db');
+const fs = require('fs');
+const path = require('path');
+ 
+const pathFecha = path.join(__dirname, '../data/config_liga.json');
 
 async function createLeague(req, res) 
 {
@@ -124,6 +128,12 @@ async function joinPrivateLeague(req, res)
     }
     
 }
+
+const getVirtualDate = () => {
+    if (!fs.existsSync(pathFecha)) return new Date('2024-09-15');
+    const data = JSON.parse(fs.readFileSync(pathFecha));
+    return new Date(data.fecha);
+};
 
 async function joinRandomLeague(req, res) {
     let connection;
@@ -292,7 +302,10 @@ async function changeLeague(req, res) {
 
 async function getClasificacion(req, res) {
     console.log("Petición de clasificación para usuario:", req.params.id_usuario);
-    
+ 
+    // Fecha virtual para filtrar jornadas ya jugadas
+    const fechaVirtual = getVirtualDate().toISOString().split('T')[0];
+ 
     const query = `
         SELECT 
             l.nombre AS liga_nombre,
@@ -303,9 +316,12 @@ async function getClasificacion(req, res) {
             CAST(COALESCE(SUM(rj.puntos), 0) AS SIGNED) AS puntos_totales
         FROM liga l
         JOIN usuario u ON l.id_liga = u.id_liga
-        LEFT JOIN plantilla p ON u.id_usuario = p.id_usuario
+        LEFT JOIN plantilla p ON u.id_usuario = p.id_usuario AND p.id_liga = u.id_liga
         LEFT JOIN alineacion al ON p.id_plantilla = al.id_plantilla
+        LEFT JOIN jornada jor ON al.id_jornada = jor.id_jornada
+            AND jor.f_fin <= ?          -- solo jornadas ya disputadas según fecha virtual
         LEFT JOIN alineacion_item ai ON al.id_alineacion = ai.id_alineacion
+            AND ai.es_titular = 1       -- solo jugadoras que estaban en el once
         LEFT JOIN plantilla_jugadora pj ON ai.id_entry = pj.id_entry
         LEFT JOIN rendimiento_jornada rj ON pj.id_jugadora = rj.id_jugadora 
             AND rj.id_jornada = al.id_jornada
@@ -313,10 +329,10 @@ async function getClasificacion(req, res) {
         GROUP BY u.id_usuario, u.nombre_usuario, u.foto_perfil_url, l.nombre, l.id_liga
         ORDER BY puntos_totales DESC;
     `;
-
+ 
     try {
-        const [rows] = await pool.query(query, [req.params.id_usuario]);
-        
+        const [rows] = await pool.query(query, [fechaVirtual, req.params.id_usuario]);
+ 
         if (rows.length === 0) {
             return res.json({
                 nombre: "Sin Liga",
@@ -324,7 +340,7 @@ async function getClasificacion(req, res) {
                 ranking: []
             });
         }
-
+ 
         const respuesta = {
             nombre: rows[0].liga_nombre,
             id_publico: rows[0].liga_id,
@@ -335,7 +351,7 @@ async function getClasificacion(req, res) {
                 puntos: r.puntos_totales
             }))
         };
-        
+ 
         res.json(respuesta);
     } catch (error) {
         console.error("Error real en getClasificacion:", error);

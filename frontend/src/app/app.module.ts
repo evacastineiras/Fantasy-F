@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { LOCALE_ID } from '@angular/core'; 
 import { registerLocaleData } from '@angular/common';
 import localeEs from '@angular/common/locales/es';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 
 import { AppComponent } from './app.component';
 import { LandingBaseComponent } from './landing/landing-base/landing-base.component';
@@ -65,7 +66,8 @@ registerLocaleData(localeEs, 'es');
     DatePipe,
     FormsModule,
     HttpClientModule,
-    AppRoutingModule
+    AppRoutingModule,
+    DragDropModule
   ],
   providers: [{ provide: LOCALE_ID, useValue: 'es' }],
   bootstrap: [AppComponent]

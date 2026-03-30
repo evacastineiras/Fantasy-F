@@ -757,12 +757,20 @@ async function placeBidFree(req, res) {
             [id_entry, id_comprador]
         );
  
+        console.log("Pujas que vamos a superar desde  market: " + pujasSuperar)
         for (const p of pujasSuperar) {
             // Marcar como retirada
             await connection.query(
                 `UPDATE puja SET estado = 'retirada', resuelta_en = ? WHERE id_puja = ?`,
                 [fechaNotif, p.id_puja]
             );
+
+            const cosa = await connection.query(
+            `SELECT id_puja, id_comprador, montante AS montante_superado FROM puja
+             WHERE id_entry = ? AND estado = 'pendiente' AND id_comprador != ?`,
+            [id_entry, id_comprador]
+        );
+        console.log("Pujas que hemos superado en market: " + cosa)
  
             // Devolver presupuesto
             await connection.query(
@@ -787,6 +795,7 @@ async function placeBidFree(req, res) {
  
         if (pujaPropia) {
             
+            console.log("Puja propia esto no tiene que estar pasando checka ahí")
             const diferencia = montante - montantePrevio;
             await connection.query(
                 'UPDATE puja SET montante = ?, creada_en = ? WHERE id_puja = ?',

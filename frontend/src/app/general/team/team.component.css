@@ -1,25 +1,17 @@
-/* ═══════════════════════════════════════════════════════════
-   MY TEAM — Fantasy Liga F
-   ═══════════════════════════════════════════════════════════ */
-
 :host { display: block; }
 
 /* ── Spinner ─────────────────────────────────────────────── */
 .spinner-overlay {
-  position: fixed;
-  inset: 0;
+  position: fixed; inset: 0;
   background: rgba(10,10,20,0.85);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  z-index: 999;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 16px; z-index: 999;
 }
 .spinner-ring {
   width: 52px; height: 52px;
   border: 3px solid rgba(57,231,95,0.15);
-  border-top-color: #39e75f;
+  border-top-color: var(--primary-green);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -29,26 +21,23 @@
 /* ── Wrapper ─────────────────────────────────────────────── */
 .team-wrapper {
   min-height: 100vh;
-  background: #0f0f1a;
+  background: var(--background-grey);
   padding: 20px;
   box-sizing: border-box;
 }
 
 /* ── Header ──────────────────────────────────────────────── */
 .team-header {
-  display: flex;
-  align-items: center;
+  display: flex; align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-  gap: 12px;
+  margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
 }
 .header-left { display: flex; align-items: center; gap: 12px; }
 .team-title { font-size: 22px; font-weight: 800; color: #fff; margin: 0; }
 .jornada-badge {
   background: rgba(57,231,95,0.12);
   border: 1px solid rgba(57,231,95,0.3);
-  color: #39e75f;
+  color: var(--primary-green);
   font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
   padding: 4px 10px; border-radius: 99px;
 }
@@ -59,20 +48,20 @@
   font-size: 12px; font-weight: 600;
   padding: 6px 14px; border-radius: 99px; border: 1px solid;
 }
-.mercado-pill.open  { background: rgba(57,231,95,0.08);  border-color: rgba(57,231,95,0.25);  color: #39e75f; }
+.mercado-pill.open  { background: rgba(57,231,95,0.08); border-color: rgba(57,231,95,0.25); color: var(--primary-green); }
 .mercado-pill.closed{ background: rgba(255,92,92,0.08);  border-color: rgba(255,92,92,0.25);  color: #ff8a8a; }
 .mercado-pill .dot  { width: 7px; height: 7px; border-radius: 50%; background: currentColor; animation: pulse 2s ease infinite; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
 
 .btn-save {
-  background: #39e75f; border: none; border-radius: 10px;
+  background: var(--primary-green); border: none; border-radius: 10px;
   color: #0a1a0f; font-size: 13px; font-weight: 800;
   padding: 10px 20px; cursor: pointer;
   transition: background .15s, transform .1s;
   min-width: 140px; min-height: 38px;
   display: flex; align-items: center; justify-content: center;
 }
-.btn-save:hover:not(:disabled) { background: #4fff72; transform: translateY(-1px); }
+.btn-save:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-1px); }
 .btn-save:disabled { opacity: .4; cursor: not-allowed; }
 .btn-spinner {
   width: 16px; height: 16px;
@@ -81,12 +70,12 @@
 }
 
 /* ── Layout ──────────────────────────────────────────────── */
-.main-layout { display: flex; gap: 16px; align-items: flex-start; }
+.main-layout { display: flex; align-items: flex-start; gap: 16px; }
 
 /* ── Panel suplentes ─────────────────────────────────────── */
 .bench-panel {
   flex-shrink: 0; width: 200px;
-  background: #1a1a2e;
+  background: #2b2b2b;
   border: 1px solid rgba(255,255,255,0.06);
   border-radius: 14px; overflow: hidden;
   transition: width .25s ease;
@@ -107,7 +96,7 @@
 .toggle-icon { font-size: 10px; flex-shrink: 0; }
 .toggle-label { flex: 1; text-align: left; white-space: nowrap; }
 .bench-count {
-  background: #39e75f; color: #0a1a0f;
+  background: var(--primary-green); color: #0a1a0f;
   font-size: 10px; font-weight: 800;
   width: 18px; height: 18px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
@@ -128,6 +117,8 @@
   border-radius: 8px; padding: 6px 8px;
   cursor: grab; position: relative;
   transition: background .15s, border-color .15s;
+  /* Evitar que el CDK encoja el elemento al entrar en un drop list */
+  will-change: transform;
 }
 .bench-card:hover { background: rgba(255,255,255,.08); border-color: rgba(57,231,95,.25); }
 .bench-card:active { cursor: grabbing; }
@@ -135,11 +126,11 @@
 .bench-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .bench-name { font-size: 11px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px; }
 .bench-pos { font-size: 9px; font-weight: 700; letter-spacing: 1px; padding: 2px 5px; border-radius: 3px; width: fit-content; }
-.bench-pos.por { background: rgba(255,200,50,.2);  color: #ffc832; }
+.bench-pos.por { background: rgba(255,200,50,.2); color: #ffc832; }
 .bench-pos.def { background: rgba(50,150,255,.2);  color: #3296ff; }
 .bench-pos.med { background: rgba(150,50,255,.2);  color: #9632ff; }
 .bench-pos.del { background: rgba(255,92,92,.2);   color: #ff5c5c; }
-.bench-pts { position: absolute; top: 4px; right: 4px; background: #39e75f; color: #0a1a0f; font-size: 9px; font-weight: 800; padding: 1px 4px; border-radius: 4px; }
+.bench-pts { position: absolute; top: 4px; right: 4px; background: var(--primary-green); color: #0a1a0f; font-size: 9px; font-weight: 800; padding: 1px 4px; border-radius: 4px; }
 .bench-empty { text-align: center; color: rgba(255,255,255,.25); font-size: 11px; padding: 20px 0; }
 
 /* ── Campo ───────────────────────────────────────────────── */
@@ -155,19 +146,22 @@
   position: absolute; inset: 0;
   display: flex; flex-direction: column;
   justify-content: space-around;
-  padding: 5% 4%;
+  padding: 3% 2%;
 }
 .formation-row { display: flex; justify-content: space-around; align-items: center; }
 
-/* ── Slot (cdkDropList) ──────────────────────────────────── */
+/* ── Slot (cdkDropList wrapper) ──────────────────────────── */
 .slot-wrapper {
   display: flex; align-items: center; justify-content: center;
-  width: 80px; height: 110px;
+  /* Tamaño generoso para que la carta quepa sin compresión */
+  width: 110px;
+  height: 150px;
 }
 
 /* Slot vacío */
 .slot-empty {
-  width: 64px; height: 90px;
+  width: 100px;
+  height: 138px;
   border: 2px dashed rgba(57,231,95,.3);
   border-radius: 10px;
   display: flex; align-items: center; justify-content: center;
@@ -177,45 +171,75 @@
 .slot-empty:not(.mercado-cerrado):hover { background: rgba(57,231,95,.06); border-color: rgba(57,231,95,.5); }
 .slot-pos { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; color: rgba(255,255,255,.3); }
 
-/* ── Carta de jugadora ──────────────────────────────────── */
+/* ── Carta de jugadora en el campo ──────────────────────── */
 .player-card {
-  position: relative; width: 68px; cursor: grab;
-  transition: transform .15s;
+  position: relative;
+  /* Tamaño real de la carta — ajusta este valor a tu gusto */
+  width: 100px;
+  cursor: grab;
+  /* transform none evita que el CDK encoja la carta al entrar en un drop list */
+  will-change: transform;
+  /* Solo animamos el hover, no dejamos que el CDK meta transform extra */
+  transition: filter .15s;
   filter: drop-shadow(0 4px 12px rgba(0,0,0,.5));
 }
-.player-card:hover { transform: translateY(-4px) scale(1.04); }
+/* El hover levanta la carta sin cambiar su tamaño */
+.player-card:hover {
+  filter: drop-shadow(0 8px 20px rgba(57,231,95,.35)) drop-shadow(0 4px 12px rgba(0,0,0,.5));
+}
 .player-card:active { cursor: grabbing; }
 .card-img { width: 100%; height: auto; display: block; border-radius: 8px; object-fit: cover; }
 .card-name {
   display: block; text-align: center;
   font-size: 9px; font-weight: 700; color: #fff;
   margin-top: 4px; text-shadow: 0 1px 4px rgba(0,0,0,.8);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 72px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 100px;
 }
 .pts-badge {
   position: absolute; top: -6px; right: -6px;
-  background: #39e75f; color: #0a1a0f;
+  background: var(--primary-green); color: #0a1a0f;
   font-size: 10px; font-weight: 900;
   min-width: 20px; height: 20px; border-radius: 99px;
   display: flex; align-items: center; justify-content: center; padding: 0 4px;
   box-shadow: 0 2px 8px rgba(0,0,0,.4); z-index: 2;
 }
 
-/* ── CDK clases globales ─────────────────────────────────── */
+/* ── CDK — preview y placeholder ────────────────────────────── */
+
+/* Preview que sigue al cursor: NO tocar transform, el CDK lo necesita para moverse */
 .cdk-drag-preview {
-  width: 68px; border-radius: 8px; overflow: hidden;
-  opacity: .9; box-shadow: 0 8px 24px rgba(0,0,0,.5);
+  width: 100px;
+  border-radius: 8px;
+  overflow: hidden;
+  opacity: .92;
+  box-shadow: 0 12px 32px rgba(0,0,0,.6);
+  /* box-sizing para que el tamaño sea exacto */
+  box-sizing: border-box;
 }
-.cdk-drag-placeholder { opacity: 0; }
+
+/* El placeholder donde caerá la carta — invisible pero ocupa espacio */
+.cdk-drag-placeholder {
+  opacity: 0;
+  min-width: 100px;
+  min-height: 138px;
+  box-sizing: border-box;
+}
+
+/* Animación de retorno si se suelta en lugar inválido */
 .cdk-drag-animating { transition: transform 250ms cubic-bezier(0,0,.2,1); }
+
+/* Los slots son fijos, no se reordenan al arrastrar */
 .cdk-drop-list-dragging .player-card:not(.cdk-drag-placeholder),
 .cdk-drop-list-dragging .bench-card:not(.cdk-drag-placeholder) {
-  transition: transform 250ms cubic-bezier(0,0,.2,1);
+  transition: none;
 }
-/* Resalta el slot cuando algo flota encima */
+
+/* Resaltar slot cuando una carta válida flota encima */
 .cdk-drop-list-receiving .slot-empty {
   background: rgba(57,231,95,.1);
-  border-color: #39e75f;
+  border-color: var(--primary-green);
+  border-style: solid;
 }
 
 /* ── Banner mercado cerrado ──────────────────────────────── */
@@ -228,11 +252,22 @@
 }
 
 /* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .slot-wrapper { width: 80px; height: 115px; }
+  .slot-empty   { width: 72px; height: 105px; }
+  .player-card  { width: 72px; }
+  .cdk-drag-preview    { width: 72px; }
+  .cdk-drag-placeholder{ min-width: 72px; min-height: 105px; }
+}
+
 @media (max-width: 768px) {
   .main-layout { flex-direction: column-reverse; }
   .bench-panel { width: 100%; position: static; max-height: 200px; }
   .bench-list  { flex-direction: row; flex-wrap: wrap; overflow-x: auto; }
   .bench-panel.collapsed { width: 100%; }
-  .slot-wrapper { width: 60px; height: 90px; }
-  .player-card  { width: 54px; }
+  .slot-wrapper { width: 64px; height: 95px; }
+  .slot-empty   { width: 58px; height: 88px; }
+  .player-card  { width: 58px; }
+  .cdk-drag-preview    { width: 58px; }
+  .cdk-drag-placeholder{ min-width: 58px; min-height: 88px; }
 }
