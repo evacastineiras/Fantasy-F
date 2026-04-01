@@ -64,12 +64,13 @@ const calcularMercadoAbierto = async () => {
     const [[ultimoPartido]] = await pool.query(
         `SELECT MAX(DATE(fecha)) as ultima_fecha FROM partido WHERE DATE(fecha) <= ?`, [hoy]
     );
-    if (!ultimoPartido?.ultima_fecha) return false;
+    if (!ultimoPartido?.ultima_fecha) return true;
 
     const apertura = new Date(ultimoPartido.ultima_fecha);
     apertura.setDate(apertura.getDate() + 1);
     const cierre = new Date(apertura);
     cierre.setDate(cierre.getDate() + 3);
+    console.log("llegue al final: "+ new Date(hoy) >= apertura && new Date(hoy) < cierre);
 
     return new Date(hoy) >= apertura && new Date(hoy) < cierre;
 };
@@ -110,15 +111,16 @@ const getInitialData = async (req, res) => {
 
         const [ligasRes]    = await pool.query('SELECT COUNT(*) as total FROM liga');
         const [usuariosRes] = await pool.query('SELECT COUNT(*) as total FROM usuario');
-        const [jornadaRes]  = await pool.query('SELECT numero as actual, f_inicio FROM jornada WHERE DATE(f_inicio) <= DATE(?) ORDER BY numero DESC', [fechaVirtual]);
+        const [jornadaRes]  = await pool.query('SELECT numero as actual FROM jornada WHERE DATE(f_inicio) <= DATE(?) ORDER BY numero DESC', [fechaVirtual]);
         const mercadoAbierto = await calcularMercadoAbierto();
 
 
+        const numeroJornada = (jornadaRes.length > 0) ? jornadaRes[0].actual : 0;
         res.json({
             totalLigas:          ligasRes[0].total,
             totalUsuarios:       usuariosRes[0].total,
-            jornadaActualNumero: jornadaRes[0].actual || 0,
-            fechaVirtual:        fechaActual,
+            jornadaActualNumero: numeroJornada,
+            fechaVirtual:        fechaVirtual,
             mercadoAbierto
         });
 
@@ -132,6 +134,8 @@ const getInitialData = async (req, res) => {
 
 const nextDay = async (req, res) => {
     try {
+
+    
         const estadoAntes = await calcularMercadoAbierto();
 
         let fechaActual = getVirtualDate();
@@ -146,6 +150,7 @@ const nextDay = async (req, res) => {
         const ayer = new Date(fechaActual);
         ayer.setDate(ayer.getDate() - 1);
         const ayerStr = ayer.toISOString().split('T')[0];
+        
 
         // ── 1. Calcular puntos de los partidos jugados ayer ──────────────────
         const [partidosAyer] = await pool.query(
@@ -222,11 +227,13 @@ const nextDay = async (req, res) => {
                 )
             ));
 
+
             // ── 3. Al cerrar el mercado: resolver pujas y congelar alineaciones ──
             if (!estadoDespues) {
                 await resolverPujasLibres(fechaNotif, nuevaFechaStr);
                 await congelarAlineaciones(nuevaFechaStr);
             }
+             
         }
 
         // ── 4. Expirar pujas entre jornadas ──────────────────────────────────
@@ -275,6 +282,7 @@ const nextDay = async (req, res) => {
                 );
             }
         }
+       
 
         res.json({ message: "Tiempo avanzado", nuevaFecha: nuevaFechaStr, mercadoAbierto: estadoDespues });
 
@@ -313,6 +321,7 @@ const nextDay = async (req, res) => {
                 ));
             }
         }
+         
 
     } catch (error) {
         console.error('Error en nextDay:', error);

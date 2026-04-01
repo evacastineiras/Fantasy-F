@@ -49,7 +49,6 @@ export class MasterPanelComponent implements OnInit {
 
  
   avanzarTiempo() {
-    
     this.masterService.nextDay({}).subscribe({
       next: (res: any) => {
         this.mostrarMensaje(`¡Tiempo avanzado! Nueva fecha: ${res.nuevaFecha}`, 'success');
