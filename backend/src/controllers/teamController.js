@@ -11,22 +11,27 @@ const getVirtualDate = () => {
 };
 
 const calcularMercadoAbierto = async () => {
-    const hoy = getVirtualDate().toISOString().split('T')[0];
+       const fechaVirtual = getVirtualDate();
+    const hoy = fechaVirtual.toISOString().split('T')[0];
 
     const [partidosHoy] = await pool.query(
         `SELECT COUNT(*) as total FROM partido WHERE DATE(fecha) = ?`, [hoy]
     );
     if (partidosHoy[0].total > 0) return false;
 
+    const [noHuboPartidos] = await pool.query(`SELECT COUNT(*) as total FROM partido WHERE DATE(fecha) < ?`, [hoy]);
+    if(noHuboPartidos[0].total < 1) return true;
+
     const [[ultimoPartido]] = await pool.query(
         `SELECT MAX(DATE(fecha)) as ultima_fecha FROM partido WHERE DATE(fecha) <= ?`, [hoy]
     );
-    if (!ultimoPartido?.ultima_fecha) return false;
+    if (!ultimoPartido?.ultima_fecha) return true;
 
     const apertura = new Date(ultimoPartido.ultima_fecha);
     apertura.setDate(apertura.getDate() + 1);
     const cierre = new Date(apertura);
     cierre.setDate(cierre.getDate() + 3);
+    console.log("llegue al final: "+ new Date(hoy) >= apertura && new Date(hoy) < cierre);
 
     return new Date(hoy) >= apertura && new Date(hoy) < cierre;
 };
@@ -43,7 +48,7 @@ const calcularMercadoAbierto = async () => {
 // ─────────────────────────────────────────────────────────────────────────────
 async function getMyTeam(req, res) {
     const { id_usuario } = req.params;
-    const fechaVirtual = getVirtualDate();
+    const fechaVirtual = getVirtualDate()
 
     try {
         // 1. Plantilla del usuario
@@ -122,14 +127,34 @@ async function getMyTeam(req, res) {
             [ultimaJornada?.id_jornada ?? 0, id_plantilla]
         );
 
-        // 5. Alineación guardada para la próxima jornada (si existe)
+        // 5. Alineación a mostrar:
+        //    - Si hay proximaJornada: la alineación guardada para esa jornada (editable)
+        //    - Si mercado cerrado y no hay proximaJornada: la última alineación congelada
         let alineacionGuardada = null;
+        let jornadaAlineacion = proximaJornada;
 
-        if (proximaJornada) {
+        // Con mercado cerrado y sin jornada futura, buscamos la última alineación guardada
+        if (!jornadaAlineacion) {
+            const [[ultimaAlineacion]] = await pool.query(
+                `SELECT a.id_jornada FROM alineacion a
+                 WHERE a.id_plantilla = ?
+                 ORDER BY a.id_jornada DESC LIMIT 1`,
+                [id_plantilla]
+            );
+            if (ultimaAlineacion) {
+                const [[jornada]] = await pool.query(
+                    `SELECT id_jornada, numero FROM jornada WHERE id_jornada = ?`,
+                    [ultimaAlineacion.id_jornada]
+                );
+                jornadaAlineacion = jornada ?? null;
+            }
+        }
+
+        if (jornadaAlineacion) {
             const [[alineacion]] = await pool.query(
                 `SELECT id_alineacion FROM alineacion
                  WHERE id_plantilla = ? AND id_jornada = ?`,
-                [id_plantilla, proximaJornada.id_jornada]
+                [id_plantilla, jornadaAlineacion.id_jornada]
             );
 
             if (alineacion) {
@@ -141,7 +166,7 @@ async function getMyTeam(req, res) {
                 );
                 alineacionGuardada = {
                     id_alineacion: alineacion.id_alineacion,
-                    items // [{ id_entry, posicion, es_titular }]
+                    items
                 };
             }
         }
@@ -219,17 +244,22 @@ async function saveAlineacion(req, res) {
             id_alineacion = result.insertId;
         }
 
-        // Insertar titulares (es_titular = 1)
+        // Insertar titulares (es_titular = 1) y actualizar es_titular_default
         for (const titular of titulares) {
             await connection.query(
                 `INSERT INTO alineacion_item (id_alineacion, id_entry, posicion, es_titular)
                  VALUES (?, ?, ?, 1)`,
                 [id_alineacion, titular.id_entry, titular.posicion]
             );
+            // Crítico: actualizar es_titular_default para que congelarAlineaciones
+            // copie correctamente el estado al congelar al cierre del mercado
+            await connection.query(
+                `UPDATE plantilla_jugadora SET es_titular_default = 1 WHERE id_entry = ?`,
+                [titular.id_entry]
+            );
         }
 
-        // Insertar suplentes (es_titular = 0)
-        // Usamos la posición real de la jugadora ya que no ocupa slot de campo
+        // Insertar suplentes (es_titular = 0) y resetear es_titular_default
         if (Array.isArray(suplentes)) {
             for (const suplente of suplentes) {
                 await connection.query(
@@ -240,6 +270,10 @@ async function saveAlineacion(req, res) {
                          WHERE pj.id_entry = ?
                      ), 0)`,
                     [id_alineacion, suplente.id_entry, suplente.id_entry]
+                );
+                await connection.query(
+                    `UPDATE plantilla_jugadora SET es_titular_default = 0 WHERE id_entry = ?`,
+                    [suplente.id_entry]
                 );
             }
         }

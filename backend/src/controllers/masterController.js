@@ -61,6 +61,9 @@ const calcularMercadoAbierto = async () => {
     );
     if (partidosHoy[0].total > 0) return false;
 
+    const [noHuboPartidos] = await pool.query(`SELECT COUNT(*) as total FROM partido WHERE DATE(fecha) < ?`, [hoy]);
+    if(noHuboPartidos[0].total < 1) return true;
+
     const [[ultimoPartido]] = await pool.query(
         `SELECT MAX(DATE(fecha)) as ultima_fecha FROM partido WHERE DATE(fecha) <= ?`, [hoy]
     );
@@ -104,26 +107,22 @@ async function getJornadaParaAlinear(fechaStr) {
 
 const getInitialData = async (req, res) => {
     const id_usuario = parseInt(req.params.id_usuario);
-    const fechaVirtual = getVirtualDate();
     try {
         if (id_usuario !== 1)
             return res.status(403).json({ message: "La petición está bloqueada para usuarios comunes" });
 
         const [ligasRes]    = await pool.query('SELECT COUNT(*) as total FROM liga');
         const [usuariosRes] = await pool.query('SELECT COUNT(*) as total FROM usuario');
-        const [jornadaRes]  = await pool.query('SELECT numero as actual FROM jornada WHERE DATE(f_inicio) <= DATE(?) ORDER BY numero DESC', [fechaVirtual]);
+        const [jornadaRes]  = await pool.query('SELECT MAX(numero) as actual FROM jornada');
         const mercadoAbierto = await calcularMercadoAbierto();
 
-
-        const numeroJornada = (jornadaRes.length > 0) ? jornadaRes[0].actual : 0;
         res.json({
             totalLigas:          ligasRes[0].total,
             totalUsuarios:       usuariosRes[0].total,
-            jornadaActualNumero: numeroJornada,
-            fechaVirtual:        fechaVirtual,
+            jornadaActualNumero: jornadaRes[0].actual || 0,
+            fechaVirtual:        getVirtualDate(),
             mercadoAbierto
         });
-
     } catch (error) {
         console.error("Error en getInitialData Admin:", error);
         res.status(500).json({ message: "Error interno del servidor" });
@@ -134,8 +133,6 @@ const getInitialData = async (req, res) => {
 
 const nextDay = async (req, res) => {
     try {
-
-    
         const estadoAntes = await calcularMercadoAbierto();
 
         let fechaActual = getVirtualDate();
@@ -150,7 +147,6 @@ const nextDay = async (req, res) => {
         const ayer = new Date(fechaActual);
         ayer.setDate(ayer.getDate() - 1);
         const ayerStr = ayer.toISOString().split('T')[0];
-        
 
         // ── 1. Calcular puntos de los partidos jugados ayer ──────────────────
         const [partidosAyer] = await pool.query(
@@ -227,13 +223,11 @@ const nextDay = async (req, res) => {
                 )
             ));
 
-
             // ── 3. Al cerrar el mercado: resolver pujas y congelar alineaciones ──
             if (!estadoDespues) {
                 await resolverPujasLibres(fechaNotif, nuevaFechaStr);
                 await congelarAlineaciones(nuevaFechaStr);
             }
-             
         }
 
         // ── 4. Expirar pujas entre jornadas ──────────────────────────────────
@@ -282,7 +276,6 @@ const nextDay = async (req, res) => {
                 );
             }
         }
-       
 
         res.json({ message: "Tiempo avanzado", nuevaFecha: nuevaFechaStr, mercadoAbierto: estadoDespues });
 
@@ -321,7 +314,6 @@ const nextDay = async (req, res) => {
                 ));
             }
         }
-         
 
     } catch (error) {
         console.error('Error en nextDay:', error);
@@ -539,8 +531,17 @@ async function resolverPujasLibres(fechaNotif, fechaStr) {
 }
 
 async function congelarAlineaciones(fechaStr) {
-    const jornadaParaAlinear = await getJornadaParaAlinear(fechaStr);
-    if (!jornadaParaAlinear) return;
+    // Jornada que se va a jugar (la que congelamos)
+    const jornadaParaCongelar = await getJornadaParaAlinear(fechaStr);
+    if (!jornadaParaCongelar) return;
+
+    // Siguiente jornada (la que se pre-crea copiando titulares)
+    const [[siguienteJornada]] = await pool.query(
+        `SELECT id_jornada, numero FROM jornada
+         WHERE f_inicio > (SELECT f_fin FROM jornada WHERE id_jornada = ?)
+         ORDER BY f_inicio ASC LIMIT 1`,
+        [jornadaParaCongelar.id_jornada]
+    );
 
     const [plantillas] = await pool.query(
         `SELECT p.id_plantilla FROM plantilla p
@@ -549,10 +550,12 @@ async function congelarAlineaciones(fechaStr) {
     );
 
     for (const { id_plantilla } of plantillas) {
+
+        // ── 1. Congelar la jornada actual ─────────────────────────────────────
         let id_alineacion;
         const [[existente]] = await pool.query(
             `SELECT id_alineacion FROM alineacion WHERE id_plantilla = ? AND id_jornada = ?`,
-            [id_plantilla, jornadaParaAlinear.id_jornada]
+            [id_plantilla, jornadaParaCongelar.id_jornada]
         );
 
         if (existente) {
@@ -563,7 +566,7 @@ async function congelarAlineaciones(fechaStr) {
         } else {
             const [res] = await pool.query(
                 `INSERT INTO alineacion (id_plantilla, id_jornada) VALUES (?, ?)`,
-                [id_plantilla, jornadaParaAlinear.id_jornada]
+                [id_plantilla, jornadaParaCongelar.id_jornada]
             );
             id_alineacion = res.insertId;
         }
@@ -582,6 +585,36 @@ async function congelarAlineaciones(fechaStr) {
                  VALUES (?, ?, ?, ?)`,
                 [id_alineacion, jug.id_entry, jug.posicion, jug.es_titular_default]
             );
+        }
+
+        // ── 2. Pre-crear alineación de la siguiente jornada copiando titulares ──
+        // Si el usuario no toca nada, jugará con las mismas jugadoras la próxima jornada
+        if (siguienteJornada) {
+            const [[existenteSig]] = await pool.query(
+                `SELECT id_alineacion FROM alineacion WHERE id_plantilla = ? AND id_jornada = ?`,
+                [id_plantilla, siguienteJornada.id_jornada]
+            );
+
+            let id_alineacion_sig;
+            if (existenteSig) {
+                // Ya existe (el usuario la había guardado manualmente): no sobreescribir
+                continue;
+            } else {
+                const [resSig] = await pool.query(
+                    `INSERT INTO alineacion (id_plantilla, id_jornada) VALUES (?, ?)`,
+                    [id_plantilla, siguienteJornada.id_jornada]
+                );
+                id_alineacion_sig = resSig.insertId;
+            }
+
+            // Copiar exactamente los mismos items que acabamos de congelar
+            for (const jug of jugadoras) {
+                await pool.query(
+                    `INSERT INTO alineacion_item (id_alineacion, id_entry, posicion, es_titular)
+                     VALUES (?, ?, ?, ?)`,
+                    [id_alineacion_sig, jug.id_entry, jug.posicion, jug.es_titular_default]
+                );
+            }
         }
     }
 }
