@@ -1,4 +1,4 @@
-/* Contenedor general para centrar el menú */
+
 .gen-container {
     background-color: var(--background-grey); 
     display: flex;
@@ -10,7 +10,7 @@
 
 .nav-stat {
     width: 100%;
-    max-width: 900px; /* Ajusta según el ancho de tu app */
+    max-width: 900px;
     display: flex;
     justify-content: center;
 }

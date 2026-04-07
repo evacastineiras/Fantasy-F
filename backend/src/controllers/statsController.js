@@ -10,8 +10,7 @@ const getVirtualDate = () => {
     return new Date(data.fecha);
 };
 
-// ─── getMyTeamStats ───────────────────────────────────────────────────────────
-// Solo cuenta jornadas cuya f_fin ya pasó Y cuyos puntos ya fueron calculados
+
 const getMyTeamStats = async (req, res) => {
     const { id_usuario } = req.params;
     const fechaVirtual = getVirtualDate().toISOString().split('T')[0];
@@ -64,10 +63,7 @@ const getMyTeamStats = async (req, res) => {
     }
 };
 
-// ─── getTopStats ──────────────────────────────────────────────────────────────
-// Las estadísticas acumuladas (goles_total etc.) son históricas y no dependen
-// de la fecha virtual — reflejan lo que la jugadora real ha hecho.
-// No cambia nada aquí.
+
 const getTopStats = async (req, res) => {
     const { criterio } = req.params; 
     
@@ -112,9 +108,7 @@ const getTopStats = async (req, res) => {
     }
 };
 
-// ─── getPlayerInfo ────────────────────────────────────────────────────────────
-// puntos_ultima_jornada: solo de jornadas ya jugadas con puntos calculados
-// medias: ídem
+
 const getPlayerInfo = async (req, res) => {
     const { id_jugadora, id_usuario } = req.body;
     const fechaVirtual = getVirtualDate().toISOString().split('T')[0];
@@ -202,9 +196,6 @@ const getPlayerInfo = async (req, res) => {
     }
 };
 
-// ─── getPlayerValueHistory ────────────────────────────────────────────────────
-// Solo incluye jornadas cuya f_fin ya pasó Y con puntos calculados.
-// Esto hace que el chart solo muestre el valor hasta donde realmente se conoce.
 const getPlayerValueHistory = async (req, res) => {
     const { id_jugadora, id_usuario } = req.body;
     const FACTOR = 0.08;
@@ -268,7 +259,7 @@ const getPlayerValueHistory = async (req, res) => {
     }
 };
 
-// ─── Sin cambios ──────────────────────────────────────────────────────────────
+
 
 const getFeed = async (req, res) => {
     const { id } = req.params; 

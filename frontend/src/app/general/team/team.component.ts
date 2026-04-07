@@ -64,8 +64,6 @@ export class TeamComponent implements OnInit {
     });
   }
 
-  // ── Setup ────────────────────────────────────────────────────────────────────
-
   private crearSlots(posicion: string, cantidad: number): Slot[] {
     return Array.from({ length: cantidad }, (_, i) => ({
       id: `${posicion}-${i}`,
@@ -90,23 +88,12 @@ export class TeamComponent implements OnInit {
     }
   }
 
-  // ── Helpers de búsqueda ──────────────────────────────────────────────────────
 
-  /** Encuentra el slot del campo que contiene una jugadora por id_entry */
-  private encontrarSlotDeJugadora(id_entry: number): Slot | null {
-    for (const slotArr of Object.values(this.slots)) {
-      const slot = slotArr.find(s => s.contenido[0]?.id_entry === id_entry);
-      if (slot) return slot;
-    }
-    return null;
-  }
 
-  /** Comprueba si un id de contenedor pertenece a un slot del campo */
   private esSlotDelCampo(containerId: string): boolean {
     return containerId !== 'bench';
   }
 
-  /** Devuelve el slot del campo por su id */
   private getSlotPorId(id: string): Slot | null {
     for (const slotArr of Object.values(this.slots)) {
       const slot = slotArr.find(s => s.id === id);
@@ -115,13 +102,6 @@ export class TeamComponent implements OnInit {
     return null;
   }
 
-  // ── Predicado de entrada ─────────────────────────────────────────────────────
-
-  /**
-   * Para slots del campo: solo permite entrada si la posición de la jugadora
-   * coincide con la del slot.
-   * Para el banquillo: siempre permite entrada.
-   */
   canEnterSlot(slot: Slot): (drag: any) => boolean {
     return (drag) => {
       const jugadora = drag.data;
@@ -129,8 +109,6 @@ export class TeamComponent implements OnInit {
       return jugadora.posicion === slot.posicion;
     };
   }
-
-  // ── Handler de drop ──────────────────────────────────────────────────────────
 
   onDrop(event: CdkDragDrop<any[]>): void {
     if (!this.mercadoAbierto) return;
@@ -142,19 +120,19 @@ export class TeamComponent implements OnInit {
     const destino   = event.container.data;
     const jugadoraArrastrada = origen[event.previousIndex];
 
-    // ── CASO 1: Banquillo → Slot del campo ─────────────────────────────────
+    //slot a campo
     if (!this.esSlotDelCampo(origenId) && this.esSlotDelCampo(destinoId)) {
       const slotDestino = this.getSlotPorId(destinoId);
       if (!slotDestino) return;
 
-      // Validación de posición (doble seguridad además del predicado)
+
       if (jugadoraArrastrada.posicion !== slotDestino.posicion) return;
 
       if (destino.length === 0) {
-        // Slot vacío: mover directamente
+      
         transferArrayItem(origen, destino, event.previousIndex, 0);
       } else {
-        // Slot ocupado: la jugadora que había vuelve al banquillo
+   
         const jugadoraDesplazada = destino[0];
         destino.splice(0, 1, jugadoraArrastrada);
         origen.splice(event.previousIndex, 1);
@@ -163,7 +141,7 @@ export class TeamComponent implements OnInit {
       return;
     }
 
-    // ── CASO 2: Slot del campo → Banquillo ─────────────────────────────────
+    // ──slot a banquillo
     if (this.esSlotDelCampo(origenId) && !this.esSlotDelCampo(destinoId)) {
       // Vaciar el slot y devolver la jugadora al banquillo sin intercambio
       origen.splice(event.previousIndex, 1);
@@ -171,19 +149,18 @@ export class TeamComponent implements OnInit {
       return;
     }
 
-    // ── CASO 3: Slot del campo → Slot del campo ────────────────────────────
+    //slot intercambio
     if (this.esSlotDelCampo(origenId) && this.esSlotDelCampo(destinoId)) {
       const slotDestino = this.getSlotPorId(destinoId);
       if (!slotDestino) return;
 
-      // Validación de posición: solo se puede intercambiar si las posiciones coinciden
+    
       if (jugadoraArrastrada.posicion !== slotDestino.posicion) return;
 
       if (destino.length === 0) {
-        // Slot destino vacío: mover
         transferArrayItem(origen, destino, event.previousIndex, 0);
       } else {
-        // Intercambio entre dos slots de la misma posición
+      
         const jugadoraDestino = destino[0];
         destino.splice(0, 1, jugadoraArrastrada);
         origen.splice(event.previousIndex, 1, jugadoraDestino);
@@ -192,7 +169,7 @@ export class TeamComponent implements OnInit {
     }
   }
 
-  // ── Guardar ──────────────────────────────────────────────────────────────────
+ 
 
   guardarAlineacion(): void {
     if (!this.mercadoAbierto || !this.id_plantilla || !this.proximaJornada) {console.log("algo fallo en el guardaespaldas. "); return;}

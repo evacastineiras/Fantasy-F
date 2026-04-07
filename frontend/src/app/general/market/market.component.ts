@@ -84,19 +84,13 @@ export class MarketComponent implements OnInit {
     this.limite += 10;
   }
 
-  // ════════════════════════════════════════════════════════════
-  // Modal de puja
-  // ════════════════════════════════════════════════════════════
-
   abrirPuja(jugadora: any): void {
     this.jugadoraSeleccionada = jugadora;
 
-    // La puja más alta es ultima_puja si existe, si no el valor de mercado
     this.pujaMasAlta = jugadora.ultima_puja ?? jugadora.valor;
     this.montante    = this.pujaMasAlta + 250_000;
     this.enviando    = false;
 
-    // Cargamos el presupuesto real del usuario
     const usuario = this.userService.getUsuario();
     this.marketService.getPresupuesto(usuario.id, usuario.id_liga).subscribe({
       next:  (data:any) => { this.presupuesto = data.presupuesto; },
@@ -118,7 +112,6 @@ export class MarketComponent implements OnInit {
     }
   }
 
-  // ── Helpers del formulario ───────────────────────────────────
 
   setPuja(valor: number): void {
     this.montante = valor;
@@ -136,13 +129,11 @@ export class MarketComponent implements OnInit {
     );
   }
 
-  // Math disponible en la plantilla a través del método helper
   calcularPorcentajePresupuesto(): number {
     if (!this.presupuesto) return 0;
     return Math.min((this.montante / this.presupuesto) * 100, 100);
   }
 
-  // ── Envío ────────────────────────────────────────────────────
 
   confirmarPuja(): void {
     if (!this.pujaValida() || !this.jugadoraSeleccionada) return;

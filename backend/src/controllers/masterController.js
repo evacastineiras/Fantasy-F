@@ -103,24 +103,24 @@ async function getJornadaParaAlinear(fechaStr) {
     return proxima ?? null;
 }
 
-// ─── getInitialData ───────────────────────────────────────────────────────────
 
 const getInitialData = async (req, res) => {
     const id_usuario = parseInt(req.params.id_usuario);
+    const hoy = getVirtualDate()
     try {
         if (id_usuario !== 1)
             return res.status(403).json({ message: "La petición está bloqueada para usuarios comunes" });
 
         const [ligasRes]    = await pool.query('SELECT COUNT(*) as total FROM liga');
         const [usuariosRes] = await pool.query('SELECT COUNT(*) as total FROM usuario');
-        const [jornadaRes]  = await pool.query('SELECT MAX(numero) as actual FROM jornada');
+        const [jornadaRes]  = await pool.query('SELECT MAX(numero) as actual FROM jornada WHERE DATE(f_fin) < ?', [hoy]);
         const mercadoAbierto = await calcularMercadoAbierto();
 
         res.json({
             totalLigas:          ligasRes[0].total,
             totalUsuarios:       usuariosRes[0].total,
-            jornadaActualNumero: jornadaRes[0].actual || 0,
-            fechaVirtual:        getVirtualDate(),
+            jornadaActualNumero: jornadaRes[0].actual + 1 || 0,
+            fechaVirtual:       hoy,
             mercadoAbierto
         });
     } catch (error) {
@@ -143,12 +143,12 @@ const nextDay = async (req, res) => {
         const nuevaFechaStr = fechaActual.toISOString().split('T')[0];
         const fechaNotif    = getFechaVirtualConHoraReal();
 
-        // Fecha de ayer (la nueva fecha menos un día) — es cuando se jugaron los partidos
+        // Fecha de ayer (la nueva fecha menos un día) es cuando se jugaron los partidos
         const ayer = new Date(fechaActual);
         ayer.setDate(ayer.getDate() - 1);
         const ayerStr = ayer.toISOString().split('T')[0];
 
-        // ── 1. Calcular puntos de los partidos jugados ayer ──────────────────
+        
         const [partidosAyer] = await pool.query(
             `SELECT DISTINCT p.id_jornada
              FROM partido p
@@ -158,7 +158,7 @@ const nextDay = async (req, res) => {
         );
 
         for (const { id_jornada } of partidosAyer) {
-            // Jugadoras con rendimiento en esta jornada pero sin puntos calculados aún
+            
             const [rendimientos] = await pool.query(
                 `SELECT rj.id_jugadora, rj.goles, rj.asistencias, rj.porterias_cero,
                         rj.amarillas, rj.rojas, rj.minutos_jugados, rj.goles_encajados,
@@ -199,14 +199,14 @@ const nextDay = async (req, res) => {
                 );
             }
 
-            // Actualizar valores de mercado tras calcular puntos
+            
             const mercadoCerrado = !(await calcularMercadoAbierto());
             if (mercadoCerrado) {
                 await actualizarValoresJugadoras();
             }
         }
 
-        // ── 2. Cambio de estado del mercado ──────────────────────────────────
+        //cambio de estado del mercado
         if (estadoAntes !== estadoDespues) {
             const tipo    = estadoDespues ? 'inicio_traspasos' : 'fin_traspasos';
             const mensaje = estadoDespues
@@ -223,14 +223,14 @@ const nextDay = async (req, res) => {
                 )
             ));
 
-            // ── 3. Al cerrar el mercado: resolver pujas y congelar alineaciones ──
+            // resolver pujas y congelar alineaciones
             if (!estadoDespues) {
                 await resolverPujasLibres(fechaNotif, nuevaFechaStr);
                 await congelarAlineaciones(nuevaFechaStr);
             }
         }
 
-        // ── 4. Expirar pujas entre jornadas ──────────────────────────────────
+        // expirar pujas
         const [pujasPendientes] = await pool.query(
             `SELECT p.id_puja, p.id_comprador, p.id_vendedor,
                     p.id_entry, p.id_liga, j.apodo
@@ -279,7 +279,7 @@ const nextDay = async (req, res) => {
 
         res.json({ message: "Tiempo avanzado", nuevaFecha: nuevaFechaStr, mercadoAbierto: estadoDespues });
 
-        // ── 5. Notificaciones de resultados de partidos de ayer ───────────────
+        // notificar resultados
         const [partidosNotif] = await pool.query(
             `SELECT p.id_partido, p.goles_local, p.goles_visitante,
                     cl.nombre AS nombre_local,    cl.escudo_url AS logo_local,
@@ -321,7 +321,7 @@ const nextDay = async (req, res) => {
     }
 };
 
-// ─── Helpers de nextDay ───────────────────────────────────────────────────────
+
 
 async function actualizarValoresJugadoras() {
     const FACTOR = 0.08;
@@ -498,7 +498,7 @@ async function resolverPujasLibres(fechaNotif, fechaStr) {
             }
         }
 
-        // Pujas sin resolver (jugadora ya tenía propietario): devolver dinero
+        // Pujas sin resolver devuelve el dinero
         const [pujasSinResolver] = await pool.query(
             `SELECT p.id_puja, p.id_comprador, p.montante, j.apodo, j.id_jugadora
              FROM puja p
@@ -531,11 +531,11 @@ async function resolverPujasLibres(fechaNotif, fechaStr) {
 }
 
 async function congelarAlineaciones(fechaStr) {
-    // Jornada que se va a jugar (la que congelamos)
+
     const jornadaParaCongelar = await getJornadaParaAlinear(fechaStr);
     if (!jornadaParaCongelar) return;
 
-    // Siguiente jornada (la que se pre-crea copiando titulares)
+   
     const [[siguienteJornada]] = await pool.query(
         `SELECT id_jornada, numero FROM jornada
          WHERE f_inicio > (SELECT f_fin FROM jornada WHERE id_jornada = ?)
@@ -551,7 +551,7 @@ async function congelarAlineaciones(fechaStr) {
 
     for (const { id_plantilla } of plantillas) {
 
-        // ── 1. Congelar la jornada actual ─────────────────────────────────────
+        
         let id_alineacion;
         const [[existente]] = await pool.query(
             `SELECT id_alineacion FROM alineacion WHERE id_plantilla = ? AND id_jornada = ?`,
@@ -587,8 +587,7 @@ async function congelarAlineaciones(fechaStr) {
             );
         }
 
-        // ── 2. Pre-crear alineación de la siguiente jornada copiando titulares ──
-        // Si el usuario no toca nada, jugará con las mismas jugadoras la próxima jornada
+        
         if (siguienteJornada) {
             const [[existenteSig]] = await pool.query(
                 `SELECT id_alineacion FROM alineacion WHERE id_plantilla = ? AND id_jornada = ?`,
@@ -597,7 +596,7 @@ async function congelarAlineaciones(fechaStr) {
 
             let id_alineacion_sig;
             if (existenteSig) {
-                // Ya existe (el usuario la había guardado manualmente): no sobreescribir
+                
                 continue;
             } else {
                 const [resSig] = await pool.query(
@@ -607,7 +606,7 @@ async function congelarAlineaciones(fechaStr) {
                 id_alineacion_sig = resSig.insertId;
             }
 
-            // Copiar exactamente los mismos items que acabamos de congelar
+            
             for (const jug of jugadoras) {
                 await pool.query(
                     `INSERT INTO alineacion_item (id_alineacion, id_entry, posicion, es_titular)
@@ -619,8 +618,7 @@ async function congelarAlineaciones(fechaStr) {
     }
 }
 
-// ─── importarJornada ─────────────────────────────────────────────────────────
-// Solo importa estructura y rendimiento bruto. Los puntos se calculan en nextDay.
+
 
 const importarJornada = async (req, res) => {
     if (!req.file)
@@ -689,7 +687,7 @@ const importarJornada = async (req, res) => {
                     golesEncajados: jug.goles_encajados_equipo - (anterior?.goles_encajados ?? 0),
                 };
 
-                // ── Puntos = NULL hasta que nextDay los calcule al día siguiente ──
+                // Puntos = NULL hasta que nextDay los calcule al día siguiente 
                 await connection.query(
                     `INSERT INTO rendimiento_jornada
                        (id_jugadora, id_jornada, goles, asistencias, porterias_cero,
@@ -711,7 +709,7 @@ const importarJornada = async (req, res) => {
                     ]
                 );
 
-                // Acumulados en jugadora (estadísticas históricas, independientes de puntos)
+                // Acumulados en jugadora 
                 await connection.query(
                     `UPDATE jugadora SET
                         goles_total           = goles_total           + ?,
@@ -741,7 +739,7 @@ const importarJornada = async (req, res) => {
     }
 };
 
-// ─── calcularPuntosJornada (manual desde panel admin) ────────────────────────
+
 
 const calcularPuntosJornada = async (req, res) => {
     const { numero } = req.params;
@@ -800,7 +798,7 @@ const calcularPuntosJornada = async (req, res) => {
     }
 };
 
-// ─── getMercadoEstado ─────────────────────────────────────────────────────────
+
 
 const getMercadoEstado = async (req, res) => {
     try {
@@ -837,7 +835,7 @@ const getMercadoEstado = async (req, res) => {
     }
 };
 
-// ─── getCalendario ────────────────────────────────────────────────────────────
+
 
 const getCalendario = async (req, res) => {
     const mes = parseInt(req.params.mes);

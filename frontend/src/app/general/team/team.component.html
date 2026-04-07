@@ -1,6 +1,4 @@
 <div class="team-wrapper">
-
-  <!-- ══ SPINNER ══════════════════════════════════════════════ -->
   <div class="spinner-overlay" *ngIf="loading">
     <div class="spinner-ring"></div>
     <span class="spinner-label">Cargando equipo...</span>
@@ -8,7 +6,6 @@
 
   <ng-container *ngIf="!loading">
 
-    <!-- ══ CABECERA ══════════════════════════════════════════════ -->
     <div class="team-header">
       <div class="header-left">
         <h1 class="team-title">Mi Equipo</h1>
@@ -31,11 +28,8 @@
       </div>
     </div>
 
-    <!-- ══ LAYOUT PRINCIPAL ══════════════════════════════════════ -->
-    <!-- cdkDropListGroup conecta automáticamente todos los cdkDropList hijos -->
     <div class="main-layout" cdkDropListGroup>
 
-      <!-- ── PANEL LATERAL — jugadoras no alineadas ─────────── -->
       <div class="bench-panel" [class.collapsed]="benchCollapsed">
         <button class="bench-toggle" (click)="benchCollapsed = !benchCollapsed">
           <span class="toggle-icon">{{ benchCollapsed ? '▶' : '◀' }}</span>
@@ -76,10 +70,8 @@
         </div>
       </div>
 
-      <!-- ── CAMPO DE FÚTBOL ─────────────────────────────────── -->
       <div class="field-container">
 
-        <!-- Césped SVG -->
         <svg class="field-svg" viewBox="0 0 600 860" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
           <rect width="600" height="860" fill="#1a4a1a"/>
           <rect y="0"   width="600" height="86"  fill="#1d521d" opacity="0.6"/>
@@ -106,10 +98,9 @@
           <path d="M 185 710 A 80 80 0 0 0 415 710" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
         </svg>
 
-        <!-- ── FORMACIÓN 4-3-3 sobre el campo ─────────────────── -->
+      
         <div class="formation-grid">
 
-          <!-- DEL (3) -->
           <div class="formation-row">
             <ng-container *ngFor="let slot of slots['DEL']">
               <div class="slot-wrapper"
@@ -132,7 +123,6 @@
             </ng-container>
           </div>
 
-          <!-- MED (3) -->
           <div class="formation-row">
             <ng-container *ngFor="let slot of slots['MED']">
               <div class="slot-wrapper"
@@ -155,7 +145,6 @@
             </ng-container>
           </div>
 
-          <!-- DEF (4) -->
           <div class="formation-row">
             <ng-container *ngFor="let slot of slots['DEF']">
               <div class="slot-wrapper"
@@ -178,7 +167,6 @@
             </ng-container>
           </div>
 
-          <!-- POR (1) -->
           <div class="formation-row">
             <ng-container *ngFor="let slot of slots['POR']">
               <div class="slot-wrapper"
@@ -201,10 +189,10 @@
             </ng-container>
           </div>
 
-        </div><!-- /formation-grid -->
-      </div><!-- /field-container -->
+        </div>
+      </div>
 
-    </div><!-- /main-layout -->
+    </div>
 
     <div class="closed-banner" *ngIf="!mercadoAbierto">
       🔒 El mercado está cerrado. Podrás modificar tu alineación cuando vuelva a abrir.

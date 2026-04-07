@@ -1,4 +1,4 @@
-/* --- Contenedor Principal --- */
+
 .liga-container {
   padding: 20px;
   max-width: 800px;
@@ -6,7 +6,6 @@
   color: white;
 }
 
-/* --- Cabecera y Título --- */
 .title-container {
   display: flex;
   align-items: center;
@@ -41,7 +40,6 @@
   margin-top: 5px;
 }
 
-/* --- Tabla de Clasificación --- */
 .tabla-clasificacion {
   background-color: #2a2a2a;
   border-radius: 8px;
@@ -76,7 +74,7 @@
 .user-row:hover { background-color: #333; }
 
 .is-me { 
-  background-color: rgba(255, 202, 40, 0.05); /* Resalte dorado muy sutil para tu fila */
+  background-color: rgba(255, 202, 40, 0.05); 
   border-left: 3px solid var(--primary-green);;
 }
 
@@ -110,7 +108,6 @@
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* --- Estilos del Modal (Pop-up) --- */
 .modal-overlay {
   position: fixed;
   top: 0;

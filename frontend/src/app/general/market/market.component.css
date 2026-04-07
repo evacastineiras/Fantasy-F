@@ -227,10 +227,6 @@
   margin: 0;
 }
 
-/* ═══════════════════════════════════════════════
-   BID MODAL — Fantasy Liga F
-   Paleta: oscuro #1c1c2e / card #252540 / verde #39e75f
-   ═══════════════════════════════════════════════ */
 
 .modal-overlay {
   position: fixed;
@@ -249,7 +245,6 @@
   to   { opacity: 1; }
 }
 
-/* ── Card ── */
 .modal-card {
   background: var(--background-grey);
   border: 1px solid rgba(255,255,255,0.08);
@@ -267,7 +262,6 @@
   to   { transform: translateY(0);    opacity: 1; }
 }
 
-/* ── Header ── */
 .modal-header {
   display: flex;
   align-items: flex-start;
@@ -344,14 +338,12 @@
   color: #fff;
 }
 
-/* ── Divider ── */
 .divider {
   height: 1px;
   background: rgba(255,255,255,0.07);
   margin: 20px 0;
 }
 
-/* ── Stats de puja ── */
 .bid-info-row {
   display: flex;
   gap: 12px;
@@ -392,7 +384,6 @@
   color: var(--primary-green);
 }
 
-/* ── Input ── */
 .bid-input-section {
   display: flex;
   flex-direction: column;
@@ -426,7 +417,6 @@
   outline: none;
   transition: border-color 0.2s;
   box-sizing: border-box;
-  /* ocultar flechas nativas del input number */
   -moz-appearance: textfield;
 }
 
@@ -449,7 +439,6 @@
   pointer-events: none;
 }
 
-/* ── Presets ── */
 .bid-presets {
   display: flex;
   gap: 8px;
@@ -474,7 +463,6 @@
   color: var(--primary-green);
 }
 
-/* ── Barra de presupuesto ── */
 .budget-bar-section {
   display: flex;
   flex-direction: column;
@@ -510,7 +498,6 @@
   background: #ff5c5c;
 }
 
-/* ── Alertas ── */
 .alert-box {
   border-radius: 8px;
   padding: 10px 14px;
@@ -532,7 +519,6 @@
   color: #6ef08a;
 }
 
-/* ── Acciones ── */
 .modal-actions {
   display: flex;
   gap: 10px;
@@ -589,7 +575,6 @@
   cursor: not-allowed;
 }
 
-/* ── Spinner ── */
 .spinner {
   display: inline-block;
   width: 18px;
@@ -604,7 +589,6 @@
   to { transform: rotate(360deg); }
 }
 
-/* ── Responsive ── */
 @media (max-width: 480px) {
   .modal-card {
     margin: 16px;

@@ -33,7 +33,6 @@ export class LoginComponent {
 
     this.authService.login( this.email, this.password).subscribe({
       next: (res: any) => {
-        console.log('Login correcto', res);
         this.userService.setUsuario(res.user);
         if(this.userService.getUsuario().id === 1)
         {
@@ -45,6 +44,7 @@ export class LoginComponent {
       },
       error: (err: any) => {
         console.error('Error en login', err)
+        window.alert("Usuario o contraseña incorrectos")
       }
     });
 

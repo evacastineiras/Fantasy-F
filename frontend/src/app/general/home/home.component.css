@@ -60,8 +60,8 @@
   filter: drop-shadow(0 0 5px rgba(0,0,0,0.5));
   width: 70px;
   height: 70px;
-  border-radius: 50%; /* La hacemos redonda */
-  object-fit: cover;   /* Evita que se deforme */
+  border-radius: 50%; 
+  object-fit: cover;   
   border: 2px solid #76ff03;
 }
 
@@ -70,7 +70,7 @@
   color: #888;
 }
 
-/* Scoreboard */
+
 .layout-match {
     display: flex;
     flex-direction: column;
@@ -145,13 +145,11 @@
   color: #000;
 }
 
-/* Color para abandono (Naranja/Rojo suave) */
 .highlight-exit {
   color: #ff5722; 
   font-weight: bold;
 }
 
-/* Efecto opcional: poner la foto en blanco y negro para los que se van */
 .avatar-circle.grayscale {
   filter: grayscale(100%);
   opacity: 0.8;

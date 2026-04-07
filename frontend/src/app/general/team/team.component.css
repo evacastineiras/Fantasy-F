@@ -1,6 +1,6 @@
 :host { display: block; }
 
-/* ── Spinner ─────────────────────────────────────────────── */
+
 .spinner-overlay {
   position: fixed; inset: 0;
   background: rgba(10,10,20,0.85);
@@ -18,7 +18,6 @@
 .spinner-label { font-size: 13px; color: rgba(255,255,255,0.5); letter-spacing: 1px; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ── Wrapper ─────────────────────────────────────────────── */
 .team-wrapper {
   min-height: 100vh;
   background: var(--background-grey);
@@ -26,7 +25,6 @@
   box-sizing: border-box;
 }
 
-/* ── Header ──────────────────────────────────────────────── */
 .team-header {
   display: flex; align-items: center;
   justify-content: space-between;
@@ -69,10 +67,9 @@
   border-radius: 50%; animation: spin .7s linear infinite; display: inline-block;
 }
 
-/* ── Layout ──────────────────────────────────────────────── */
 .main-layout { display: flex; align-items: flex-start; gap: 16px; }
 
-/* ── Panel suplentes ─────────────────────────────────────── */
+
 .bench-panel {
   flex-shrink: 0; width: 200px;
   background: #2b2b2b;
@@ -117,7 +114,7 @@
   border-radius: 8px; padding: 6px 8px;
   cursor: grab; position: relative;
   transition: background .15s, border-color .15s;
-  /* Evitar que el CDK encoja el elemento al entrar en un drop list */
+
   will-change: transform;
 }
 .bench-card:hover { background: rgba(255,255,255,.08); border-color: rgba(57,231,95,.25); }
@@ -133,7 +130,6 @@
 .bench-pts { position: absolute; top: 4px; right: 4px; background: var(--primary-green); color: #0a1a0f; font-size: 9px; font-weight: 800; padding: 1px 4px; border-radius: 4px; }
 .bench-empty { text-align: center; color: rgba(255,255,255,.25); font-size: 11px; padding: 20px 0; }
 
-/* ── Campo ───────────────────────────────────────────────── */
 .field-container {
   flex: 1; position: relative; border-radius: 16px; overflow: hidden;
   box-shadow: 0 20px 60px rgba(0,0,0,.5);
@@ -141,7 +137,7 @@
 }
 .field-svg { width: 100%; height: auto; display: block; }
 
-/* ── Formación sobre el campo ────────────────────────────── */
+
 .formation-grid {
   position: absolute; inset: 0;
   display: flex; flex-direction: column;
@@ -150,15 +146,15 @@
 }
 .formation-row { display: flex; justify-content: space-around; align-items: center; }
 
-/* ── Slot (cdkDropList wrapper) ──────────────────────────── */
+
 .slot-wrapper {
   display: flex; align-items: center; justify-content: center;
-  /* Tamaño generoso para que la carta quepa sin compresión */
+
   width: 110px;
   height: 150px;
 }
 
-/* Slot vacío */
+
 .slot-empty {
   width: 100px;
   height: 138px;
@@ -171,19 +167,19 @@
 .slot-empty:not(.mercado-cerrado):hover { background: rgba(57,231,95,.06); border-color: rgba(57,231,95,.5); }
 .slot-pos { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; color: rgba(255,255,255,.3); }
 
-/* ── Carta de jugadora en el campo ──────────────────────── */
+
 .player-card {
   position: relative;
-  /* Tamaño real de la carta — ajusta este valor a tu gusto */
+
   width: 100px;
   cursor: grab;
-  /* transform none evita que el CDK encoja la carta al entrar en un drop list */
+  
   will-change: transform;
-  /* Solo animamos el hover, no dejamos que el CDK meta transform extra */
+  
   transition: filter .15s;
   filter: drop-shadow(0 4px 12px rgba(0,0,0,.5));
 }
-/* El hover levanta la carta sin cambiar su tamaño */
+
 .player-card:hover {
   filter: drop-shadow(0 8px 20px rgba(57,231,95,.35)) drop-shadow(0 4px 12px rgba(0,0,0,.5));
 }
@@ -205,20 +201,16 @@
   box-shadow: 0 2px 8px rgba(0,0,0,.4); z-index: 2;
 }
 
-/* ── CDK — preview y placeholder ────────────────────────────── */
-
-/* Preview que sigue al cursor: NO tocar transform, el CDK lo necesita para moverse */
 .cdk-drag-preview {
   width: 100px;
   border-radius: 8px;
   overflow: hidden;
   opacity: .92;
   box-shadow: 0 12px 32px rgba(0,0,0,.6);
-  /* box-sizing para que el tamaño sea exacto */
   box-sizing: border-box;
 }
 
-/* El placeholder donde caerá la carta — invisible pero ocupa espacio */
+
 .cdk-drag-placeholder {
   opacity: 0;
   min-width: 100px;
@@ -226,23 +218,21 @@
   box-sizing: border-box;
 }
 
-/* Animación de retorno si se suelta en lugar inválido */
 .cdk-drag-animating { transition: transform 250ms cubic-bezier(0,0,.2,1); }
 
-/* Los slots son fijos, no se reordenan al arrastrar */
+
 .cdk-drop-list-dragging .player-card:not(.cdk-drag-placeholder),
 .cdk-drop-list-dragging .bench-card:not(.cdk-drag-placeholder) {
   transition: none;
 }
 
-/* Resaltar slot cuando una carta válida flota encima */
 .cdk-drop-list-receiving .slot-empty {
   background: rgba(57,231,95,.1);
   border-color: var(--primary-green);
   border-style: solid;
 }
 
-/* ── Banner mercado cerrado ──────────────────────────────── */
+
 .closed-banner {
   margin-top: 16px;
   background: rgba(255,92,92,.08);
@@ -251,7 +241,6 @@
   color: #ff8a8a; font-size: 13px; font-weight: 500; text-align: center;
 }
 
-/* ── Responsive ──────────────────────────────────────────── */
 @media (max-width: 900px) {
   .slot-wrapper { width: 80px; height: 115px; }
   .slot-empty   { width: 72px; height: 105px; }

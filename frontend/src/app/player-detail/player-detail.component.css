@@ -89,7 +89,6 @@
   height: 40px;
   cursor: pointer;
 }
-/* --- Estructura Principal --- */
 .main-container {
     height: auto;
     min-height: 60vh;
@@ -104,12 +103,11 @@
     flex-direction: row;
     justify-content: center;
     align-items: flex-start;
-    gap: 160px; /* Espacio entre carta e info */
+    gap: 160px; 
     width: 90%;
     margin-top: 10px;
 }
 
-/* --- Columna Izquierda (Carta y Botones) --- */
 .card-box {
     width: 320px;
     display: flex;
@@ -150,7 +148,6 @@
     font-size: 1.4rem;
 }
 
-/* --- Botones (Ajustados al ancho de la carta) --- */
 .bottom-part {
     width: 100%;
     display: flex;
@@ -183,7 +180,6 @@
     transform: translateY(-2px);
 }
 
-/* --- Panel de Información (Derecha) --- */
 .info-box {
     background-color: #262626; 
     width: 45vw;      
@@ -593,14 +589,12 @@
   color: #fff;
 }
 
-/* ── Divider ── */
 .divider {
   height: 1px;
   background: rgba(255,255,255,0.07);
   margin: 20px 0;
 }
 
-/* ── Stats de puja ── */
 .bid-info-row {
   display: flex;
   gap: 12px;
@@ -675,7 +669,6 @@
   outline: none;
   transition: border-color 0.2s;
   box-sizing: border-box;
-  /* ocultar flechas nativas del input number */
   -moz-appearance: textfield;
 }
 
@@ -698,7 +691,7 @@
   pointer-events: none;
 }
 
-/* ── Presets ── */
+
 .bid-presets {
   display: flex;
   gap: 8px;
@@ -723,7 +716,7 @@
   color: var(--primary-green);
 }
 
-/* ── Barra de presupuesto ── */
+
 .budget-bar-section {
   display: flex;
   flex-direction: column;
@@ -759,7 +752,7 @@
   background: #ff5c5c;
 }
 
-/* ── Alertas ── */
+
 .alert-box {
   border-radius: 8px;
   padding: 10px 14px;
@@ -781,7 +774,7 @@
   color: #6ef08a;
 }
 
-/* ── Acciones ── */
+
 .modal-actions {
   display: flex;
   gap: 10px;
@@ -838,7 +831,7 @@
   cursor: not-allowed;
 }
 
-/* ── Spinner ── */
+
 .spinner {
   display: inline-block;
   width: 18px;
@@ -853,7 +846,6 @@
   to { transform: rotate(360deg); }
 }
 
-/* ── Responsive ── */
 @media (max-width: 480px) {
   .modal-card {
     margin: 16px;

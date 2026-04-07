@@ -48,7 +48,6 @@ export class GeneralComponent implements OnInit {
   }
 
    ngOnDestroy(): void {
-    // Evitar memory leaks al destruir el componente
     this.usuarioSub?.unsubscribe();
   }
  
