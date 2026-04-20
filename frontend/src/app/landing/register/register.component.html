@@ -11,6 +11,7 @@
         [(ngModel)]="nombre"
         required
         minlength="3"
+        maxlength="30"
         #nombreInput="ngModel"
         [ngClass]="{
           'input-error': nombreInput.invalid && nombreInput.touched
@@ -26,6 +27,7 @@
         [(ngModel)]="username"
         required
         minlength="3"
+         maxlength="30"
         #usernameInput="ngModel"
         [ngClass]="{
           'input-error': usernameInput.invalid && usernameInput.touched

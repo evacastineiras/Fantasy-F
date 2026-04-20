@@ -39,9 +39,9 @@
         </div>
         
         <div class="bid-group">
-          <span class="label" *ngIf="jugadora.id_propietario">Valor:</span>
+          
           <span class="label" *ngIf="jugadora.id_propietario == null">Última puja:</span>
-          <span class="current-bid">
+          <span class="current-bid" *ngIf="jugadora.id_propietario == null">
             {{ jugadora.ultima_puja ? (jugadora.ultima_puja | number:'1.0-0') + '€' : (jugadora.valor | number:'1.0-0') + '€' }}
           </span>
         </div>

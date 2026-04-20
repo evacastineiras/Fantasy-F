@@ -166,6 +166,8 @@ async function getMyTeam(req, res) {
             alineacionGuardada
         });
 
+       
+
     } catch (error) {
         console.error('Error en getMyTeam:', error);
         res.status(500).json({ message: 'Error interno del servidor' });

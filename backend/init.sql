@@ -752,6 +752,14 @@ FROM jugadora;
 
 update plantilla_jugadora set id_plantilla = 1 where id_entry=4 and id_jugadora = 204;
 update plantilla_jugadora set id_plantilla = 1 where id_entry=21 and id_jugadora = 701;
-
-
-update plantilla set n_jugadoras = 2, valor_equipo= 15000000 +  47500000  where id_plantilla = 1;
+update plantilla_jugadora set id_plantilla = 1 where id_entry=23;
+update plantilla_jugadora set id_plantilla = 1 where id_entry=25;
+update plantilla_jugadora set id_plantilla = 1 where id_entry=31;
+update plantilla_jugadora set id_plantilla = 1 where id_entry=32;
+update plantilla_jugadora set id_plantilla = 1 where id_entry=6;
+update plantilla_jugadora set id_plantilla = 1 where id_entry=41;
+update plantilla_jugadora set id_plantilla = 1 where id_entry=42;
+update plantilla_jugadora set id_plantilla = 1 where id_entry=50;
+update plantilla_jugadora set id_plantilla = 1 where id_entry=11;
+update plantilla_jugadora set id_plantilla = 1 where id_entry=30;
+update plantilla set n_jugadoras = 12, valor_equipo= 15000000 +  47500000  where id_plantilla = 1;

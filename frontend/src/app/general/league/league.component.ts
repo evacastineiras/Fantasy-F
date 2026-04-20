@@ -38,6 +38,7 @@ export class LeagueComponent implements OnInit {
         next: (data: LigaInfo) => {
           this.ligaData = data;
           this.loading = false;
+          console.log(this.ligaData)
         },
         error: (err) => {
           console.error('Error cargando la clasificación: ', err);

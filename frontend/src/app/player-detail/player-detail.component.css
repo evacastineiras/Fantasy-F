@@ -213,7 +213,6 @@
     margin-bottom: 18px;
 }
 
-/* --- Tabs y Gráfico --- */
 .tabs-box {
     width: 70%;
     padding-left: 25px;          
@@ -635,7 +634,7 @@
   color: var(--primary-green);
 }
 
-/* ── Input ── */
+
 .bid-input-section {
   display: flex;
   flex-direction: column;

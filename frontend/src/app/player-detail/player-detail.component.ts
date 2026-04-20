@@ -196,7 +196,14 @@ cerrarModal() {
 
 
 confirmarNuevaClausula() {
-  if(this.nuevaClausula > (this.jugadora.valor * 1.40))
+  if(this.nuevaClausula < this.jugadora.valor)
+  {
+    window.alert("La nueva cláusula no debe ser inferior al valor de mercado")
+  }else {
+    if(!this.nuevaClausula){
+      window.alert("La nueva cláusula no puede ser vacía")
+    }else {
+       if(this.nuevaClausula > (this.jugadora.valor * 1.40))
   {
     window.alert("La nueva cláusula no puede sobrepasar el valor de mercado en más del 40%");
   } else {
@@ -218,6 +225,10 @@ confirmarNuevaClausula() {
 
     
   }
+    }
+      
+  }
+ 
   this.showModalClausula = false;
 }
 

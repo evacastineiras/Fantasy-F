@@ -30,10 +30,17 @@ export class RegisterComponent implements OnInit {
 
   registrarse()
   {
+
     if(this.password != this.confirmPassword){
-      alert('Las contraseñas no coinciden');
+      window.alert('Las contraseñas no coinciden');
       return;
     }
+
+    
+
+    if(this.nombre == '' || this.username == '' || this.email == '' || this.password == '' || this.confirmPassword == '')
+      window.alert("Por favor, rellene todos los campos")
+    
 
     const newUser = {
       nombre: this.nombre,
@@ -54,6 +61,7 @@ export class RegisterComponent implements OnInit {
       },
       error: (error:any) => {
         console.error('Error en el registro', error)
+        window.alert(error.error.message)
       }
     })
   }

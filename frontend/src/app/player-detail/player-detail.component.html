@@ -101,7 +101,7 @@
                      
                     <div *ngIf="activeTab === 'rendimiento'" class="animate-fade">
 
-                        <!-- Grid jugadoras de campo -->
+                       
                         <div *ngIf="jugadora.posicion !== 'POR'" class="stats-grid animate-fade">
                             <div class="stat-group">
                                 <p class="par">Pierna buena</p>
@@ -137,7 +137,7 @@
                             </div>
                         </div>
 
-                        <!-- Grid porteras -->
+                     
                         <div *ngIf="jugadora.posicion === 'POR'" class="stats-grid animate-fade">
                             <div class="stat-group">
                                 <p class="par">Pierna buena</p>
@@ -184,7 +184,6 @@
 
         </div>
   
-        <!--Modal modificar clausula-->
 
 
 <div class="modal-overlay" *ngIf="showModalClausula">
@@ -206,7 +205,7 @@
     </div>
 </div>
 
-<!--Modal para clausula y vender a la banca-->
+
 <div class="modal-overlay" *ngIf="showModalVender">
     <div class="modal-content border-red">
         <h2 class="modal-title">¿Vender a {{jugadora?.apodo}}?</h2>
@@ -231,7 +230,7 @@
     </div>
 </div>
 
-<!--Modal ofrecer oferta-->
+
 
 
 <div class="modal-overlay" *ngIf="showModalOfrecer">
